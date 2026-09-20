@@ -1,0 +1,1115 @@
+@import "@fontsource-variable/cairo";
+@import "@fontsource-variable/jetbrains-mono";
+
+/* Tailwind v4: a single @import replaces the three @tailwind directives. */
+@import "tailwindcss";
+
+/* Keep the JS config as the single source of truth for the design tokens
+   (colours, the z-scale, keyframes) instead of duplicating them into @theme.
+   v4 reads it through this bridge. */
+@config "../tailwind.config.ts";
+
+/* shadcn/ui theme tokens.
+   Mapped onto the existing AWWA palette rather than shadcn's default slate,
+   so Radix primitives inherit the neon look instead of fighting it.
+   Dark-only: :root and .dark carry identical values. */
+:root,
+.dark {
+  --radius: 0.75rem;
+
+  --background: #05070e;
+  --foreground: #ffffff;
+  --card: #0d111a;
+  --card-foreground: #ffffff;
+  --popover: #0b0f18;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #14171d;
+  --secondary-foreground: #cbd5e1;
+  --muted: #14171d;
+  --muted-foreground: #94a3b8;
+  --accent: #e8ecf0;
+  --accent-foreground: #000000;
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+  --border: #1a1d23;
+  --input: #1a1d23;
+  --ring: #ffffff;
+}
+
+/* Expose the tokens to Tailwind v4 so `bg-background`, `text-muted-foreground`,
+   `rounded-lg` etc. resolve. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Spacing scale — every section/card uses these, no ad-hoc values */
+  --section-y: 7rem;
+  --card-p: 1.75rem;
+}
+
+/* Arabic switches the sans stack to Cairo (it carries Latin glyphs too).
+   Cairo needs more vertical room than Geist, so leading is opened up. */
+[dir="rtl"] {
+  --font-sans: "Cairo Variable", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --leading-tight: 1.45;
+  --leading-body: 1.95;
+}
+
+[dir="rtl"] h1 { line-height: 1.3 !important; }
+[dir="rtl"] h2 { line-height: 1.35 !important; }
+[dir="rtl"] h3,
+[dir="rtl"] h4 { line-height: 1.45 !important; }
+[dir="rtl"] p,
+[dir="rtl"] li,
+[dir="rtl"] blockquote { line-height: var(--leading-body); }
+
+/* Cairo renders visually heavier and its terminals collide at small sizes,
+   so weights step down one notch and body text gets a touch more room.
+   `font-synthesis: none` stops the browser from faking bold Cairo, which
+   looked smeared on Android. */
+[dir="rtl"] .font-black { font-weight: 800; }
+[dir="rtl"] .font-extrabold { font-weight: 700; }
+[dir="rtl"] .font-bold { font-weight: 650; }
+[dir="rtl"] .font-semibold { font-weight: 600; }
+[dir="rtl"] body { font-synthesis: none; }
+
+/* Cairo's natively tight tracking reads cramped below ~14px (chips, meta
+   labels, table cells); a hair of letter-spacing restores legibility.
+   Headings keep letter-spacing 0 — set in @layer base below. */
+[dir="rtl"] .chip,
+[dir="rtl"] .mono-label,
+[dir="rtl"] text-xs,
+[dir="rtl"] .text-xs,
+[dir="rtl"] .text-\[10px\],
+[dir="rtl"] .text-\[11px\] {
+  letter-spacing: 0.01em;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+    background-color: #05070e;
+  }
+
+  /* Between sections the shader backdrop showed through the rounding seams
+     as a 1px light gap. Overlapping by 1px and compensating with the same
+     margin closes the seam without visual offset. */
+  main > section + section {
+    margin-top: -1px;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    @apply bg-base text-ink-mid antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  ::selection {
+    @apply bg-neon-cyan/25 text-white;
+  }
+
+  /* Headings are pure white and heavy — maximum contrast. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-extrabold text-ink-hi;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4 {
+    letter-spacing: 0;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  .tabular,
+  .font-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-neon-cyan ring-offset-2 ring-offset-base;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+
+  .section-y {
+    padding-block: var(--section-y);
+  }
+
+  /* ---------------- Cards ---------------- */
+  /* Single source of truth: #0D111A @ 88% + blur, hairline #1E293B border. */
+  .surface,
+  .glass-card {
+    /* bg raised 60 -> 88 and blur md -> xl: the animated shader backdrop
+       showed straight through the old value and left card text washed out
+       and hard to read. */
+    @apply relative rounded-2xl border border-line bg-surface/88 backdrop-blur-xl;
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+  }
+
+  .glass-card {
+    @apply rounded-3xl transition-colors duration-300;
+  }
+
+  /* Neon glow border on hover */
+  .glow-hover {
+    @apply transition-all duration-300;
+  }
+  .glow-hover:hover {
+    @apply border-white/45;
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.06),
+      0 0 0 1px rgb(255 255 255 / 0.14),
+      0 22px 60px -28px rgb(255 255 255 / 0.3);
+  }
+
+  .glow-border {
+    @apply relative overflow-hidden rounded-3xl border border-line;
+  }
+
+  /* ---------------- Buttons ---------------- */
+  .btn {
+    @apply relative inline-flex select-none items-center justify-center gap-2 rounded-xl px-5 py-3
+           text-sm font-semibold tracking-tight transition-colors duration-200;
+  }
+
+  .btn-primary {
+    /* Tailwind v4 cannot @apply another custom component class, so the base
+       button rules are repeated here instead of `@apply btn`. */
+    @apply relative inline-flex select-none items-center justify-center gap-2 rounded-xl px-5 py-3
+           text-sm font-semibold tracking-tight transition-colors duration-200
+           overflow-hidden text-white;
+    background: linear-gradient(100deg, #ffffff 0%, #e8ecf0 40%, #c9d1da 100%);
+    background-size: 180% auto;
+    animation: gradient-pan 5s ease-in-out infinite;
+    box-shadow: 0 10px 38px -10px rgb(255 255 255 / 0.4);
+    color: #000000;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 16px 52px -10px rgb(255 255 255 / 0.55);
+  }
+  /* Shimmering sweep across the CTA */
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgb(0 0 0 / 0.12) 50%, transparent 80%);
+    transform: translateX(-120%);
+    animation: sweep 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .btn-ghost {
+    @apply relative inline-flex select-none items-center justify-center gap-2 rounded-xl px-5 py-3
+           text-sm font-semibold tracking-tight transition-colors duration-200
+           border border-line-strong bg-white/[0.02] text-ink-mid;
+  }
+  .btn-ghost:hover {
+    @apply border-neon-cyan/50 bg-neon-cyan/[0.06] text-white;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white/[0.03]
+           px-3 py-1 text-xs font-medium tracking-tight text-ink-low;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-white/[0.03] px-4 py-3 text-sm text-ink-hi
+           outline-none transition placeholder:text-ink-faint
+           focus:border-neon-cyan/60 focus:ring-2 focus:ring-neon-cyan/20;
+  }
+
+  /* Neutral tech grid — static white hairlines on black. No hue cycling, no
+     crawl, no bloom animation: the grid is a stage, not a light show. */
+  .cyber-grid {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  /* Static soft lift over the grid — barely-there. */
+  .cyber-grid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(38rem 26rem at 50% 40%, rgb(255 255 255 / 0.04), transparent 70%);
+  }
+
+  /* ---------------- Stage backdrop (hero) ----------------
+     A cinematic light rig: a shaft of light from above the fold, silk aurora
+     curtains, a glowing horizon, a perspective floor grid and floating dust.
+     Every animated piece moves on transform/opacity only; all blurs are
+     static, so the whole rig costs one rasterisation and then composites. */
+
+  /* Single column of light falling from above the viewport — neutral white,
+     a breath of light rather than a beam. */
+  .light-shaft {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: conic-gradient(
+      at 50% -18%,
+      transparent 43%,
+      rgb(255 255 255 / 0.03) 46.5%,
+      rgb(255 255 255 / 0.04) 50%,
+      rgb(255 255 255 / 0.03) 53.5%,
+      transparent 57%
+    );
+    filter: blur(30px);
+  }
+
+  /* Razor-thin neon horizon where the stage meets the floor. Anchored to
+     the top of its positioning parent (the floor band in StageBackdrop). */
+  .horizon-line {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(92%, 1180px);
+    height: 1px;
+    translate: -50% 0;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgb(255 255 255 / 0.16) 22%,
+      rgb(255 255 255 / 0.22) 50%,
+      rgb(255 255 255 / 0.16) 78%,
+      transparent
+    );
+    box-shadow:
+      0 0 10px rgb(255 255 255 / 0.08),
+      0 0 36px rgb(255 255 255 / 0.05);
+  }
+
+  /* Perspective floor — a grid plane tipping away to the horizon.
+     transform-origin top + rotateX gives the retro-floor convergence. */
+  .floor-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+    background-size: 76px 58px;
+    background-position: top center;
+    transform: perspective(520px) rotateX(63deg) scale(1.75);
+    transform-origin: 50% 0;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 24%, black 78%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 24%, black 78%, transparent);
+    opacity: 0.3;
+  }
+
+  /* A pulse of light racing from the horizon toward the viewer — neutral. */
+  .floor-sheen {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 34%;
+    background: linear-gradient(to bottom, transparent, rgb(255 255 255 / 0.03), transparent);
+    animation: sheen-run 20s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  /* Silk aurora curtains — neutral grey silk under a heavy static blur. */
+  .aurora-ribbon {
+    position: absolute;
+    width: 58%;
+    height: 46%;
+    pointer-events: none;
+    border-radius: 100%;
+    filter: blur(72px);
+    opacity: 0.15;
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+  }
+  .aurora-ribbon-a {
+    inset-inline-start: -12%;
+    top: 6%;
+    background: linear-gradient(105deg, transparent 8%, rgb(255 255 255 / 0.12) 38%, rgb(255 255 255 / 0.07) 62%, transparent 92%);
+    animation: ribbon-sway-a 32s ease-in-out infinite alternate;
+  }
+  .aurora-ribbon-b {
+    inset-inline-end: -14%;
+    top: 2%;
+    background: linear-gradient(75deg, transparent 10%, rgb(255 255 255 / 0.09) 42%, rgb(255 255 255 / 0.06) 68%, transparent 90%);
+    animation: ribbon-sway-b 38s ease-in-out infinite alternate;
+  }
+
+  /* Slow-drifting luminous dust — neutral grey motes. */
+  .dust {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.22);
+    box-shadow: 0 0 4px rgb(255 255 255 / 0.16);
+    animation: dust-float var(--dust-t, 18s) ease-in-out var(--dust-d, 0s) infinite alternate;
+    will-change: transform, opacity;
+  }
+
+  /* Cinematic edge falloff — keeps corners dark so the stage stays focused. */
+  .stage-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 30%, transparent 55%, rgb(5 7 14 / 0.55) 100%);
+  }
+
+  /* Deep neutral mesh — grey/black wash, no colour casts. */
+  .mesh-deep {
+    background-image:
+      radial-gradient(60rem 40rem at 12% -5%, rgb(255 255 255 / 0.05), transparent 60%),
+      radial-gradient(50rem 35rem at 88% 0%, rgb(255 255 255 / 0.045), transparent 62%),
+      radial-gradient(45rem 32rem at 70% 85%, rgb(255 255 255 / 0.03), transparent 60%);
+  }
+
+  /* Drifting aurora field — now a neutral grey light field (no RGB tint).
+     The gradients stay static (no repaint); the whole field "breathes" on
+     the compositor via transform. */
+  .aurora-field {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image:
+      radial-gradient(44rem 30rem at 20% 10%, rgb(255 255 255 / 0.07), transparent 62%),
+      radial-gradient(40rem 28rem at 84% 6%, rgb(255 255 255 / 0.06), transparent 62%),
+      radial-gradient(38rem 30rem at 70% 80%, rgb(255 255 255 / 0.045), transparent 60%),
+      radial-gradient(32rem 24rem at 22% 86%, rgb(255 255 255 / 0.035), transparent 60%);
+    animation: aurora-breathe 26s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  /* ---------------- Hero console ---------------- */
+  /* Tilted holographic console occupying the visual column. */
+  .console-tilt {
+    transform: perspective(1600px) rotateY(var(--tilt, -13deg)) rotateX(6deg);
+    transform-style: preserve-3d;
+  }
+  [dir="rtl"] .console-tilt {
+    --tilt: 13deg;
+  }
+
+  .console-shell {
+    @apply relative overflow-hidden rounded-3xl border border-white/25 bg-surface/80 backdrop-blur-xl;
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.07),
+      0 0 0 1px rgb(255 255 255 / 0.1),
+      0 40px 90px -40px rgb(255 255 255 / 0.28),
+      0 30px 80px -50px rgb(255 255 255 / 0.18);
+  }
+
+  /* Scanline texture over the console face. */
+  .console-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 3px,
+      rgb(255 255 255 / 0.04) 3px 4px
+    );
+  }
+
+  .console-row {
+    @apply flex items-center justify-between gap-3 rounded-xl border border-line/80 bg-white/[0.025] px-3 py-2.5
+           transition-colors duration-300;
+  }
+  .console-row:hover {
+    @apply border-white/40 bg-white/[0.05];
+  }
+
+  /* Pulsing status dot with an expanding halo. */
+  .live-dot {
+    @apply relative inline-flex h-2 w-2 shrink-0 rounded-full;
+  }
+  .live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: inherit;
+    animation: ping-soft 1.9s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* Counter that keeps living after the count-up finishes. The digits are
+     final and exact; only the light moves. */
+  /* Composed with .text-gradient's own gradient-pan, so both run: the hue
+     keeps travelling AND the glow keeps pulsing. */
+  .counter-live {
+    animation:
+      gradient-pan 6s ease-in-out infinite,
+      counter-breathe 3.4s ease-in-out infinite;
+  }
+
+  /* ---------------- RGB halo field ---------------- */
+  /* Soft red/green/blue orbs that drift forever behind the content. They are
+     wide and heavily blurred, so they read as ambient light, not as shapes. */
+  .rgb-halo {
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+  }
+  .halo-r {
+    background: radial-gradient(circle, rgb(255 255 255 / 0.4), transparent 70%);
+  }
+  .halo-g {
+    background: radial-gradient(circle, rgb(255 255 255 / 0.32), transparent 70%);
+  }
+  .halo-b {
+    background: radial-gradient(circle, rgb(255 255 255 / 0.38), transparent 70%);
+  }
+  .halo-v {
+    background: radial-gradient(circle, rgb(255 255 255 / 0.34), transparent 70%);
+  }
+
+  /* Slow conic white wash — the "calm" layer that stops the palette going flat. */
+  .rgb-wash {
+    position: absolute;
+    inset: -30%;
+    pointer-events: none;
+    opacity: 0.14;
+    filter: blur(120px);
+    background: conic-gradient(
+      from 0deg,
+      rgb(255 255 255 / 0.4),
+      rgb(255 255 255 / 0.18),
+      rgb(255 255 255 / 0.34),
+      rgb(255 255 255 / 0.16),
+      rgb(255 255 255 / 0.4)
+    );
+    animation: wash-spin 46s linear infinite;
+  }
+
+  /* Slow vertical light sweep — a "scanning" pass over whole sections. */
+  .beam-sweep {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .beam-sweep::before {
+    content: "";
+    position: absolute;
+    inset-inline: -20%;
+    height: 45%;
+    top: -45%;
+    background: linear-gradient(to bottom, transparent, rgb(255 255 255 / 0.04), transparent);
+    animation: beam-fall 13s linear infinite;
+  }
+
+  /* Respect reduced motion inside raw-CSS animations too: the global
+     `prefers-reduced-motion` override already collapses durations, but
+     parking the sweep entirely avoids an invisible always-running timer. */
+  @media (prefers-reduced-motion: reduce) {
+    .beam-sweep::before {
+      animation: none;
+    }
+  }
+
+  /* Faint drifting starfield — neutral white motes. Sized one tile (340px)
+     larger than the viewport and moved with `transform`, so the drift is
+     composited instead of forcing a full-screen repaint every frame. */
+  .starfield {
+    position: absolute;
+    inset: 0 -340px -340px 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image:
+      radial-gradient(1px 1px at 12% 22%, rgb(255 255 255 / 0.5), transparent),
+      radial-gradient(1px 1px at 68% 14%, rgb(255 255 255 / 0.42), transparent),
+      radial-gradient(1px 1px at 34% 71%, rgb(255 255 255 / 0.38), transparent),
+      radial-gradient(1px 1px at 84% 63%, rgb(255 255 255 / 0.34), transparent),
+      radial-gradient(1px 1px at 52% 41%, rgb(255 255 255 / 0.4), transparent),
+      radial-gradient(1px 1px at 22% 88%, rgb(255 255 255 / 0.36), transparent);
+    background-size: 340px 340px;
+    animation: star-drift 90s linear infinite;
+    will-change: transform;
+  }
+
+  /* ---------------- Living light ---------------- */
+  .aurora {
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+  /* Aurora orbs — neutral white light balls now (grey/black stage). The
+     legacy colour class names are kept so existing markup keeps working. */
+  .aurora-cyan {
+    background: radial-gradient(circle, rgb(255 255 255 / 0.4), transparent 70%);
+  }
+  .aurora-magenta {
+    background: radial-gradient(circle, rgb(255 255 255 / 0.34), transparent 70%);
+  }
+  .aurora-purple {
+    background: radial-gradient(circle, rgb(255 255 255 / 0.36), transparent 70%);
+  }
+  .aurora-emerald {
+    background: radial-gradient(circle, rgb(255 255 255 / 0.3), transparent 70%);
+  }
+
+  /* Continuously rotating neon border (always on, not hover-only) */
+  .neon-border {
+    position: relative;
+  }
+  .neon-border::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+      from var(--angle, 0deg),
+      transparent 0deg,
+      rgb(255 255 255 / 0.9) 70deg,
+      rgb(255 255 255 / 0.35) 150deg,
+      transparent 240deg
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.55;
+    animation: rotate-angle 6s linear infinite;
+    pointer-events: none;
+  }
+  .neon-border:hover::before {
+    opacity: 1;
+  }
+
+  .noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------------- Text ---------------- */
+  .text-gradient {
+    background: linear-gradient(100deg, #ffffff 0%, #dfe5ec 45%, #aab3bd 100%);
+    background-size: 200% auto;
+    animation: gradient-pan 6s ease-in-out infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-hero {
+    background: linear-gradient(100deg, #ffffff 0%, #f0f3f6 35%, #c3cbd4 65%, #8f99a5 100%);
+    background-size: 220% auto;
+    animation: gradient-pan 7s ease-in-out infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ---------------- Page chrome (ported design pass) ---------------- */
+  /* Scroll depth bar. transform-origin follows the reading direction so the
+     bar grows from the side the user starts reading on. */
+  .scroll-progress {
+    position: fixed;
+    z-index: 61;
+    inset-block-start: 0;
+    inset-inline: 0;
+    height: 2px;
+    pointer-events: none;
+    background: linear-gradient(90deg, #ffffff, #c3cbd4);
+    box-shadow: 0 0 14px rgb(255 255 255 / 0.45);
+    transform-origin: left center;
+  }
+  [dir="rtl"] .scroll-progress {
+    transform-origin: right center;
+  }
+
+  .cursor-glow {
+    position: fixed;
+    z-index: 0;
+    top: 0;
+    left: 0;
+    width: 360px;
+    height: 360px;
+    pointer-events: none;
+    border-radius: 50%;
+    opacity: 0.14;
+    background: radial-gradient(circle, rgb(255 255 255 / 0.3), rgb(255 255 255 / 0.06) 42%, transparent 72%);
+    filter: blur(8px);
+    mix-blend-mode: screen;
+  }
+
+  /* ---------------- Hero lights (Vercel-style) ----------------
+     No core object at all — just clean neutral light on a grey/black stage:
+     a soft white glow disc breathing behind the headline area, and a distant
+     sun arc clipped by the horizon (the signature Vercel/Stripe light).
+     Static gradients; only transform/opacity ever animate. */
+  .hero-glow {
+    position: absolute;
+    border-radius: 9999px;
+    background:
+      radial-gradient(circle, rgb(255 255 255 / 0.14) 0%, rgb(255 255 255 / 0.05) 45%, transparent 70%);
+    filter: blur(46px);
+    animation: hero-halo 9s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+
+  /* Distant sun arc — a gradient disc clipped by a mask so only its top
+     sliver rises over the horizon line. */
+  .horizon-glow {
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: min(78vw, 900px);
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      rgb(255 255 255 / 0.17) 0%,
+      rgb(255 255 255 / 0.07) 32%,
+      transparent 62%
+    );
+    filter: blur(10px);
+    -webkit-mask-image: linear-gradient(to bottom, black 0 2px, transparent 62%);
+    mask-image: linear-gradient(to bottom, black 0 2px, transparent 62%);
+  }
+
+  /* Ghost-faint neutral rings — the only remaining geometry. */
+  .hero-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 9999px;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .hero-ring-a {
+    width: 116%;
+    aspect-ratio: 1;
+    border: 1px solid rgb(255 255 255 / 0.07);
+    animation: ring-spin-a 20s linear infinite;
+  }
+  .hero-ring-b {
+    width: 134%;
+    aspect-ratio: 1;
+    border: 1px solid rgb(255 255 255 / 0.05);
+    animation: ring-spin-b 30s linear infinite;
+  }
+  .hero-ring-c {
+    width: 154%;
+    aspect-ratio: 1;
+    border: 1px dashed rgb(255 255 255 / 0.04);
+    animation: ring-spin-c 38s linear infinite;
+  }
+
+  /* Orbiting sparks — tiny white embers on wires of light. */
+  .hero-spark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    margin: -2.5px 0 0 -2.5px;
+    border-radius: 9999px;
+    background: radial-gradient(circle, #fff 0%, rgb(255 255 255 / 0.55) 40%, transparent 70%);
+    box-shadow:
+      0 0 6px rgb(255 255 255 / 0.35),
+      0 0 14px rgb(255 255 255 / 0.12);
+    animation: spark-orbit var(--orbit-t, 12s) linear infinite;
+    will-change: transform;
+  }
+  .hero-spark-1 {
+    --orbit-r: min(36vw, 192px);
+    --orbit-t: 15s;
+  }
+  .hero-spark-2 {
+    --orbit-r: min(42vw, 222px);
+    --orbit-t: 22s;
+    animation-delay: -8s;
+  }
+  .hero-spark-3 {
+    --orbit-r: min(32vw, 170px);
+    --orbit-t: 18s;
+    animation-delay: -14s;
+  }
+  .hero-spark-4 {
+    --orbit-r: min(45vw, 238px);
+    --orbit-t: 26s;
+    animation-delay: -19s;
+  }
+
+  .mono-label {
+    font-family: var(--font-mono);
+    @apply text-[10px] font-semibold uppercase tracking-[0.28em] text-neon-cyan;
+  }
+
+  /* ---------------- Tech marquee ---------------- */
+  /* Edge fade so chips dissolve instead of clipping. */
+  .marquee-mask {
+    mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  }
+
+  /* Dual-direction infinite scroll. The track is a doubled list, so a
+     -50% translate loops seamlessly. */
+  .marquee-track,
+  .marquee-reverse {
+    animation: marquee 46s linear infinite;
+    will-change: transform;
+  }
+  .marquee-reverse {
+    animation-direction: reverse;
+    animation-duration: 54s;
+  }
+
+  .lede {
+    @apply text-ink-low;
+  }
+}
+
+@layer utilities {
+  .perspective {
+    perspective: 1200px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  /* Logical transform origin — flips correctly under RTL */
+  .origin-inline-start {
+    transform-origin: left center;
+  }
+  [dir="rtl"] .origin-inline-start {
+    transform-origin: right center;
+  }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* Referenced directly by .text-gradient / .btn-primary, so it must live here:
+   Tailwind only emits config keyframes for `animate-*` utilities it finds. */
+@keyframes gradient-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes rotate-angle {
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* Referenced from raw CSS only (.counter-live / .rgb-wash), so they must be
+   declared here — Tailwind only emits config keyframes for scanned
+   `animate-*` utilities. */
+@keyframes counter-breathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgb(255 255 255 / 0.22));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgb(255 255 255 / 0.4));
+  }
+}
+
+@keyframes wash-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes beam-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  12%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(340%);
+    opacity: 0;
+  }
+}
+
+@keyframes star-drift {
+  from {
+    transform: translate3d(-340px, -340px, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Used by .live-dot::after in raw CSS — must be declared here, not in the
+   Tailwind config, since no `animate-ping-soft` class is ever scanned. */
+
+/* Hero light-stage — referenced only from raw CSS, so declared here. */
+@keyframes hero-halo {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes ring-spin-a {
+  from {
+    transform: translate(-50%, -50%) perspective(900px) rotateX(72deg) rotateZ(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) perspective(900px) rotateX(72deg) rotateZ(360deg);
+  }
+}
+
+@keyframes ring-spin-b {
+  from {
+    transform: translate(-50%, -50%) perspective(900px) rotateX(66deg) rotateY(14deg) rotateZ(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) perspective(900px) rotateX(66deg) rotateY(14deg) rotateZ(-360deg);
+  }
+}
+
+@keyframes ring-spin-c {
+  from {
+    transform: translate(-50%, -50%) perspective(900px) rotateX(74deg) rotateZ(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) perspective(900px) rotateX(74deg) rotateZ(-360deg);
+  }
+}
+
+@keyframes spark-orbit {
+  from {
+    transform: rotate(0turn) translateX(var(--orbit-r, 180px)) rotate(0turn);
+  }
+  to {
+    transform: rotate(1turn) translateX(var(--orbit-r, 180px)) rotate(-1turn);
+  }
+}
+
+@keyframes aurora-pan {
+  0% {
+    background-position: 0% 0%, 100% 0%, 70% 100%, 10% 90%;
+  }
+  50% {
+    background-position: 45% 35%, 55% 45%, 30% 60%, 60% 30%;
+  }
+  100% {
+    background-position: 90% 70%, 10% 80%, 0% 20%, 90% 10%;
+  }
+}
+
+/* Composited breathing for the aurora field — scale/translate only, so the
+   gradient layer is rasterised once and never repaints. */
+@keyframes aurora-breathe {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.08) translate3d(-1.5%, -1%, 0);
+  }
+}
+
+/* LineForms — phased glow for the big line clusters. Opacity only, so each
+   static ring stack just lights up and dims on the compositor. */
+@keyframes form-breathe-a {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  38% {
+    opacity: 1;
+  }
+}
+
+@keyframes form-breathe-b {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 0.16;
+  }
+  78% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes form-breathe-c {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+/* Stage backdrop — referenced only from raw CSS, so declared here. */
+@keyframes ribbon-sway-a {
+  from {
+    transform: rotate(-11deg) skewX(-8deg) translate3d(-2%, -1%, 0) scale(1);
+  }
+  to {
+    transform: rotate(-7deg) skewX(-5deg) translate3d(3%, 2%, 0) scale(1.06);
+  }
+}
+
+@keyframes ribbon-sway-b {
+  from {
+    transform: rotate(9deg) skewX(10deg) translate3d(2%, 1%, 0) scale(1.02);
+  }
+  to {
+    transform: rotate(5deg) skewX(6deg) translate3d(-3%, -2%, 0) scale(1);
+  }
+}
+
+@keyframes sheen-run {
+  0% {
+    transform: translateY(-60%);
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(320%);
+    opacity: 0;
+  }
+}
+
+@keyframes dust-float {
+  from {
+    transform: translate3d(0, 10px, 0);
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  to {
+    transform: translate3d(12px, -28px, 0);
+    opacity: 0.2;
+  }
+}
+
+@keyframes ping-soft {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  75%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@keyframes sweep {
+  0%,
+  55% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Directional glyphs (arrows, quotes) mirror under RTL */
+[dir="rtl"] .flip-x {
+  transform: scaleX(-1);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #07090e;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
