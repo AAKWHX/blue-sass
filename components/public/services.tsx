@@ -55,7 +55,7 @@ export function Services() {
 
       <div className="container-x relative z-content">
         <Reveal>
-          <SectionHeading eyebrow="01 / CAPABILITIES" title={t.services.title} subtitle={t.services.subtitle} />
+          <SectionHeading title={t.services.title} subtitle={t.services.subtitle} />
         </Reveal>
 
         <Reveal delay={0.08} className="mt-14">
@@ -191,14 +191,11 @@ export function Services() {
                   {/* CTA */}
                   <div className="mt-auto flex flex-wrap items-center gap-3 pt-10">
                     <Button asChild variant="neon" className="group">
-                      <a href={`/${locale}/quote#services`}>
+                      <a href={`/${locale}/services/${["web", "mobile", "ai", "cloud", "design", "security"][active]}`}>
                         <span className="relative z-10">{t.services.requestCta}</span>
                         <ArrowRight className="relative z-10 h-4 w-4 shrink-0 flip-x transition-transform group-hover:translate-x-0.5" />
                       </a>
                     </Button>
-                    <span className="mono-label hidden opacity-50 sm:block">
-                      {String(active + 1).padStart(2, "0")} — {String(t.services.items.length).padStart(2, "0")}
-                    </span>
                   </div>
                 </motion.div>
               </AnimatePresence>

@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
-import { Hexagon, LayoutDashboard, LogIn, Menu, UserCircle2 } from "lucide-react";
+import { LogIn, Menu } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
 import { useI18n } from "@/components/providers";
 import { LanguageSwitcher } from "@/components/ui/switchers";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand-logo";
 
 export interface SiteHeaderProps {
   /** Resolved on the server so the correct auth links render on first paint. */
@@ -86,23 +87,7 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
       />
 
       <div className="container-x flex h-16 items-center gap-4">
-        {/* Brand — spinning-orbit hexagon mark */}
-        <Link href={base} className="group flex shrink-0 items-center gap-2.5">
-          <span className="relative grid h-9 w-9 shrink-0 place-items-center">
-            {/* Orbiting ring: only spins on hover, so it stays calm by default */}
-            <span
-              aria-hidden
-              className="absolute inset-0 rounded-xl border border-neon-cyan/0 transition-all duration-500 group-hover:rotate-90 group-hover:border-neon-cyan/40"
-            />
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-white via-white to-slate-300 text-black shadow-glow-cyan transition-transform duration-300 group-hover:scale-105">
-              <Hexagon className="h-5 w-5" strokeWidth={2.5} />
-            </span>
-          </span>
-          <span className="leading-tight">
-            <span className="block text-sm font-black tracking-widest text-ink-hi">AAKWHX</span>
-            <span className="mono-label block">awwa</span>
-          </span>
-        </Link>
+        <Link href={base} className="shrink-0 transition-opacity hover:opacity-90"><BrandLogo /></Link>
 
         {/* Nav — animated underline sweep on hover */}
         <nav className="hidden items-center gap-1 lg:flex">
@@ -123,18 +108,6 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
 
         <div className="ms-auto flex shrink-0 items-center gap-2">
           <div className="hidden items-center gap-2 md:flex">
-            <Button asChild variant="ghostNeon" className="whitespace-nowrap !px-3 !py-2 !text-xs">
-              <Link href={`${base}/portal`}>
-                <UserCircle2 className="h-4 w-4 shrink-0" />
-                {t.nav.portal}
-              </Link>
-            </Button>
-            <Button asChild variant="ghostNeon" className="whitespace-nowrap !px-3 !py-2 !text-xs">
-              <Link href={`${base}/admin`}>
-                <LayoutDashboard className="h-4 w-4 shrink-0" />
-                {t.nav.admin}
-              </Link>
-            </Button>
             {signedIn ? (
               <form action={signOutAction}>
                 <input type="hidden" name="locale" value={locale} />
@@ -174,12 +147,9 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
               <nav className="flex flex-col gap-1">
                 {[
                   ...links,
-                  { href: `${base}/portal`, label: t.nav.portal },
-                  { href: `${base}/admin`, label: t.nav.admin },
                   signedIn
                     ? { href: `${base}/portal`, label: t.auth.dashboard }
                     : { href: `${base}/login`, label: t.auth.signIn },
-                  ...(signedIn ? [] : [{ href: `${base}/register`, label: t.auth.signUp }]),
                 ].map((l) => (
                   <SheetClose asChild key={l.href}>
                     <Link

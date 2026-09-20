@@ -51,7 +51,6 @@ export function TechMarquee() {
       <div className="container-x relative z-content">
         <Reveal>
           <SectionHeading
-            eyebrow="04 / STACK"
             title={t.stack.title}
             subtitle={t.stack.subtitle}
           />

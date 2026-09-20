@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Hexagon, Mail } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
 import { useI18n } from "@/components/providers";
-import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand-logo";
+
+const legalLabels = {
+  ar: { privacy: "سياسة الخصوصية", terms: "شروط الاستخدام" },
+  en: { privacy: "Privacy policy", terms: "Terms of service" },
+  nl: { privacy: "Privacybeleid", terms: "Gebruiksvoorwaarden" },
+  de: { privacy: "Datenschutz", terms: "Nutzungsbedingungen" },
+  tr: { privacy: "Gizlilik politikası", terms: "Kullanım koşulları" },
+  fr: { privacy: "Confidentialité", terms: "Conditions d’utilisation" },
+  es: { privacy: "Privacidad", terms: "Términos de uso" },
+} as const;
 
 export function SiteFooter() {
   const { locale, t } = useI18n();
@@ -24,22 +34,10 @@ export function SiteFooter() {
       <div className="container-x relative grid gap-12 py-16 text-start md:grid-cols-2 lg:grid-cols-4">
         {/* Brand + newsletter */}
         <div className="lg:col-span-2">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-white via-white to-slate-300 text-black shadow-glow-cyan">
-              <Hexagon className="h-5 w-5" strokeWidth={2.5} />
-            </span>
-            <span className="text-sm font-black tracking-widest">AAKWHX</span>
-          </div>
+          <BrandLogo />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-low">
-            {t.brand.tagline} {t.footer.built}
+            {t.services.subtitle}
           </p>
-          <p className="mt-3 text-xs uppercase tracking-[0.2em] text-ink-faint">{t.footer.offices}</p>
-
-          {/* Newsletter */}
-          <div className="mt-7 max-w-sm">
-            <h3 className="mono-label">{t.footer.newsletterTitle}</h3>
-            <p className="mt-3 text-sm leading-relaxed text-ink-low">Newsletter registration will be available shortly.</p>
-          </div>
         </div>
 
         {/* Services */}
@@ -66,18 +64,8 @@ export function SiteFooter() {
                 {t.nav.quote}
               </Link>
             </li>
-            <li>
-              <Link href={`${base}/portal`} className="hover:text-neon-cyan">
-                {t.nav.portal}
-              </Link>
-            </li>
-            <li>
-              <Link href={`${base}/admin`} className="hover:text-neon-cyan">
-                {t.nav.admin}
-              </Link>
-            </li>
             <li className="flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5" /> <a href="mailto:hello@aakwhx.com" className="hover:text-neon-cyan">hello@aakwhx.com</a>
+              <Mail className="h-3.5 w-3.5" /> <a href="mailto:etskar@bluesass.nl" className="hover:text-neon-cyan">etskar@bluesass.nl</a>
             </li>
           </ul>
         </div>
@@ -85,10 +73,10 @@ export function SiteFooter() {
 
       <div className="relative border-t border-line py-5 text-center text-xs text-ink-faint">
         <div className="container-x flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <span>© {new Date().getFullYear()} AAKWHX · AWWA. {t.footer.rights}</span>
+          <span>© {new Date().getFullYear()} Blue Sass. {t.footer.rights}</span>
           <span className="flex items-center gap-4">
-            <Link href={`${base}/privacy`} className="transition-colors hover:text-neon-cyan">Privacy</Link>
-            <Link href={`${base}/terms`} className="transition-colors hover:text-neon-cyan">Terms</Link>
+            <Link href={`${base}/privacy`} className="transition-colors hover:text-neon-cyan">{legalLabels[locale].privacy}</Link>
+            <Link href={`${base}/terms`} className="transition-colors hover:text-neon-cyan">{legalLabels[locale].terms}</Link>
           </span>
         </div>
       </div>

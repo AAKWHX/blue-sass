@@ -17,6 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneField } from "@/components/ui/phone-field";
 import { validateEmail } from "@/lib/validation/contact";
+import { GoogleSignIn } from "@/components/auth/google-sign-in";
+
+const orLabels = { ar: "أو", en: "or", nl: "of", de: "oder", tr: "veya", fr: "ou", es: "o" } as const;
 
 const initial: ActionState = { ok: false, message: "" };
 const initialLogin: LoginState = { ok: false, message: "" };
@@ -120,7 +123,7 @@ export function VerifyNotice({ email, tone = "info" }: { email: string; tone?: "
   );
 }
 
-export function LoginForm() {
+export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }) {
   const { t, locale } = useI18n();
   const [state, formAction, pending] = useActionState(loginAction, initialLogin);
 
@@ -134,6 +137,17 @@ export function LoginForm() {
           {t.auth.loginSubtitle}
         </p>
       </div>
+
+      {googleEnabled && (
+        <>
+          <GoogleSignIn />
+          <div className="flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-line" />
+            <span className="text-xs text-ink-faint">{orLabels[locale]}</span>
+            <span className="h-px flex-1 bg-line" />
+          </div>
+        </>
+      )}
 
       {state.unverifiedEmail ? (
         <VerifyNotice email={state.unverifiedEmail} tone="warn" />
@@ -303,4 +317,3 @@ export function RegisterForm() {
     </form>
   );
 }
-

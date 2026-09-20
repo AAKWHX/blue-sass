@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Quote } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { SectionHeading } from "@/components/ui/primitives";
 import { Reveal, StaggerGroup, StaggerItem, TiltCard } from "@/components/ui/motion";
 import { ParticleField } from "@/components/ui/backgrounds";
-import { testimonials } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -36,7 +35,7 @@ export function Process() {
       <div aria-hidden className="beam-sweep absolute inset-0" />
       <div className="container-x relative z-content">
         <Reveal>
-          <SectionHeading eyebrow="03 / METHODOLOGY" title={t.process.title} subtitle={t.process.subtitle} />
+          <SectionHeading title={t.process.title} subtitle={t.process.subtitle} />
         </Reveal>
 
         <div ref={pathRef} className="relative mt-16">
@@ -72,23 +71,6 @@ export function Process() {
           </StaggerGroup>
         </div>
 
-        <StaggerGroup className="mt-20 grid gap-5 md:grid-cols-3">
-          <p className="md:col-span-3 text-center text-xs text-ink-faint">Illustrative client feedback shown for demonstration purposes.</p>
-          {testimonials.map((item) => (
-            <StaggerItem key={item.author}>
-              <figure className="glass-card glow-hover h-full p-7">
-                <Quote className="h-7 w-7 text-neon-cyan/50 flip-x" />
-                <blockquote className="mt-4 text-sm leading-relaxed text-ink-mid">
-                  “{item.quote}”
-                </blockquote>
-                <figcaption className="mt-5 border-t border-line pt-4">
-                  <span className="block text-xs font-bold">{item.author}</span>
-                  <span className="mono-label !text-ink-low">{item.role}</span>
-                </figcaption>
-              </figure>
-            </StaggerItem>
-          ))}
-        </StaggerGroup>
       </div>
     </section>
   );

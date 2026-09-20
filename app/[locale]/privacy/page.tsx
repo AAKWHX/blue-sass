@@ -12,6 +12,16 @@ const sections = [
   { title: "Contact", paragraphs: ["For privacy questions or requests, contact etskar@bluesass.nl. If you are in the European Economic Area, you may also lodge a complaint with your local data protection authority."] },
 ];
 
-export default function PrivacyPage() {
+const arabicSections = [
+  { title: "المعلومات التي نجمعها", paragraphs: ["عند طلب تسعيرة أو إنشاء حساب أو التواصل معنا، قد نجمع الاسم والبريد الإلكتروني وبيانات الشركة ومتطلبات المشروع ومحتوى الرسالة.", "عند تسجيل الدخول بواسطة Google نستلم البريد الإلكتروني المؤكد والاسم وصورة الحساب ومعرّف الحساب. لا نستلم كلمة مرور Google ولا نطلب الوصول إلى الملفات أو جهات الاتصال."] },
+  { title: "كيف نستخدم المعلومات", paragraphs: ["نستخدم البيانات لتسجيل الدخول وتشغيل بوابة العميل والرد على الطلبات وتقديم الخدمات وحماية الموقع. لا نبيع البيانات الشخصية ولا نستخدم بيانات Google للإعلانات."] },
+  { title: "ملفات الارتباط والحماية", paragraphs: ["نستخدم ملفات ارتباط ضرورية وآمنة للحفاظ على جلسة الدخول وحماية النماذج. هذه الملفات مطلوبة لعمل بوابة العميل."] },
+  { title: "التخزين وحقوقك", paragraphs: ["تُعالج البيانات عبر مزودي استضافة وقواعد بيانات موثوقين مثل Vercel وSupabase. يمكنك طلب الوصول إلى بياناتك أو تصحيحها أو حذفها وفق القوانين السارية."] },
+  { title: "التواصل", paragraphs: ["لأي طلب متعلق بالخصوصية، تواصل معنا عبر etskar@bluesass.nl."] },
+];
+
+export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  if (locale === "ar") return <LegalPage eyebrow="معلومات قانونية" title="سياسة الخصوصية" updated="21 سبتمبر 2026" updatedLabel="آخر تحديث" introduction="تحترم Blue Sass خصوصيتك. توضح هذه السياسة البيانات التي نجمعها وسبب استخدامها والخيارات المتاحة لك." sections={arabicSections} />;
   return <LegalPage eyebrow="Legal" title="Privacy Policy" updated="21 September 2026" introduction="Blue Sass respects your privacy. This policy explains what information we collect through bluesass.nl, why we use it, and the choices available to you." sections={sections} />;
 }

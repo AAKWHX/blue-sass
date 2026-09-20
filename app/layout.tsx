@@ -2,10 +2,10 @@ import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bluesass.nl"),
-  title: "AWWA — AAKWHX Digital Agency Platform",
+  title: "Blue Sass — Digital products built clearly",
   description:
-    "AAKWHX builds platforms, AI systems and brand-grade interfaces. AWWA is our delivery platform: public site, client portal and internal ERP.",
-  keywords: ["AAKWHX", "AWWA", "software agency", "Next.js", "ERP", "client portal"],
+    "Blue Sass designs and builds websites, apps, intelligent systems and digital brands.",
+  keywords: ["Blue Sass", "software agency", "web development", "mobile apps", "AI automation"],
 };
 
 export const viewport: Viewport = {
