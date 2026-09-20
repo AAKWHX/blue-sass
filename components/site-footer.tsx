@@ -84,7 +84,13 @@ export function SiteFooter() {
       </div>
 
       <div className="relative border-t border-line py-5 text-center text-xs text-ink-faint">
-        © {new Date().getFullYear()} AAKWHX · AWWA. {t.footer.rights}
+        <div className="container-x flex flex-col items-center justify-between gap-3 sm:flex-row">
+          <span>© {new Date().getFullYear()} AAKWHX · AWWA. {t.footer.rights}</span>
+          <span className="flex items-center gap-4">
+            <Link href={`${base}/privacy`} className="transition-colors hover:text-neon-cyan">Privacy</Link>
+            <Link href={`${base}/terms`} className="transition-colors hover:text-neon-cyan">Terms</Link>
+          </span>
+        </div>
       </div>
     </footer>
   );
