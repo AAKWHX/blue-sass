@@ -43,10 +43,10 @@ const modules: { key: AdminModule; icon: typeof Gauge }[] = [
 
 const columns = ["todo", "in_progress", "blocked", "done"] as const;
 
-export function AdminView() {
+export function AdminView({ demoMode = true }: { demoMode?: boolean }) {
   const { t, locale } = useI18n();
   const [role, setRole] = useState<AppRole>("super_admin");
-  const [module, setModule] = useState<AdminModule>("dashboard");
+  const [module, setModule] = useState<AdminModule>(demoMode ? "dashboard" : "cmsStats");
   const [query, setQuery] = useState("");
 
   const allowed = canAccess(role, module);
@@ -67,7 +67,7 @@ export function AdminView() {
             <span className="rounded-full border border-violet-400/30 bg-violet-400/5 px-3 py-1.5 text-sm font-semibold text-violet-200">Blue Sass</span>
             <h1 className="mt-3 text-3xl font-black tracking-tight"><span className="text-gradient">{t.admin.title}</span></h1>
           </div>
-          <div className="flex items-center gap-3">
+          {demoMode && <div className="flex items-center gap-3">
             <Label htmlFor="role-switch" className="text-xs font-semibold uppercase tracking-widest text-ink-low">
               {t.admin.roleLabel}
             </Label>
@@ -83,13 +83,13 @@ export function AdminView() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </div>}
         </header>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[220px_1fr]">
           <nav className="glass-card sticky top-20 h-fit p-3">
             <ul className="space-y-1">
-              {modules.map(({ key, icon: Icon }) => {
+              {modules.filter(({ key }) => demoMode || key === "cmsStats" || key === "cmsPortfolio").map(({ key, icon: Icon }) => {
                 const can = canAccess(role, key);
                 return (
                   <li key={key}>

@@ -30,7 +30,7 @@ export default async function AdminPage({
   return (
     <>
       <LeadsPanel leads={leads} locale={locale} />
-      <AdminView />
+      <AdminView demoMode={false} />
     </>
   );
 }
