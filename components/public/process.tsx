@@ -73,6 +73,7 @@ export function Process() {
         </div>
 
         <StaggerGroup className="mt-20 grid gap-5 md:grid-cols-3">
+          <p className="md:col-span-3 text-center text-xs text-ink-faint">Illustrative client feedback shown for demonstration purposes.</p>
           {testimonials.map((item) => (
             <StaggerItem key={item.author}>
               <figure className="glass-card glow-hover h-full p-7">

@@ -7,6 +7,7 @@ import { db, isDatabaseConfigured } from "@/lib/db";
 import { leads } from "@/lib/db/schema";
 import { requireRole } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 export interface LeadState {
   ok: boolean;
@@ -40,6 +41,7 @@ const leadSchema = z.object({
   timelineWeeks: z.coerce.number().int().min(0).default(0),
   currency: z.string().default("EUR"),
   message: z.string().trim().max(4000).optional(),
+  website: z.string().max(0).optional(),
 });
 
 /**
@@ -57,6 +59,13 @@ export async function submitLeadAction(
       fieldErrors[String(issue.path[0])] = issue.message;
     }
     return { ok: false, message: "Please correct the highlighted fields.", fieldErrors };
+  }
+
+  // Honeypot + per-process rate limit make automated form spam costly without
+  // exposing any customer data to a third-party CAPTCHA provider.
+  if (parsed.data.website) return { ok: true, message: "Thank you." };
+  if (!takeRateLimit(`lead:${parsed.data.email}`, 3, 10 * 60_000)) {
+    return { ok: false, message: "Too many requests. Please try again later." };
   }
 
   if (!isDatabaseConfigured) {

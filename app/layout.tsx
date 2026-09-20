@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://awwa.studio"),
+  metadataBase: new URL("https://www.bluesass.nl"),
   title: "AWWA — AAKWHX Digital Agency Platform",
   description:
     "AAKWHX builds platforms, AI systems and brand-grade interfaces. AWWA is our delivery platform: public site, client portal and internal ERP.",

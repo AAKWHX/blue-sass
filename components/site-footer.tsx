@@ -1,16 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowRight, Check, Globe2, Hexagon, Mail, Rss, Send, Share2 } from "lucide-react";
+import { ArrowRight, Hexagon, Mail } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 export function SiteFooter() {
   const { locale, t } = useI18n();
   const base = `/${locale}`;
-  const [subscribed, setSubscribed] = useState(false);
 
   return (
     <footer className="relative overflow-hidden border-t border-line bg-elevated/80 backdrop-blur-md">
@@ -41,31 +38,7 @@ export function SiteFooter() {
           {/* Newsletter */}
           <div className="mt-7 max-w-sm">
             <h3 className="mono-label">{t.footer.newsletterTitle}</h3>
-            {subscribed ? (
-              <p className="mt-3 inline-flex items-center gap-2 rounded-xl border border-neon-emerald/30 bg-neon-emerald/10 px-4 py-3 text-sm font-semibold text-neon-emerald">
-                <Check className="h-4 w-4 shrink-0" />
-                {t.footer.newsletterDone}
-              </p>
-            ) : (
-              <form
-                className="mt-3 flex gap-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSubscribed(true);
-                }}
-              >
-                <Input
-                  type="email"
-                  required
-                  placeholder={t.footer.newsletterPlaceholder}
-                  aria-label={t.footer.newsletterTitle}
-                  className="!py-2.5"
-                />
-                <Button type="submit" variant="neon" className="!px-3.5" aria-label={t.footer.newsletterCta}>
-                  <Send className="h-4 w-4" />
-                </Button>
-              </form>
-            )}
+            <p className="mt-3 text-sm leading-relaxed text-ink-low">Newsletter registration will be available shortly.</p>
           </div>
         </div>
 
@@ -104,20 +77,9 @@ export function SiteFooter() {
               </Link>
             </li>
             <li className="flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5" /> hello@aakwhx.com
+              <Mail className="h-3.5 w-3.5" /> <a href="mailto:hello@aakwhx.com" className="hover:text-neon-cyan">hello@aakwhx.com</a>
             </li>
           </ul>
-          <div className="mt-5 flex gap-3 text-ink-low">
-            <span className="grid h-9 w-9 cursor-pointer place-items-center rounded-xl border border-line transition-all duration-300 hover:-translate-y-0.5 hover:border-neon-cyan/50 hover:text-neon-cyan">
-              <Globe2 className="h-4 w-4" />
-            </span>
-            <span className="grid h-9 w-9 cursor-pointer place-items-center rounded-xl border border-line transition-all duration-300 hover:-translate-y-0.5 hover:border-neon-cyan/50 hover:text-neon-cyan">
-              <Share2 className="h-4 w-4" />
-            </span>
-            <span className="grid h-9 w-9 cursor-pointer place-items-center rounded-xl border border-line transition-all duration-300 hover:-translate-y-0.5 hover:border-neon-cyan/50 hover:text-neon-cyan">
-              <Rss className="h-4 w-4" />
-            </span>
-          </div>
         </div>
       </div>
 

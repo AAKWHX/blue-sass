@@ -62,6 +62,7 @@ export function Portfolio() {
         <Reveal>
           <SectionHeading eyebrow="02 / SELECTED WORK" title={t.portfolio.title} subtitle={t.portfolio.subtitle} />
         </Reveal>
+        <p className="mt-4 text-center text-xs text-ink-faint">Concept portfolio examples — client names and figures are anonymised illustrative content.</p>
 
         {/* ---------------- Control bar: search + filters ---------------- */}
         <Reveal delay={0.1}>

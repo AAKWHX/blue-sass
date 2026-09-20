@@ -115,6 +115,7 @@ export function QuoteWizard() {
             {/* The calculator's output travels with the contact details so the
                 sales team sees the exact scope the visitor configured. */}
             <form action={formAction} className="glass-card space-y-4 p-6">
+              <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
               <input type="hidden" name="locale" value={locale} />
               <input type="hidden" name="projectType" value={type} />
               <input type="hidden" name="services" value={features.join(",")} />
