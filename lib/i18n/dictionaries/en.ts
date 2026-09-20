@@ -190,6 +190,9 @@ const en = {
     done: "Done",
   },
   auth: {
+    googleSignIn: "Continue with Google",
+    googleError: "Sign-in failed. Please try again or use your email and password.",
+    googleAccountExists: "An account with this email already exists. Sign in with its password first.",
     phoneCountry: "Country",
     phoneSearch: "Search country or code",
     phoneNoResults: "No matching country.",

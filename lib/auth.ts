@@ -1,13 +1,12 @@
 /**
- * Auth.js v5 configuration backed by Neon + Drizzle.
+ * Auth.js v5 configuration backed by PostgreSQL + Drizzle.
  *
- * Credentials (email + bcrypt password) is the only provider, which keeps the
- * deployment free of third-party OAuth setup. The Drizzle adapter still stores
- * users/accounts/sessions so an OAuth provider can be added later without a
- * migration.
+ * Supports email/password and Google OAuth. Existing accounts are not linked
+ * automatically by matching email addresses; Auth.js requires authentication.
  */
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -51,6 +50,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   pages: { signIn: "/en/login", error: "/en/login" },
   providers: [
+    ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET ? [Google({
+      clientId: process.env.AUTH_GOOGLE_ID.trim(),
+      clientSecret: process.env.AUTH_GOOGLE_SECRET.trim(),
+      authorization: { params: { scope: "openid email profile", prompt: "select_account" } },
+    })] : []),
     Credentials({
       name: "credentials",
       credentials: {
@@ -89,6 +93,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    signIn({ account, profile }) {
+      if (account?.provider === "google") {
+        return isDatabaseConfigured && profile?.email_verified === true;
+      }
+      return true;
+    },
     jwt({ token, user, trigger, session }) {
       if (user) {
         token.uid = user.id;
@@ -112,4 +122,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
-

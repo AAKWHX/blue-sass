@@ -110,6 +110,9 @@ const tr: Dictionary = {
   },
   status: { planning: "Planlama", design: "Tasarım", development: "Geliştirme", testing: "Test", review: "İnceleme", completed: "Tamamlandı", todo: "Yapılacak", in_progress: "Devam ediyor", blocked: "Engellendi", done: "Bitti" },
   auth: {
+    googleSignIn: "Google ile devam et",
+    googleError: "Giriş başarısız. Tekrar deneyin veya e-posta ve parolanızı kullanın.",
+    googleAccountExists: "Bu e-posta ile bir hesap var. Önce parolanızla giriş yapın.",
     phoneCountry: "Ülke",
     phoneSearch: "Ülke veya kod ara",
     phoneNoResults: "Eşleşen ülke yok.",

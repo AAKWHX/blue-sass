@@ -110,6 +110,9 @@ const de: Dictionary = {
   },
   status: { planning: "Planung", design: "Design", development: "Entwicklung", testing: "Testing", review: "Review", completed: "Abgeschlossen", todo: "Offen", in_progress: "In Arbeit", blocked: "Blockiert", done: "Erledigt" },
   auth: {
+    googleSignIn: "Weiter mit Google",
+    googleError: "Anmeldung fehlgeschlagen. Erneut versuchen oder E-Mail und Passwort verwenden.",
+    googleAccountExists: "Ein Konto mit dieser E-Mail existiert bereits. Zuerst mit dem Passwort anmelden.",
     phoneCountry: "Land",
     phoneSearch: "Land oder Vorwahl suchen",
     phoneNoResults: "Kein passendes Land.",

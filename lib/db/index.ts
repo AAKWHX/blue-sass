@@ -1,12 +1,12 @@
 /**
- * Neon connection. Uses the HTTP driver, which works on the Vercel Edge and
- * Node runtimes without connection pooling headaches.
+ * PostgreSQL connection for the Node runtime, compatible with Supabase.
+ * Prepared statements are disabled for transaction-pooler compatibility.
  *
  * `isDatabaseConfigured` lets every caller fall back to bundled mock data so
  * the preview keeps working before the database is provisioned.
  */
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import postgres from "postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
 
 const url = process.env.DATABASE_URL ?? "";
@@ -28,7 +28,12 @@ function makeDb() {
       },
     });
   }
-  return drizzle(neon(url), { schema, casing: "snake_case" });
+  return drizzle(postgres(url, {
+    prepare: false,
+    max: 3,
+    idle_timeout: 20,
+    connect_timeout: 10,
+  }), { schema, casing: "snake_case" });
 }
 
 export const db = makeDb();

@@ -192,6 +192,9 @@ const ar: Dictionary = {
     done: "منجز",
   },
   auth: {
+    googleSignIn: "المتابعة باستخدام Google",
+    googleError: "تعذّر تسجيل الدخول. يرجى المحاولة مجددًا أو استخدام البريد وكلمة المرور.",
+    googleAccountExists: "يوجد حساب بهذا البريد. سجّل الدخول بكلمة المرور الخاصة به أولًا.",
     phoneCountry: "الدولة",
     phoneSearch: "ابحث عن دولة أو رمز",
     phoneNoResults: "لا توجد دولة مطابقة.",

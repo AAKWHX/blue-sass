@@ -110,6 +110,9 @@ const nl: Dictionary = {
   },
   status: { planning: "Planning", design: "Design", development: "Ontwikkeling", testing: "Testen", review: "Review", completed: "Afgerond", todo: "Te doen", in_progress: "Bezig", blocked: "Geblokkeerd", done: "Klaar" },
   auth: {
+    googleSignIn: "Doorgaan met Google",
+    googleError: "Inloggen mislukt. Probeer opnieuw of gebruik je e-mail en wachtwoord.",
+    googleAccountExists: "Er bestaat al een account met dit e-mailadres. Log eerst in met het wachtwoord.",
     phoneCountry: "Land",
     phoneSearch: "Zoek land of netnummer",
     phoneNoResults: "Geen land gevonden.",
