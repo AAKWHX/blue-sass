@@ -44,9 +44,9 @@ export function SiteFooter() {
         <div>
           <h3 className="mono-label">{t.nav.services}</h3>
           <ul className="mt-4 space-y-2.5 text-sm text-ink-low">
-            {t.services.items.slice(0, 5).map((s) => (
+            {t.services.items.slice(0, 5).map((s, index) => (
               <li key={s.title}>
-                <Link href={`${base}/quote`} className="inline-flex items-center gap-1.5 transition-colors hover:text-neon-cyan">
+                <Link href={`${base}/services/${["web", "mobile", "ai", "cloud", "design"][index]}`} className="inline-flex items-center gap-1.5 transition-colors hover:text-neon-cyan">
                   <ArrowRight className="h-3 w-3 shrink-0 flip-x opacity-0 transition-opacity duration-300 hover:opacity-100" />
                   {s.title}
                 </Link>

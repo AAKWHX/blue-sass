@@ -103,9 +103,6 @@ export function CallToAction() {
                   <ArrowRight className="relative z-10 h-4 w-4 shrink-0 flip-x transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
-              <Button asChild variant="ghostNeon" className="!px-7 !py-3.5 !text-base">
-                <Link href={`/${locale}/portal`}>{t.nav.portal}</Link>
-              </Button>
             </div>
           </div>
         </Reveal>

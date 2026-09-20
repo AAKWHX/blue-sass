@@ -17,7 +17,7 @@ export function Hero() {
             <p className="text-base leading-relaxed text-ink-low sm:text-lg">{t.hero.subtitle}</p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button asChild variant="neon"><Link href={`/${locale}/quote`}>{t.hero.ctaPrimary}<ArrowRight className="size-4 flip-x" /></Link></Button>
-              <Button asChild variant="ghostNeon"><Link href="#portfolio">{t.hero.ctaSecondary}<ArrowDown className="size-4" /></Link></Button>
+              <Button asChild variant="ghostNeon"><Link href="#services">{t.nav.services}<ArrowDown className="size-4" /></Link></Button>
             </div>
           </div>
           <div className="relative rounded-[2rem] border border-line bg-elevated/55 p-4 shadow-2xl backdrop-blur">

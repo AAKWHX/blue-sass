@@ -146,16 +146,8 @@ export function Services() {
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   className="relative flex h-full min-h-[320px] flex-col"
                 >
-                  {/* Status line */}
-                  <div className="flex items-center gap-2">
-                    <span className="live-dot bg-neon-cyan" />
-                    <span className="mono-label">
-                      {t.services.stageLabel} 0{active + 1} / 0{t.services.items.length}
-                    </span>
-                  </div>
-
                   {/* Big icon + title */}
-                  <div className="mt-8 flex items-start gap-5">
+                  <div className="flex items-start gap-5">
                     <span
                       className={cn(
                         "grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ring-1 ring-inset ring-white/10 animate-float-y",

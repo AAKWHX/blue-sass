@@ -51,7 +51,6 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
   const base = `/${locale}`;
   const links = [
     { href: `${base}#services`, label: t.nav.services },
-    { href: `${base}#portfolio`, label: t.nav.portfolio },
     { href: `${base}#process`, label: t.nav.process },
     { href: `${base}/quote`, label: t.nav.quote },
   ];
