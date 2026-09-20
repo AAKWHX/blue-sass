@@ -56,8 +56,7 @@ export function CmsPortfolio() {
     <div className="space-y-5">
       <div className="glass-card flex flex-wrap items-center justify-between gap-3 p-6">
         <div>
-          <h3 className="mono-label">CMS / SHOWCASE</h3>
-          <p className="mt-2 text-lg font-bold">{t.admin.tabs.cmsPortfolio}</p>
+          <h3 className="text-lg font-bold">{t.admin.tabs.cmsPortfolio}</h3>
           <p className="mt-1 text-xs text-ink-low">{t.admin.cms.portfolioHint}</p>
         </div>
         <Button type="button" onClick={openNew} variant="neon" className="!py-2 text-xs">

@@ -22,8 +22,7 @@ export function CmsStats() {
       <div className="glass-card p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="mono-label">CMS / METRICS</h3>
-            <p className="mt-2 text-lg font-bold">{t.admin.tabs.cmsStats}</p>
+            <h3 className="text-lg font-bold">{t.admin.tabs.cmsStats}</h3>
             <p className="mt-1 text-xs text-ink-low">{t.admin.cms.statsHint}</p>
           </div>
           <div className="flex gap-2">

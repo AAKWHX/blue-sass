@@ -70,6 +70,8 @@ export interface ClientDashboardProps {
 }
 
 function MediaCard({ file }: { file: ProjectFile }) {
+  const { locale } = useI18n();
+  const liveDemo = locale === "ar" ? "عرض مباشر" : locale === "nl" ? "Live demonstratie" : locale === "de" ? "Live-Demo" : locale === "tr" ? "Canlı demo" : locale === "fr" ? "Démo en direct" : locale === "es" ? "Demostración en vivo" : "Live demo";
   if (file.kind === "image") {
     return (
       <figure className="overflow-hidden rounded-xl border border-line-strong bg-black/30">
@@ -121,7 +123,7 @@ function MediaCard({ file }: { file: ProjectFile }) {
           {file.name}
         </span>
         <span className="block text-xs text-ink-low">
-          {file.kind === "demo" ? "Live demo" : `${file.sizeKb} KB · ${file.version}`}
+          {file.kind === "demo" ? liveDemo : `${file.sizeKb} KB · ${file.version}`}
         </span>
       </span>
     </a>
@@ -447,7 +449,7 @@ export function ClientDashboard({ viewerName, viewerCompany, projects }: ClientD
             </div>
 
             <div className="glass-card p-5">
-              <p className="text-xs font-bold uppercase tracking-widest text-ink-low">Stack</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-ink-low">{t.services.title}</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {project.tech.map((tech) => (
                   <Badge key={tech} variant="outline">
