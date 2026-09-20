@@ -50,6 +50,7 @@ export function QuoteWizard() {
                     key={key}
                     type="button"
                     onClick={() => setType(key)}
+                    aria-pressed={type === key}
                     className={clsx(
                       "rounded-xl border px-4 py-3 text-sm font-semibold transition",
                       type === key
@@ -99,6 +100,7 @@ export function QuoteWizard() {
                     key={key}
                     type="button"
                     onClick={() => setSpeed(key)}
+                    aria-pressed={speed === key}
                     className={clsx(
                       "rounded-xl border px-4 py-3 text-sm font-semibold transition",
                       speed === key

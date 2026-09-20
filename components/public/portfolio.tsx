@@ -208,6 +208,7 @@ function FilterPill({
       size="auto"
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={clsx(
         "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold tracking-tight transition-all duration-300",
         active

@@ -222,16 +222,19 @@
            overflow-hidden text-white;
     background: linear-gradient(100deg, #ffffff 0%, #e8ecf0 40%, #c9d1da 100%);
     background-size: 180% auto;
-    animation: gradient-pan 5s ease-in-out infinite;
-    box-shadow: 0 10px 38px -10px rgb(255 255 255 / 0.4);
+    animation: none;
+    box-shadow: none;
+    border-radius: 6px;
+    min-height: 44px;
     color: #000000;
   }
   .btn-primary:hover {
-    box-shadow: 0 16px 52px -10px rgb(255 255 255 / 0.55);
+    background: #dfe5ec;
+    box-shadow: none;
   }
   /* Shimmering sweep across the CTA */
   .btn-primary::after {
-    content: "";
+    content: none;
     position: absolute;
     inset: 0;
     background: linear-gradient(100deg, transparent 20%, rgb(0 0 0 / 0.12) 50%, transparent 80%);
@@ -248,6 +251,10 @@
   .btn-ghost:hover {
     @apply border-neon-cyan/50 bg-neon-cyan/[0.06] text-white;
   }
+
+  .btn-ghost { border-radius: 6px; min-height: 44px; }
+  [data-slot="button"] { cursor: pointer; }
+  [data-slot="button"]:disabled { cursor: not-allowed; }
 
   .chip {
     @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white/[0.03]
@@ -616,7 +623,8 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: 0.55;
-    animation: rotate-angle 6s linear infinite;
+    animation: none;
+    display: none;
     pointer-events: none;
   }
   .neon-border:hover::before {
@@ -636,7 +644,7 @@
   .text-gradient {
     background: linear-gradient(100deg, #ffffff 0%, #dfe5ec 45%, #aab3bd 100%);
     background-size: 200% auto;
-    animation: gradient-pan 6s ease-in-out infinite;
+    animation: none;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -645,7 +653,7 @@
   .text-gradient-hero {
     background: linear-gradient(100deg, #ffffff 0%, #f0f3f6 35%, #c3cbd4 65%, #8f99a5 100%);
     background-size: 220% auto;
-    animation: gradient-pan 7s ease-in-out infinite;
+    animation: none;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
