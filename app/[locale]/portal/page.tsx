@@ -5,7 +5,7 @@ import { isDatabaseConfigured } from "@/lib/db";
 import { getViewer } from "@/lib/db/access";
 import { getProjectDetail, listViewerProjects, summariseProgress } from "@/lib/db/queries";
 
-export const metadata = { title: "Client Portal — AAKWHX" };
+export const metadata = { title: "Client Portal — Blue Sass" };
 
 /**
  * With a database connected this is the real, per-account dashboard.

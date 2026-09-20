@@ -20,6 +20,16 @@ import {
 } from "@/components/ui/table";
 import type { Lead, LeadStatus } from "@/lib/db/schema";
 
+const panelCopy = {
+  ar: { title: "طلبات التسعير", empty: "لا توجد طلبات تسعير بعد. ستظهر هنا الطلبات المرسلة من حاسبة المشروع.", contact: "جهة الاتصال", scope: "النطاق", estimate: "التقدير", status: "الحالة", weeks: "أسبوع", next: "نقل إلى" },
+  en: { title: "Quote requests", empty: "No quote requests yet. Requests from the project estimator will appear here.", contact: "Contact", scope: "Scope", estimate: "Estimate", status: "Status", weeks: "weeks", next: "Move to" },
+  nl: { title: "Offerteaanvragen", empty: "Nog geen aanvragen. Aanvragen uit de projectcalculator verschijnen hier.", contact: "Contact", scope: "Omvang", estimate: "Schatting", status: "Status", weeks: "weken", next: "Verplaats naar" },
+  de: { title: "Angebotsanfragen", empty: "Noch keine Anfragen. Anfragen aus dem Projektkalkulator erscheinen hier.", contact: "Kontakt", scope: "Umfang", estimate: "Schätzung", status: "Status", weeks: "Wochen", next: "Verschieben zu" },
+  tr: { title: "Teklif talepleri", empty: "Henüz teklif talebi yok. Proje hesaplayıcısından gelen talepler burada görünür.", contact: "İletişim", scope: "Kapsam", estimate: "Tahmin", status: "Durum", weeks: "hafta", next: "Taşı" },
+  fr: { title: "Demandes de devis", empty: "Aucune demande pour le moment. Les demandes du calculateur apparaîtront ici.", contact: "Contact", scope: "Périmètre", estimate: "Estimation", status: "Statut", weeks: "semaines", next: "Passer à" },
+  es: { title: "Solicitudes de presupuesto", empty: "Todavía no hay solicitudes. Las del estimador aparecerán aquí.", contact: "Contacto", scope: "Alcance", estimate: "Estimación", status: "Estado", weeks: "semanas", next: "Mover a" },
+} as const;
+
 const NEXT_STATUS: Record<LeadStatus, LeadStatus> = {
   new: "contacted",
   contacted: "qualified",
@@ -37,6 +47,7 @@ const STATUS_TONE: Record<LeadStatus, string> = {
 };
 
 export function LeadsPanel({ leads, locale }: { leads: Lead[]; locale: string }) {
+  const c = panelCopy[locale as keyof typeof panelCopy] ?? panelCopy.en;
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "EUR",
@@ -50,24 +61,24 @@ export function LeadsPanel({ leads, locale }: { leads: Lead[]; locale: string })
         <header className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-ink-low">
             <Inbox className="size-4 text-neon-cyan" />
-            Quote requests
+            {c.title}
           </h2>
           <Badge variant="outline">{leads.length}</Badge>
         </header>
 
         {leads.length === 0 ? (
           <p className="mt-6 text-sm text-ink-low">
-            No quote requests yet. Submissions from the public estimator land here.
+            {c.empty}
           </p>
         ) : (
           <div className="mt-5 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Scope</TableHead>
-                  <TableHead>Estimate</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>{c.contact}</TableHead>
+                  <TableHead>{c.scope}</TableHead>
+                  <TableHead>{c.estimate}</TableHead>
+                  <TableHead>{c.status}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -117,7 +128,7 @@ export function LeadsPanel({ leads, locale }: { leads: Lead[]; locale: string })
                         {money.format(lead.budgetEstimate)}
                       </span>
                       <span className="block text-xs text-ink-low">
-                        ~{lead.timelineWeeks} weeks · {dateFmt.format(lead.createdAt)}
+                        ~{lead.timelineWeeks} {c.weeks} · {dateFmt.format(lead.createdAt)}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -131,7 +142,7 @@ export function LeadsPanel({ leads, locale }: { leads: Lead[]; locale: string })
                           <input type="hidden" name="id" value={lead.id} />
                           <input type="hidden" name="status" value={NEXT_STATUS[lead.status]} />
                           <Button type="submit" variant="ghostNeon" className="!px-3 !py-1.5 !text-xs">
-                            → {NEXT_STATUS[lead.status]}
+                            {c.next} {NEXT_STATUS[lead.status]}
                           </Button>
                         </form>
                       )}

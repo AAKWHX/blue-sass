@@ -64,7 +64,7 @@ export function AdminView() {
       <div className="container-x relative z-content">
         <header className="glass-card flex flex-wrap items-center justify-between gap-5 p-6">
           <div>
-            <span className="mono-label rounded-full border border-violet-400/30 bg-violet-400/5 px-3 py-1.5">AAKWHX / ERP CORE</span>
+            <span className="rounded-full border border-violet-400/30 bg-violet-400/5 px-3 py-1.5 text-sm font-semibold text-violet-200">Blue Sass</span>
             <h1 className="mt-3 text-3xl font-black tracking-tight"><span className="text-gradient">{t.admin.title}</span></h1>
           </div>
           <div className="flex items-center gap-3">
@@ -135,14 +135,14 @@ export function AdminView() {
                     <BarChart3 className="h-4 w-4" /> {t.admin.kpis.revenue}
                   </h3>
                   <div className="mt-6 flex h-48 items-end gap-2">
-                    {kpis.revenueByMonth.map((m) => (
+                    {kpis.revenueByMonth.map((m, index) => (
                       <div key={m.month} className="flex flex-1 flex-col items-center gap-2">
                         <div
                           className="w-full rounded-t-lg bg-gradient-to-t from-neon-cyan via-neon-blue to-neon-indigo shadow-glow-cyan transition-all"
                           style={{ height: `${(m.value / 500) * 100}%` }}
                           title={`${m.value}k`}
                         />
-                        <span className="text-[10px] font-semibold text-ink-low">{m.month}</span>
+                        <span className="text-[10px] font-semibold text-ink-low">{new Intl.DateTimeFormat(locale, { month: "short" }).format(new Date(2026, index, 1))}</span>
                       </div>
                     ))}
                   </div>

@@ -5,7 +5,7 @@ import { isDatabaseConfigured } from "@/lib/db";
 import { getViewer, isStaff } from "@/lib/db/access";
 import { listLeads } from "@/lib/db/queries";
 
-export const metadata = { title: "Operations & ERP — AAKWHX" };
+export const metadata = { title: "Administration — Blue Sass" };
 
 /**
  * With a database connected the route is staff-only and shows the live sales
