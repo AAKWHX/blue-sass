@@ -1,16 +1,15 @@
 import { redirect } from "next/navigation";
 import { AdminView } from "@/components/admin/admin-view";
 import { LeadsPanel } from "@/components/admin/leads-panel";
-import { isDatabaseConfigured } from "@/lib/db";
 import { getViewer, isStaff } from "@/lib/db/access";
 import { listLeads } from "@/lib/db/queries";
 
 export const metadata = { title: "Administration — Blue Sass" };
 
 /**
- * With a database connected the route is staff-only and shows the live sales
- * inbox above the ERP console. Without one it renders the demo ERP so the
- * preview stays complete.
+ * This route is staff-only in every environment. A preview must never expose
+ * an operations dashboard or even demo customer information to anonymous
+ * visitors.
  */
 export default async function AdminPage({
   params,
@@ -18,8 +17,6 @@ export default async function AdminPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-
-  if (!isDatabaseConfigured) return <AdminView />;
 
   const viewer = await getViewer();
   if (!viewer) redirect(`/${locale}/login`);

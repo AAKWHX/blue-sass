@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { ClientDashboard, type DashboardProject } from "@/components/portal/client-dashboard";
 import { PortalView } from "@/components/portal/portal-view";
+import { PortalNav } from "@/components/portal/portal-nav";
 import { isDatabaseConfigured } from "@/lib/db";
 import { getViewer } from "@/lib/db/access";
 import { getProjectDetail, listViewerLeads, listViewerProjects, summariseProgress } from "@/lib/db/queries";
@@ -18,7 +19,7 @@ export default async function PortalPage({
 }) {
   const { locale } = await params;
 
-  if (!isDatabaseConfigured) return <PortalView />;
+  if (!isDatabaseConfigured) return <><PortalNav locale={locale} /><PortalView /></>;
 
   const viewer = await getViewer();
   if (!viewer) redirect(`/${locale}/login`);
@@ -30,12 +31,13 @@ export default async function PortalPage({
     .filter((d): d is NonNullable<typeof d> => d !== null)
     .map((detail) => ({ ...detail, summary: summariseProgress(detail) }));
 
-  return (
+  return <>
+    <PortalNav locale={locale} />
     <ClientDashboard
       viewerName={viewer.name ?? viewer.email}
       viewerCompany={null}
       projects={projects}
       orders={orders}
     />
-  );
+  </>;
 }

@@ -14,7 +14,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 const projectTypes: ProjectType[] = ["web", "mobile", "ai", "ecommerce", "erp", "brand"];
-const featureKeys: FeatureKey[] = ["auth", "payments", "dashboard", "i18n", "cms", "api", "ai", "realtime"];
+const featuresByType: Record<ProjectType, FeatureKey[]> = {
+  web: ["auth", "dashboard", "i18n", "cms", "api", "realtime"],
+  mobile: ["auth", "payments", "i18n", "api", "realtime"],
+  ai: ["auth", "dashboard", "api", "ai", "realtime"],
+  ecommerce: ["auth", "payments", "dashboard", "i18n", "cms", "api"],
+  erp: ["auth", "dashboard", "i18n", "api", "ai", "realtime"],
+  brand: ["i18n", "cms", "api"],
+};
 const speeds: Speed[] = ["relaxed", "standard", "rush"];
 const addOns = ["domain", "email", "hosting", "maintenance", "google", "analytics"] as const;
 type AddOn = (typeof addOns)[number];
@@ -44,22 +51,27 @@ const uiCopy: Record<QuoteLocale, { extras: string; extrasHint: string; project:
   es: { extras: "Extras y suscripciones", extrasHint: "Elija varios servicios. Los precios se muestran antes de enviar.", project: "Nombre del proyecto", projectExample: "p. ej., North Store", domain: "Dominio deseado", save: "Guardar solicitud", deposit: "Depósito de reserva", estimate: "Estimación", paymentOff: "El pago se activará al añadir las claves de los proveedores. Puede guardar ahora sin pagar." },
 };
 
-export function QuoteWizard({ initialType, payments }: { initialType?: string; payments: { stripe: boolean; mollie: boolean } }) {
+export function QuoteWizard({ initialType, initialEmail = "", payments }: { initialType?: string; initialEmail?: string; payments: { stripe: boolean; mollie: boolean } }) {
   const { locale, t } = useI18n();
   const [type, setType] = useState<ProjectType>(projectTypes.includes(initialType as ProjectType) ? initialType as ProjectType : "web");
   const [features, setFeatures] = useState<FeatureKey[]>(["auth", "i18n"]);
   const [selectedAddOns, setSelectedAddOns] = useState<AddOn[]>([]);
   const [speed, setSpeed] = useState<Speed>("standard");
-  const [form, setForm] = useState({ name: "", email: "", company: "", notes: "" });
+  const [form, setForm] = useState({ name: "", email: initialEmail, company: "", notes: "" });
   const [state, formAction, pending] = useActionState<LeadState, FormData>(submitLeadAction, {
     ok: false,
     message: "",
   });
 
   const result = useMemo(() => estimate(type, features, speed), [type, features, speed]);
+  const availableFeatures = featuresByType[type];
 
   function toggleFeature(key: FeatureKey) {
     setFeatures((prev) => (prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]));
+  }
+  function chooseType(next: ProjectType) {
+    setType(next);
+    setFeatures((previous) => previous.filter((feature) => featuresByType[next].includes(feature)));
   }
   function toggleAddOn(key: AddOn) {
     setSelectedAddOns((prev) => prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]);
@@ -82,7 +94,7 @@ export function QuoteWizard({ initialType, payments }: { initialType?: string; p
                   <Button variant="unstyled" size="auto"
                     key={key}
                     type="button"
-                    onClick={() => setType(key)}
+                    onClick={() => chooseType(key)}
                     aria-pressed={type === key}
                     className={clsx(
                       "rounded-xl border px-4 py-3 text-sm font-semibold transition",
@@ -114,8 +126,9 @@ export function QuoteWizard({ initialType, payments }: { initialType?: string; p
 
             <div className="glass-card p-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{t.quote.fields.features}</h3>
+              <p className="mt-2 text-sm text-ink-low">{locale === "ar" ? "اختر الآن الميزات المناسبة لهذا النوع من المشاريع." : "Now choose the features that fit this project type."}</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {featureKeys.map((key) => {
+                {availableFeatures.map((key) => {
                   const on = features.includes(key);
                   return (
                     <Button variant="unstyled" size="auto"

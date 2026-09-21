@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { leads } from "@/lib/db/schema";
-import { requireRole } from "@/lib/db/access";
+import { getViewer, requireRole } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
 import { takeRateLimit } from "@/lib/rate-limit";
 
@@ -55,6 +55,8 @@ export async function submitLeadAction(
   _prev: LeadState,
   formData: FormData,
 ): Promise<LeadState> {
+  const viewer = await getViewer();
+  if (!viewer) return { ok: false, message: "Sign in before saving a project request." };
   const parsed = leadSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
@@ -80,6 +82,11 @@ export async function submitLeadAction(
   }
 
   const data = parsed.data;
+  // The authenticated identity is authoritative. A hidden form field must
+  // never be able to create, view, or later claim someone else's request.
+  if (data.email !== viewer.email.toLowerCase()) {
+    return { ok: false, message: "Use the email address of your signed-in account." };
+  }
   const addOns = data.addOns ? data.addOns.split(",").filter(Boolean) : [];
   const details = [
     data.projectName ? `Project: ${data.projectName}` : "",

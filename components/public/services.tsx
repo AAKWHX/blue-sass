@@ -64,7 +64,7 @@ export function Services() {
             <div
               role="tablist"
               aria-label={t.services.title}
-              className="relative flex gap-2 overflow-x-auto border-b border-line p-4 lg:flex-col lg:overflow-visible lg:border-b-0 lg:border-e lg:p-5"
+              className="relative grid grid-cols-2 gap-2 border-b border-line p-3 sm:grid-cols-3 lg:flex lg:flex-col lg:overflow-visible lg:border-b-0 lg:border-e lg:p-5"
             >
               {t.services.items.map((item, i) => {
                 const ItemIcon = icons[i % icons.length];
@@ -77,7 +77,7 @@ export function Services() {
                     aria-selected={selected}
                     onClick={() => setActive(i)}
                     className={cn(
-                      "group relative flex min-w-[132px] shrink-0 items-center gap-3 rounded-xl border px-3.5 py-3 text-start transition-all duration-300",
+                      "group relative flex min-w-0 items-center gap-2 rounded-xl border px-3 py-3 text-start transition-all duration-300 lg:min-w-[132px] lg:gap-3 lg:px-3.5",
                       selected
                         ? "border-neon-cyan/45 bg-white/[0.05] shadow-glow-cyan"
                         : "border-transparent hover:border-line hover:bg-white/[0.03]",
@@ -85,7 +85,7 @@ export function Services() {
                   >
                     <span
                       className={cn(
-                        "grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ring-1 ring-inset ring-white/10 transition-transform duration-300 group-hover:scale-105",
+                        "grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ring-1 ring-inset ring-white/10 transition-transform duration-300 group-hover:scale-105 lg:h-10 lg:w-10",
                         itemAccent.glow,
                         itemAccent.text,
                         selected && "scale-110",
@@ -95,7 +95,7 @@ export function Services() {
                     </span>
                     <span
                       className={cn(
-                        "min-w-0 text-sm font-semibold leading-snug tracking-tight transition-colors",
+                        "min-w-0 text-xs font-semibold leading-snug tracking-tight transition-colors sm:text-sm",
                         selected ? "text-ink-hi" : "text-ink-low group-hover:text-ink-mid",
                       )}
                     >

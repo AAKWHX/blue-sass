@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Mail } from "lucide-react";
+import { ArrowRight, AtSign, Mail, Phone } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { BrandLogo } from "@/components/brand-logo";
 
@@ -67,6 +67,8 @@ export function SiteFooter() {
             <li className="flex items-center gap-1.5">
               <Mail className="h-3.5 w-3.5" /> <a href="mailto:etskar@bluesass.nl" className="hover:text-neon-cyan">etskar@bluesass.nl</a>
             </li>
+            <li className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /><a href="tel:+31634543374" dir="ltr" className="hover:text-neon-cyan">+31 6 3454 3374</a></li>
+            <li className="flex items-center gap-1.5"><AtSign className="h-3.5 w-3.5" /><a href="https://instagram.com/aakwhx" target="_blank" rel="noreferrer" className="hover:text-neon-cyan">@aakwhx</a></li>
           </ul>
         </div>
       </div>

@@ -58,11 +58,11 @@ export function Process() {
             {t.process.steps.map((step, i) => (
               <StaggerItem key={step.title}>
                 <TiltCard intensity={6} className="h-full">
-                  <div className="glass-card glow-hover neon-border group relative h-full p-6 pt-9">
-                    <span className="absolute -top-3 start-6 rounded-full bg-gradient-to-r from-neon-cyan to-neon-indigo px-3 py-1 font-mono text-[11px] font-black text-white shadow-glow-cyan">
+                  <div className="glass-card glow-hover group relative h-full border border-line-strong p-6 pt-10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+                    <span className="absolute -top-3 start-6 grid h-8 min-w-8 place-items-center rounded-full border border-white/35 bg-[#1b2028] px-2 font-mono text-[11px] font-black tracking-wider text-white shadow-[0_0_18px_rgba(255,255,255,0.22)]">
                       0{i + 1}
                     </span>
-                    <h3 className="text-base font-bold tracking-tight">{step.title}</h3>
+                    <h3 className="text-base font-bold tracking-tight text-ink-hi">{step.title}</h3>
                     <p className="mt-2.5 text-sm leading-relaxed text-ink-low">{step.desc}</p>
                   </div>
                 </TiltCard>

@@ -49,10 +49,14 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
   }, []);
 
   const base = `/${locale}`;
+  const extra = locale === "ar"
+    ? { projects: "المشاريع", create: "اصنع مشروعًا", contact: "تواصل" }
+    : { projects: "Projects", create: "Start a project", contact: "Contact" };
   const links = [
     { href: `${base}#services`, label: t.nav.services },
-    { href: `${base}#process`, label: t.nav.process },
-    { href: `${base}/quote`, label: t.nav.quote },
+    { href: `${base}/projects`, label: extra.projects },
+    { href: `${base}/create-project`, label: extra.create },
+    { href: `${base}/contact`, label: extra.contact },
   ];
 
   // Always dark + frosted, never transparent: over the animated 3D field a

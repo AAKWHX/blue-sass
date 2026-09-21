@@ -107,6 +107,13 @@ export async function listViewerLeads(email: string) {
   return db.select().from(leads).where(eq(leads.email, email.toLowerCase())).orderBy(desc(leads.createdAt));
 }
 
+/** One saved order, scoped to its owner for the client receipt page. */
+export async function getViewerLead(id: string, email: string) {
+  if (!isDatabaseConfigured) return null;
+  const [lead] = await db.select().from(leads).where(and(eq(leads.id, id), eq(leads.email, email.toLowerCase()))).limit(1);
+  return lead ?? null;
+}
+
 /** Admin: the client directory. */
 export async function listUsers() {
   if (!isDatabaseConfigured) return [];

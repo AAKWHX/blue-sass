@@ -9,6 +9,7 @@
  */
 import { useActionState, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import clsx from "clsx";
 import {
   CalendarClock,
@@ -159,7 +160,7 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
             {orders.length ? (locale === "ar" ? "طلباتك محفوظة هنا. سنحوّل الطلب إلى مشروع بعد اعتماد النطاق والدفعة الأولى." : "Your requests are saved here. They become projects after scope and deposit approval.") : t.auth.noProjects}
           </p>
         </div>
-        {orders.length ? <div className="mt-5 grid gap-4 sm:grid-cols-2">{orders.map((order) => <article key={order.id} className="glass-card p-5"><div className="flex items-center justify-between gap-3"><span className="font-bold">{order.projectType}</span><Badge variant="outline">{order.status}</Badge></div><p className="mt-3 text-sm text-ink-low">{order.services.join(" · ")}</p><div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-xs"><span className="flex items-center gap-2 text-ink-low"><ReceiptText className="size-4" />{locale === "ar" ? "التقدير" : "Estimate"}</span><span className="font-bold">{new Intl.NumberFormat(locale, { style: "currency", currency: order.currency, maximumFractionDigits: 0 }).format(order.budgetEstimate)}</span></div></article>)}</div> : null}
+        {orders.length ? <div className="mt-5 grid gap-4 sm:grid-cols-2">{orders.map((order) => <Link key={order.id} href={`/${locale}/portal/orders/${order.id}`} className="glass-card block p-5 transition hover:border-neon-cyan/50"><div className="flex items-center justify-between gap-3"><span className="font-bold">{order.projectType}</span><Badge variant="outline">{order.status}</Badge></div><p className="mt-3 text-sm text-ink-low">{order.services.join(" · ")}</p><div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-xs"><span className="flex items-center gap-2 text-ink-low"><ReceiptText className="size-4" />{locale === "ar" ? "التقدير" : "Estimate"}</span><span className="font-bold">{new Intl.NumberFormat(locale, { style: "currency", currency: order.currency, maximumFractionDigits: 0 }).format(order.budgetEstimate)}</span></div></Link>)}</div> : null}
         </div>
       </section>
     );
