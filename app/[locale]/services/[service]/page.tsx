@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { getDictionary, isLocale } from "@/lib/i18n";
 
 const slugs = ["web", "mobile", "ai", "cloud", "design", "security"] as const;
+const quoteTypes = { web: "web", mobile: "mobile", ai: "ai", cloud: "erp", design: "brand", security: "web" } as const;
 const copy = {
   ar: { what: "ما الذي ستحصل عليه؟", steps: "من الفكرة إلى الإطلاق", estimate: "احسب تكلفة مشروعك", points: ["تخطيط واضح ونطاق عمل موثّق", "تصميم متجاوب وسهل الاستخدام", "تنفيذ آمن وقابل للتوسع", "اختبار وإطلاق ودعم مستمر"] },
   en: { what: "What you receive", steps: "From idea to launch", estimate: "Estimate your project", points: ["A clear plan and documented scope", "Responsive, accessible design", "Secure and scalable implementation", "Testing, launch and ongoing support"] },
@@ -50,7 +51,7 @@ export default async function ServicePage({ params }: { params: Promise<{ locale
         <section className="mt-20 rounded-[2rem] border border-line bg-elevated/70 p-8 text-center sm:p-12">
           <h2 className="text-3xl font-bold">{c.steps}</h2>
           <p className="mx-auto mt-4 max-w-2xl text-ink-low">{t.process.subtitle}</p>
-          <Button asChild variant="neon" className="mt-8"><Link href={`/${locale}/quote`}>{c.estimate}<ArrowRight className="h-4 w-4 flip-x" /></Link></Button>
+          <Button asChild variant="neon" className="mt-8"><Link href={`/${locale}/quote?type=${quoteTypes[service as keyof typeof quoteTypes]}`}>{c.estimate}<ArrowRight className="h-4 w-4 flip-x" /></Link></Button>
         </section>
       </div>
     </div>

@@ -12,5 +12,4 @@
  * working because they already carry an `email_verified` timestamp.
  */
 export const requireEmailVerification =
-  process.env.REQUIRE_EMAIL_VERIFICATION !== "false";
-
+  process.env.REQUIRE_EMAIL_VERIFICATION === "true";

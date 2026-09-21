@@ -101,6 +101,12 @@ export async function listLeads() {
   return db.select().from(leads).orderBy(desc(leads.createdAt));
 }
 
+/** Saved requests belonging to the signed-in customer. */
+export async function listViewerLeads(email: string) {
+  if (!isDatabaseConfigured) return [];
+  return db.select().from(leads).where(eq(leads.email, email.toLowerCase())).orderBy(desc(leads.createdAt));
+}
+
 /** Admin: the client directory. */
 export async function listUsers() {
   if (!isDatabaseConfigured) return [];

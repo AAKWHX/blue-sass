@@ -12,7 +12,7 @@ const API = "https://api.resend.com/emails";
 export const isEmailConfigured = Boolean(process.env.RESEND_API_KEY);
 
 function fromAddress(): string {
-  return process.env.EMAIL_FROM ?? "AAKWHX <onboarding@resend.dev>";
+  return process.env.EMAIL_FROM ?? "Blue Sass <onboarding@resend.dev>";
 }
 
 export interface SendResult {

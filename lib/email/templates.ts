@@ -17,7 +17,7 @@ export function verificationEmail(locale: string, link: string) {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
       <tr><td align="center">
         <table role="presentation" width="100%" style="max-width:520px;background:#0d1220;border:1px solid #1e2a44;border-radius:16px;padding:32px" cellpadding="0" cellspacing="0" dir="${dir}">
-          <tr><td style="font-size:13px;letter-spacing:.18em;color:#5eead4;text-transform:uppercase">AAKWHX</td></tr>
+          <tr><td style="font-size:15px;color:#5eead4;font-weight:700">Blue Sass</td></tr>
           <tr><td style="padding-top:12px;font-size:22px;font-weight:700">${t.heading}</td></tr>
           <tr><td style="padding-top:12px;font-size:15px;line-height:1.7;color:#aab6d4">${t.body}</td></tr>
           <tr><td style="padding-top:24px">

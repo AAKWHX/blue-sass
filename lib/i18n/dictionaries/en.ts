@@ -42,7 +42,7 @@ const en = {
   hero: {
     badge: "Full-stack product studio · Est. 2016",
     systemOnline: "SYSTEM ONLINE",
-    title: "We build the systems your competitors will copy.",
+    title: "We design and build your website or app, from idea to launch.",
     subtitle:
       "AAKWHX is a high-tech agency delivering platforms, AI systems and brand-grade interfaces for teams that refuse to ship average software.",
     ctaPrimary: "Start a project",

@@ -41,6 +41,9 @@ const leadSchema = z.object({
   timelineWeeks: z.coerce.number().int().min(0).default(0),
   currency: z.string().default("EUR"),
   message: z.string().trim().max(4000).optional(),
+  projectName: z.string().trim().max(120).optional(),
+  domain: z.string().trim().max(160).optional(),
+  addOns: z.string().optional(),
   website: z.string().max(0).optional(),
 });
 
@@ -77,6 +80,12 @@ export async function submitLeadAction(
   }
 
   const data = parsed.data;
+  const addOns = data.addOns ? data.addOns.split(",").filter(Boolean) : [];
+  const details = [
+    data.projectName ? `Project: ${data.projectName}` : "",
+    data.domain ? `Domain: ${data.domain}` : "",
+    data.message || "",
+  ].filter(Boolean).join("\n");
   await db.insert(leads).values({
     name: data.name,
     email: data.email,
@@ -84,11 +93,11 @@ export async function submitLeadAction(
     phone: data.phone || null,
     locale: data.locale,
     projectType: data.projectType,
-    services: data.services ? data.services.split(",").filter(Boolean) : [],
+    services: [...(data.services ? data.services.split(",").filter(Boolean) : []), ...addOns.map((item) => `addon:${item}`)],
     budgetEstimate: data.budgetEstimate,
     timelineWeeks: data.timelineWeeks,
     currency: data.currency,
-    message: data.message || null,
+    message: details || null,
   });
 
   revalidatePath("/[locale]/admin", "page");

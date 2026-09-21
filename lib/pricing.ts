@@ -32,7 +32,17 @@ export interface Estimate {
   low: number;
   high: number;
   weeks: number;
+  deposit: number;
 }
+
+export const reservationDeposit: Record<ProjectType, number> = {
+  web: 99,
+  mobile: 199,
+  ai: 249,
+  ecommerce: 149,
+  erp: 299,
+  brand: 79,
+};
 
 export function estimate(type: ProjectType, features: FeatureKey[], speed: Speed): Estimate {
   const base = baseCost[type];
@@ -48,6 +58,7 @@ export function estimate(type: ProjectType, features: FeatureKey[], speed: Speed
     low: Math.round((price * 0.9) / 500) * 500,
     high: Math.round((price * 1.2) / 500) * 500,
     weeks,
+    deposit: reservationDeposit[type],
   };
 }
 

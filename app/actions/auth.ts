@@ -205,7 +205,10 @@ async function dispatchVerification(email: string, locale: string): Promise<bool
   const link = `${origin}/${locale}/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
   const { subject, html, text } = verificationEmail(locale, link);
   const result = await sendEmail({ to: email, subject, html, text });
-  return result.ok;
+  // A missing provider key is a safe development fallback, not a delivered
+  // message. Never tell a customer that a verification email was sent when it
+  // was only skipped.
+  return result.ok && !result.skipped;
 }
 
 /* ------------------------------------------------------------------ *
@@ -320,4 +323,3 @@ export async function signOutAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "ar");
   await signOut({ redirectTo: `/${locale}` });
 }
-

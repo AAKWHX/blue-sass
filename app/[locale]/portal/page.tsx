@@ -3,7 +3,7 @@ import { ClientDashboard, type DashboardProject } from "@/components/portal/clie
 import { PortalView } from "@/components/portal/portal-view";
 import { isDatabaseConfigured } from "@/lib/db";
 import { getViewer } from "@/lib/db/access";
-import { getProjectDetail, listViewerProjects, summariseProgress } from "@/lib/db/queries";
+import { getProjectDetail, listViewerLeads, listViewerProjects, summariseProgress } from "@/lib/db/queries";
 
 export const metadata = { title: "Client Portal — Blue Sass" };
 
@@ -23,7 +23,7 @@ export default async function PortalPage({
   const viewer = await getViewer();
   if (!viewer) redirect(`/${locale}/login`);
 
-  const rows = await listViewerProjects();
+  const [rows, orders] = await Promise.all([listViewerProjects(), listViewerLeads(viewer.email)]);
   const details = await Promise.all(rows.map((row) => getProjectDetail(row.id)));
 
   const projects: DashboardProject[] = details
@@ -35,6 +35,7 @@ export default async function PortalPage({
       viewerName={viewer.name ?? viewer.email}
       viewerCompany={null}
       projects={projects}
+      orders={orders}
     />
   );
 }

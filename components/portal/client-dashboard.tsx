@@ -21,6 +21,8 @@ import {
   Hourglass,
   Loader2,
   MonitorPlay,
+  PackageCheck,
+  ReceiptText,
   Send,
   ShieldCheck,
 } from "lucide-react";
@@ -43,6 +45,7 @@ import type {
   Project,
   ProjectFile,
   ProjectStage,
+  Lead,
 } from "@/lib/db/schema";
 
 const STAGES: ProjectStage[] = ["planning", "design", "development", "testing", "review"];
@@ -67,6 +70,7 @@ export interface ClientDashboardProps {
   viewerName: string;
   viewerCompany: string | null;
   projects: DashboardProject[];
+  orders: Lead[];
 }
 
 function MediaCard({ file }: { file: ProjectFile }) {
@@ -130,7 +134,7 @@ function MediaCard({ file }: { file: ProjectFile }) {
   );
 }
 
-export function ClientDashboard({ viewerName, viewerCompany, projects }: ClientDashboardProps) {
+export function ClientDashboard({ viewerName, viewerCompany, projects, orders }: ClientDashboardProps) {
   const { t, locale } = useI18n();
   const [index, setIndex] = useState(0);
   const [feedbackState, feedbackAction, feedbackPending] = useActionState(
@@ -145,14 +149,17 @@ export function ClientDashboard({ viewerName, viewerCompany, projects }: ClientD
   if (projects.length === 0) {
     return (
       <section className="container-x py-20">
-        <div className="glass-card mx-auto max-w-xl p-8 text-center">
-          <Hourglass className="mx-auto size-8 text-neon-cyan" />
+        <div className="mx-auto max-w-4xl">
+        <div className="glass-card p-8 text-center">
+          {orders.length ? <PackageCheck className="mx-auto size-8 text-neon-cyan" /> : <Hourglass className="mx-auto size-8 text-neon-cyan" />}
           <h1 className="mt-4 text-2xl font-bold text-ink-hi">
             {t.portal.welcome}, {viewerName}
           </h1>
           <p className="mt-3 text-sm text-ink-low" dir="auto">
-            {t.auth.noProjects}
+            {orders.length ? (locale === "ar" ? "طلباتك محفوظة هنا. سنحوّل الطلب إلى مشروع بعد اعتماد النطاق والدفعة الأولى." : "Your requests are saved here. They become projects after scope and deposit approval.") : t.auth.noProjects}
           </p>
+        </div>
+        {orders.length ? <div className="mt-5 grid gap-4 sm:grid-cols-2">{orders.map((order) => <article key={order.id} className="glass-card p-5"><div className="flex items-center justify-between gap-3"><span className="font-bold">{order.projectType}</span><Badge variant="outline">{order.status}</Badge></div><p className="mt-3 text-sm text-ink-low">{order.services.join(" · ")}</p><div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-xs"><span className="flex items-center gap-2 text-ink-low"><ReceiptText className="size-4" />{locale === "ar" ? "التقدير" : "Estimate"}</span><span className="font-bold">{new Intl.NumberFormat(locale, { style: "currency", currency: order.currency, maximumFractionDigits: 0 }).format(order.budgetEstimate)}</span></div></article>)}</div> : null}
         </div>
       </section>
     );
