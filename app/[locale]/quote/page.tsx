@@ -1,6 +1,6 @@
 import { QuoteWizard } from "@/components/public/quote-wizard";
 
-export const metadata = { title: "Project estimator — AAKWHX" };
+export const metadata = { title: "Project estimator — Blue Sass" };
 
 export default async function QuotePage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
   const { type } = await searchParams;

@@ -1,7 +1,7 @@
 import type { Dictionary } from "./en";
 
 const nl: Dictionary = {
-  brand: { name: "AAKWHX", product: "AWWA", tagline: "Wij bouwen de digitale voorsprong." },
+  brand: { name: "Blue Sass", product: "Studio", tagline: "Digitale producten die meegroeien." },
   nav: { menu: "Menu", home: "Home", services: "Diensten", portfolio: "Portfolio", process: "Werkwijze", quote: "Offerte", portal: "Klantportaal", admin: "Beheer / ERP", contact: "Contact" },
   common: {
     language: "Taal", theme: "Thema", dark: "Donker", light: "Licht", all: "Alles", public: "Openbaar", private: "Privé",
@@ -14,7 +14,7 @@ const nl: Dictionary = {
     badge: "Full-stack productstudio · Sinds 2016",
     systemOnline: "SYSTEEM ONLINE",
     title: "Wij bouwen de systemen die uw concurrenten gaan kopiëren.",
-    subtitle: "AAKWHX is een hightech agency dat platformen, AI-systemen en premium interfaces levert voor teams die geen genoegen nemen met middelmatige software.",
+    subtitle: "Blue Sass ontwerpt en ontwikkelt websites, mobiele apps en slimme systemen voor groeiende bedrijven.",
     ctaPrimary: "Start een project", ctaSecondary: "Bekijk ons werk",
     console: {
       live: "LIVE",
@@ -164,7 +164,7 @@ const nl: Dictionary = {
     milestonesDone: "mijlpalen afgerond",
     noProjects: "Er is nog geen project aan je account gekoppeld. Ons team regelt dit binnenkort.",
   },
-  footer: { rights: "Alle rechten voorbehouden.", built: "Ontworpen en gebouwd door AAKWHX.", offices: "Amsterdam · Istanboel · Riyad",
+  footer: { rights: "Alle rechten voorbehouden.", built: "Ontworpen en gebouwd door Blue Sass.", offices: "Websites · Apps · Digitale systemen",
     newsletterTitle: "Veldnotities", newsletterPlaceholder: "jouw@email.com", newsletterCta: "Abonneren", newsletterDone: "Geabonneerd — welkom aan boord." },
   stack: {
     title: "Aangedreven door een moderne stack",
@@ -172,9 +172,9 @@ const nl: Dictionary = {
   },
   emails: {
     verify: {
-      subject: "Bevestig je AAKWHX-account",
+      subject: "Bevestig je Blue Sass-account",
       heading: "Bevestig je e-mailadres",
-      body: "Bedankt voor het aanmaken van een AAKWHX-klantaccount. Bevestig dit adres om je account te activeren en je projectdashboard te openen.",
+      body: "Bedankt voor het aanmaken van een Blue Sass-klantaccount. Bevestig dit adres om je account te activeren en je projectdashboard te openen.",
       cta: "Mijn e-mailadres bevestigen",
       expiry: "Deze link is 24 uur geldig en kan één keer worden gebruikt.",
       ignore: "Heb je dit account niet aangemaakt? Dan kun je dit bericht negeren.",

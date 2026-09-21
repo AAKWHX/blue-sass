@@ -7,7 +7,7 @@ import { validateEmail } from "@/lib/validation/contact";
 import { Button } from "@/components/ui/button";
 import { VerifyResend } from "@/components/auth/verify-resend";
 
-export const metadata = { title: "Confirm your email — AAKWHX" };
+export const metadata = { title: "Confirm your email — Blue Sass" };
 export const dynamic = "force-dynamic";
 
 export default async function VerifyPage({

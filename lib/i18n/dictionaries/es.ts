@@ -1,7 +1,7 @@
 import type { Dictionary } from "./en";
 
 const es: Dictionary = {
-  brand: { name: "AAKWHX", product: "AWWA", tagline: "Diseñamos la ventaja digital." },
+  brand: { name: "Blue Sass", product: "Studio", tagline: "Productos digitales preparados para crecer." },
   nav: { menu: "Menú", home: "Inicio", services: "Servicios", portfolio: "Portafolio", process: "Proceso", quote: "Presupuesto", portal: "Portal del cliente", admin: "Administración / ERP", contact: "Contacto" },
   common: {
     language: "Idioma", theme: "Tema", dark: "Oscuro", light: "Claro", all: "Todo", public: "Público", private: "Privado",
@@ -14,7 +14,7 @@ const es: Dictionary = {
     badge: "Estudio de producto full-stack · desde 2016",
     systemOnline: "SISTEMA EN LÍNEA",
     title: "Construimos los sistemas que tu competencia copiará.",
-    subtitle: "AAKWHX es una agencia de alta tecnología que entrega plataformas, sistemas de IA e interfaces de nivel premium para equipos que no aceptan software mediocre.",
+    subtitle: "Blue Sass diseña y desarrolla sitios web, aplicaciones móviles y sistemas inteligentes para empresas en crecimiento.",
     ctaPrimary: "Iniciar un proyecto", ctaSecondary: "Ver nuestro trabajo",
     console: {
       live: "EN VIVO",
@@ -164,7 +164,7 @@ const es: Dictionary = {
     milestonesDone: "hitos completados",
     noProjects: "Aún no hay ningún proyecto asignado a tu cuenta. Nuestro equipo lo configurará pronto.",
   },
-  footer: { rights: "Todos los derechos reservados.", built: "Diseñado y desarrollado por AAKWHX.", offices: "Ámsterdam · Estambul · Riad",
+  footer: { rights: "Todos los derechos reservados.", built: "Diseñado y desarrollado por Blue Sass.", offices: "Sitios web · Aplicaciones · Sistemas digitales",
     newsletterTitle: "Notas de campo", newsletterPlaceholder: "tu@email.com", newsletterCta: "Suscribirse", newsletterDone: "Suscrito — bienvenido a bordo." },
   stack: {
     title: "Impulsado por un stack moderno",
@@ -172,9 +172,9 @@ const es: Dictionary = {
   },
   emails: {
     verify: {
-      subject: "Confirma tu cuenta de AAKWHX",
+      subject: "Confirma tu cuenta de Blue Sass",
       heading: "Confirma tu dirección de correo",
-      body: "Gracias por crear una cuenta de cliente en AAKWHX. Confirma esta dirección para activar tu cuenta y abrir el panel de tu proyecto.",
+      body: "Gracias por crear una cuenta de cliente en Blue Sass. Confirma esta dirección para activar tu cuenta y abrir el panel de tu proyecto.",
       cta: "Confirmar mi correo",
       expiry: "Este enlace es válido 24 horas y puede usarse una vez.",
       ignore: "Si no has creado esta cuenta, puedes ignorar este mensaje.",

@@ -1,7 +1,7 @@
 import type { Dictionary } from "./en";
 
 const tr: Dictionary = {
-  brand: { name: "AAKWHX", product: "AWWA", tagline: "Dijital üstünlüğü mühendislikle kuruyoruz." },
+  brand: { name: "Blue Sass", product: "Studio", tagline: "Büyümeye hazır dijital ürünler." },
   nav: { menu: "Menü", home: "Ana Sayfa", services: "Hizmetler", portfolio: "Portföy", process: "Süreç", quote: "Teklif Al", portal: "Müşteri Portalı", admin: "Yönetim / ERP", contact: "İletişim" },
   common: {
     language: "Dil", theme: "Tema", dark: "Koyu", light: "Açık", all: "Tümü", public: "Genel", private: "Özel",
@@ -14,7 +14,7 @@ const tr: Dictionary = {
     badge: "Full-stack ürün stüdyosu · 2016'dan beri",
     systemOnline: "SİSTEM ÇEVRİMİÇİ",
     title: "Rakiplerinizin kopyalayacağı sistemleri kuruyoruz.",
-    subtitle: "AAKWHX; ortalama yazılımı kabul etmeyen ekipler için platformlar, yapay zekâ sistemleri ve marka kalitesinde arayüzler üreten ileri teknoloji ajansıdır.",
+    subtitle: "Blue Sass, büyüyen işletmeler için web siteleri, mobil uygulamalar ve akıllı sistemler tasarlar ve geliştirir.",
     ctaPrimary: "Projeye başla", ctaSecondary: "İşlerimizi incele",
     console: {
       live: "CANLI",
@@ -164,7 +164,7 @@ const tr: Dictionary = {
     milestonesDone: "kilometre taşı tamamlandı",
     noProjects: "Hesabınıza henüz bir proje atanmadı. Ekibimiz kısa süre içinde ayarlayacak.",
   },
-  footer: { rights: "Tüm hakları saklıdır.", built: "AAKWHX tarafından tasarlandı ve geliştirildi.", offices: "Amsterdam · İstanbul · Riyad",
+  footer: { rights: "Tüm hakları saklıdır.", built: "Blue Sass tarafından tasarlandı ve geliştirildi.", offices: "Web siteleri · Uygulamalar · Dijital sistemler",
     newsletterTitle: "Saha notları", newsletterPlaceholder: "senin@email.com", newsletterCta: "Abone ol", newsletterDone: "Abone olundu — aramıza hoş geldin." },
   stack: {
     title: "Modern bir teknoloji yığınıyla çalışıyoruz",
@@ -172,9 +172,9 @@ const tr: Dictionary = {
   },
   emails: {
     verify: {
-      subject: "AAKWHX hesabınızı doğrulayın",
+      subject: "Blue Sass hesabınızı doğrulayın",
       heading: "E-posta adresinizi doğrulayın",
-      body: "AAKWHX müşteri hesabı oluşturduğunuz için teşekkürler. Hesabınızı etkinleştirmek ve proje panonuzu açmak için bu adresi doğrulayın.",
+      body: "Blue Sass müşteri hesabı oluşturduğunuz için teşekkürler. Hesabınızı etkinleştirmek ve proje panonuzu açmak için bu adresi doğrulayın.",
       cta: "E-postamı doğrula",
       expiry: "Bu bağlantı 24 saat geçerlidir ve bir kez kullanılabilir.",
       ignore: "Bu hesabı siz oluşturmadıysanız bu mesajı yok sayabilirsiniz.",

@@ -24,13 +24,24 @@ const addOnPrice: Record<AddOn, string> = {
   maintenance: "€79 / month", google: "€49 once", analytics: "€39 once",
 };
 
-const addOnLabel: Record<AddOn, { ar: string; en: string }> = {
-  domain: { ar: "حجز وربط النطاق", en: "Domain registration & setup" },
-  email: { ar: "بريد مهني", en: "Professional email" },
-  hosting: { ar: "استضافة مُدارة", en: "Managed hosting" },
-  maintenance: { ar: "صيانة ودعم", en: "Maintenance & support" },
-  google: { ar: "تسجيل الدخول بواسطة Google", en: "Google sign-in" },
-  analytics: { ar: "التحليلات وقياس الأداء", en: "Analytics & performance" },
+type QuoteLocale = "ar" | "en" | "nl" | "de" | "tr" | "fr" | "es";
+const addOnLabel: Record<AddOn, Record<QuoteLocale, string>> = {
+  domain: { ar: "حجز وربط النطاق", en: "Domain registration & setup", nl: "Domeinregistratie en koppeling", de: "Domainregistrierung und Einrichtung", tr: "Alan adı kaydı ve bağlantısı", fr: "Enregistrement et connexion du domaine", es: "Registro y conexión del dominio" },
+  email: { ar: "بريد مهني", en: "Professional email", nl: "Professionele e-mail", de: "Professionelle E-Mail", tr: "Profesyonel e-posta", fr: "E-mail professionnel", es: "Correo profesional" },
+  hosting: { ar: "استضافة مُدارة", en: "Managed hosting", nl: "Beheerde hosting", de: "Managed Hosting", tr: "Yönetilen hosting", fr: "Hébergement géré", es: "Alojamiento administrado" },
+  maintenance: { ar: "صيانة ودعم", en: "Maintenance & support", nl: "Onderhoud en support", de: "Wartung und Support", tr: "Bakım ve destek", fr: "Maintenance et assistance", es: "Mantenimiento y soporte" },
+  google: { ar: "تسجيل الدخول بواسطة Google", en: "Google sign-in", nl: "Inloggen met Google", de: "Google-Anmeldung", tr: "Google ile giriş", fr: "Connexion avec Google", es: "Inicio de sesión con Google" },
+  analytics: { ar: "التحليلات وقياس الأداء", en: "Analytics & performance", nl: "Analyse en prestaties", de: "Analyse und Leistung", tr: "Analiz ve performans", fr: "Analytique et performance", es: "Analítica y rendimiento" },
+};
+
+const uiCopy: Record<QuoteLocale, { extras: string; extrasHint: string; project: string; projectExample: string; domain: string; save: string; deposit: string; estimate: string; paymentOff: string }> = {
+  ar: { extras: "الخدمات الإضافية والاشتراكات", extrasHint: "يمكن اختيار أكثر من خدمة، والأسعار واضحة قبل إرسال الطلب.", project: "اسم المشروع", projectExample: "مثال: متجر نور", domain: "النطاق المطلوب", save: "حفظ الطلب ومراجعته", deposit: "عربون الحجز", estimate: "التقدير", paymentOff: "الدفع سيُفعّل بعد إضافة مفاتيح المزود. يمكنك حفظ طلبك الآن دون دفع." },
+  en: { extras: "Add-ons & subscriptions", extrasHint: "Choose any combination. Pricing is shown before you submit.", project: "Project name", projectExample: "e.g. North Store", domain: "Preferred domain", save: "Save order for review", deposit: "Reservation deposit", estimate: "Estimate", paymentOff: "Payment activates when provider keys are added. You can save your order now without paying." },
+  nl: { extras: "Extra's en abonnementen", extrasHint: "Kies elke gewenste combinatie. Prijzen staan vooraf vermeld.", project: "Projectnaam", projectExample: "bijv. North Store", domain: "Gewenst domein", save: "Aanvraag opslaan", deposit: "Reserveringsbedrag", estimate: "Schatting", paymentOff: "Betalen wordt actief zodra de providersleutels zijn toegevoegd. U kunt nu zonder betaling opslaan." },
+  de: { extras: "Extras und Abonnements", extrasHint: "Wählen Sie mehrere Leistungen. Die Preise sind vorab sichtbar.", project: "Projektname", projectExample: "z. B. North Store", domain: "Gewünschte Domain", save: "Anfrage speichern", deposit: "Reservierungsanzahlung", estimate: "Schätzung", paymentOff: "Die Zahlung wird nach Hinterlegung der Anbieterschlüssel aktiviert. Sie können jetzt ohne Zahlung speichern." },
+  tr: { extras: "Ek hizmetler ve abonelikler", extrasHint: "Birden fazla hizmet seçebilirsiniz. Fiyatlar gönderimden önce görünür.", project: "Proje adı", projectExample: "örn. North Store", domain: "İstenen alan adı", save: "Talebi kaydet", deposit: "Rezervasyon ön ödemesi", estimate: "Tahmin", paymentOff: "Sağlayıcı anahtarları eklendiğinde ödeme etkinleşir. Talebinizi şimdi ödeme yapmadan kaydedebilirsiniz." },
+  fr: { extras: "Options et abonnements", extrasHint: "Choisissez plusieurs services. Les prix sont affichés avant l'envoi.", project: "Nom du projet", projectExample: "ex. North Store", domain: "Domaine souhaité", save: "Enregistrer la demande", deposit: "Acompte de réservation", estimate: "Estimation", paymentOff: "Le paiement sera activé après l'ajout des clés des prestataires. Vous pouvez enregistrer sans payer." },
+  es: { extras: "Extras y suscripciones", extrasHint: "Elija varios servicios. Los precios se muestran antes de enviar.", project: "Nombre del proyecto", projectExample: "p. ej., North Store", domain: "Dominio deseado", save: "Guardar solicitud", deposit: "Depósito de reserva", estimate: "Estimación", paymentOff: "El pago se activará al añadir las claves de los proveedores. Puede guardar ahora sin pagar." },
 };
 
 export function QuoteWizard({ initialType, payments }: { initialType?: string; payments: { stripe: boolean; mollie: boolean } }) {
@@ -54,7 +65,7 @@ export function QuoteWizard({ initialType, payments }: { initialType?: string; p
     setSelectedAddOns((prev) => prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]);
   }
 
-  const ar = locale === "ar";
+  const copy = uiCopy[locale as QuoteLocale] ?? uiCopy.en;
 
   return (
     <section className="relative overflow-hidden section-y">
@@ -87,14 +98,14 @@ export function QuoteWizard({ initialType, payments }: { initialType?: string; p
             </div>
 
             <div className="glass-card p-6">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{ar ? "الخدمات الإضافية والاشتراكات" : "Add-ons & subscriptions"}</h3>
-              <p className="mt-2 text-sm text-ink-low">{ar ? "يمكن اختيار أكثر من خدمة، والأسعار واضحة قبل إرسال الطلب." : "Choose any combination. Pricing is shown before you submit."}</p>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{copy.extras}</h3>
+              <p className="mt-2 text-sm text-ink-low">{copy.extrasHint}</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {addOns.map((key) => {
                   const on = selectedAddOns.includes(key);
                   return <Button key={key} type="button" variant="unstyled" size="auto" onClick={() => toggleAddOn(key)} aria-pressed={on}
                     className={clsx("flex items-start justify-between gap-3 rounded-xl border p-4 text-start transition", on ? "border-neon-cyan/50 bg-neon-cyan/10" : "border-line-strong hover:border-neon-cyan/50")}>
-                    <span><span className="block text-sm font-semibold">{addOnLabel[key][ar ? "ar" : "en"]}</span><span className="mt-1 block text-xs text-ink-low">{addOnPrice[key]}</span></span>
+                    <span><span className="block text-sm font-semibold">{addOnLabel[key][locale as QuoteLocale] ?? addOnLabel[key].en}</span><span className="mt-1 block text-xs text-ink-low">{addOnPrice[key]}</span></span>
                     <CheckCircle2 className={clsx("mt-0.5 size-4 shrink-0", on ? "text-neon-cyan" : "text-ink-mid")} />
                   </Button>;
                 })}
@@ -163,8 +174,8 @@ export function QuoteWizard({ initialType, payments }: { initialType?: string; p
               <input type="hidden" name="currency" value="EUR" />
               <input type="hidden" name="addOns" value={selectedAddOns.join(",")} />
               <div className="grid gap-4 sm:grid-cols-2">
-                <div><Label className="mb-1.5 block text-xs font-semibold text-ink-low">{ar ? "اسم المشروع" : "Project name"}</Label><Input name="projectName" dir="auto" className="field" placeholder={ar ? "مثال: متجر نور" : "e.g. North Store"} /></div>
-                <div><Label className="mb-1.5 block text-xs font-semibold text-ink-low">{ar ? "النطاق المطلوب" : "Preferred domain"}</Label><Input name="domain" dir="ltr" className="field" placeholder="example.com" /></div>
+                <div><Label className="mb-1.5 block text-xs font-semibold text-ink-low">{copy.project}</Label><Input name="projectName" dir="auto" className="field" placeholder={copy.projectExample} /></div>
+                <div><Label className="mb-1.5 block text-xs font-semibold text-ink-low">{copy.domain}</Label><Input name="domain" dir="ltr" className="field" placeholder="example.com" /></div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="block">
@@ -215,7 +226,7 @@ export function QuoteWizard({ initialType, payments }: { initialType?: string; p
               <Button type="submit" variant="neon" disabled={pending} className="w-full gap-2">
                 {pending ? <Loader2 className="size-4 animate-spin" /> : null}
                 {!pending ? <Save className="size-4" /> : null}
-                {pending ? t.auth.submitting : (ar ? "حفظ الطلب ومراجعته" : "Save order for review")}
+                {pending ? t.auth.submitting : copy.save}
               </Button>
               {state.message ? (
                 state.ok ? (
@@ -255,7 +266,7 @@ export function QuoteWizard({ initialType, payments }: { initialType?: string; p
                   <dd className="tabular font-bold">{features.length}</dd>
                 </div>
                 <div className="flex items-center justify-between border-t border-line pt-3">
-                  <dt className="flex items-center gap-2 text-ink-low"><CreditCard className="h-4 w-4" />{ar ? "عربون الحجز" : "Reservation deposit"}</dt>
+                  <dt className="flex items-center gap-2 text-ink-low"><CreditCard className="h-4 w-4" />{copy.deposit}</dt>
                   <dd className="tabular text-lg font-black text-neon-cyan">{formatEUR(result.deposit, locale)}</dd>
                 </div>
               </dl>
@@ -276,7 +287,7 @@ export function QuoteWizard({ initialType, payments }: { initialType?: string; p
                 <Button type="button" variant="outline" disabled={!payments.stripe} className="gap-2"><CreditCard className="size-4" />Stripe</Button>
                 <Button type="button" variant="outline" disabled={!payments.mollie} className="gap-2"><Globe2 className="size-4" />Mollie</Button>
               </div>
-              {!payments.stripe && !payments.mollie ? <p className="mt-3 text-center text-xs text-ink-low">{ar ? "الدفع سيُفعّل بعد إضافة مفاتيح المزود. يمكنك حفظ طلبك الآن دون دفع." : "Payment activates when provider keys are added. You can save your order now without paying."}</p> : null}
+              {!payments.stripe && !payments.mollie ? <p className="mt-3 text-center text-xs text-ink-low">{copy.paymentOff}</p> : null}
             </div>
           </aside>
         </div>

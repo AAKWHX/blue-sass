@@ -14,7 +14,7 @@ export default function NotFound() {
           <p className="mt-3 text-ink-low">This page could not be found.</p>
           <Button asChild variant="neon" className="mt-6 inline-block">
 <Link href="/en">
-            Back to AAKWHX
+            Back to Blue Sass
           </Link>
 </Button>
         </div>

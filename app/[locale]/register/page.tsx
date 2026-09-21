@@ -4,7 +4,7 @@ import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import { getViewer } from "@/lib/db/access";
 import { isDatabaseConfigured } from "@/lib/db";
 
-export const metadata = { title: "Create account — AAKWHX" };
+export const metadata = { title: "Create account — Blue Sass" };
 
 export default async function RegisterPage({
   params,

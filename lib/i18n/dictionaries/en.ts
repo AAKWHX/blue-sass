@@ -1,5 +1,5 @@
 const en = {
-  brand: { name: "AAKWHX", product: "AWWA", tagline: "Engineering the digital edge." },
+  brand: { name: "Blue Sass", product: "Studio", tagline: "Digital products built to grow." },
   nav: {
     menu: "Menu",
     home: "Home",
@@ -44,7 +44,7 @@ const en = {
     systemOnline: "SYSTEM ONLINE",
     title: "We design and build your website or app, from idea to launch.",
     subtitle:
-      "AAKWHX is a high-tech agency delivering platforms, AI systems and brand-grade interfaces for teams that refuse to ship average software.",
+      "Blue Sass designs and develops websites, mobile apps and intelligent systems for businesses ready to grow.",
     ctaPrimary: "Start a project",
     ctaSecondary: "Explore our work",
     console: {
@@ -71,7 +71,7 @@ const en = {
       { title: "Mobile Applications", desc: "Native-grade iOS and Android apps with shared design systems and offline-first sync.", tags: ["React Native", "Swift", "Kotlin"] },
       { title: "AI & Automation", desc: "RAG assistants, document pipelines and workflow agents wired into your existing stack.", tags: ["LLM", "RAG", "Agents"] },
       { title: "Cloud & DevOps", desc: "Infrastructure as code, CI/CD, observability and cost engineering across AWS and Vercel.", tags: ["Terraform", "K8s", "CI/CD"] },
-      { title: "Brand & UI Systems", desc: "Design languages, motion systems and accessible component libraries in 7 languages.", tags: ["Design System", "Motion", "a11y"] },
+      { title: "Brand & UI Systems", desc: "Design languages, motion systems and accessible multilingual component libraries.", tags: ["Design System", "Motion", "a11y"] },
       { title: "Security & Compliance", desc: "Threat modelling, penetration testing, GDPR and ISO-aligned data governance.", tags: ["GDPR", "Pentest", "RLS"] },
     ],
     stageLabel: "CAPABILITY",
@@ -114,7 +114,7 @@ const en = {
       auth: "Authentication & roles",
       payments: "Payments & billing",
       dashboard: "Analytics dashboard",
-      i18n: "Multi-language (7)",
+      i18n: "Multi-language",
       cms: "Content management",
       api: "Public API",
       ai: "AI assistant",
@@ -246,8 +246,8 @@ const en = {
   },
   footer: {
     rights: "All rights reserved.",
-    built: "Designed and engineered by AAKWHX.",
-    offices: "Amsterdam · Istanbul · Riyadh",
+    built: "Designed and engineered by Blue Sass.",
+    offices: "Websites · Apps · Digital systems",
     newsletterTitle: "Field notes",
     newsletterPlaceholder: "your@email.com",
     newsletterCta: "Subscribe",
@@ -259,9 +259,9 @@ const en = {
   },
   emails: {
     verify: {
-      subject: "Confirm your AAKWHX account",
+      subject: "Confirm your Blue Sass account",
       heading: "Confirm your email address",
-      body: "Thanks for creating an AAKWHX client account. Confirm this address to activate your account and open your project dashboard.",
+      body: "Thanks for creating a Blue Sass client account. Confirm this address to activate your account and open your project dashboard.",
       cta: "Confirm my email",
       expiry: "This link is valid for 24 hours and can be used once.",
       ignore: "If you did not create this account, you can ignore this message.",
