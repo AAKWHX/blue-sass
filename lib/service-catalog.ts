@@ -15,6 +15,6 @@ const rows: Record<Locale, string[]> = {
 export function serviceCatalog(locale: Locale) {
   return rows[locale].map((row, i) => {
     const [title, description, features] = row.split("|");
-    return { slug: serviceSlugs[i], title, description, features: features.split(","), quoteType: serviceQuoteTypes[i] };
+    return { slug: serviceSlugs[i], title, description, features: features.split(/[,،]/), quoteType: serviceQuoteTypes[i] };
   });
 }
