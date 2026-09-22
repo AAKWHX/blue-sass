@@ -9,7 +9,7 @@ const sections = [
   { title: "Proposals and paid services", paragraphs: ["Website content, quote requests, and preliminary discussions do not create a binding services engagement. Project scope, deliverables, fees, payment terms, intellectual property, and warranties are governed by a separate written proposal or agreement accepted by both parties."] },
   { title: "Intellectual property", paragraphs: ["Unless otherwise stated, the website, brand, design, text, and software are owned by Blue Sass or its licensors. You may not reproduce, distribute, or create derivative works from them without prior written permission, except as permitted by law."] },
   { title: "Availability and liability", paragraphs: ["We work to keep the website secure and available, but it is provided on an “as available” basis. To the maximum extent permitted by law, we are not liable for indirect, incidental, special, or consequential loss arising from use of the public website. Nothing in these terms excludes liability that cannot legally be excluded."] },
-  { title: "Changes and contact", paragraphs: ["We may update these terms as the service evolves. Material changes will be reflected by the date above. Questions about these terms can be sent to etskar@bluesass.nl."] },
+  { title: "Changes and contact", paragraphs: ["We may update these terms as the service evolves. Material changes will be reflected by the date above. Questions about these terms can be sent to help@bluesass.com."] },
 ];
 
 const arabicSections = [
@@ -17,7 +17,7 @@ const arabicSections = [
   { title: "الحسابات", paragraphs: ["أنت مسؤول عن النشاط الذي يتم عبر حسابك وعن حماية بيانات الدخول. يجب أن تكون المعلومات المقدمة صحيحة، وقد نعلّق الوصول عند الحاجة لحماية المستخدمين أو تطبيق القانون."] },
   { title: "العروض والخدمات المدفوعة", paragraphs: ["لا ينشئ محتوى الموقع أو طلب التسعيرة اتفاقًا ملزمًا. يُحدد نطاق المشروع والتسليمات والرسوم وحقوق الملكية في عرض أو عقد منفصل يقبله الطرفان."] },
   { title: "الملكية والمسؤولية", paragraphs: ["الموقع والعلامة والتصميم والبرمجيات مملوكة لـBlue Sass أو مرخّصيها. تُقدّم الخدمة حسب توفرها، ولا تُستبعد أي مسؤولية لا يسمح القانون باستبعادها."] },
-  { title: "التغييرات والتواصل", paragraphs: ["قد نحدّث هذه الشروط مع تطور الخدمة. للاستفسارات تواصل معنا عبر etskar@bluesass.nl."] },
+  { title: "التغييرات والتواصل", paragraphs: ["قد نحدّث هذه الشروط مع تطور الخدمة. للاستفسارات تواصل معنا عبر help@bluesass.com."] },
 ];
 
 export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {

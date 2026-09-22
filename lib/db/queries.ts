@@ -17,7 +17,7 @@ import {
   users,
 } from "@/lib/db/schema";
 import type { Project } from "@/lib/db/schema";
-import { getViewer, isStaff, visibleProjectsFilter } from "@/lib/db/access";
+import { getViewer, isStaff, isReadOnlyAssistant, visibleProjectsFilter } from "@/lib/db/access";
 import * as mock from "@/lib/mock-data";
 
 /** Public portfolio — only projects explicitly marked public. */
@@ -97,6 +97,8 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
 
 /** Admin: every lead captured by the public quote form. */
 export async function listLeads() {
+  const viewer = await getViewer();
+  if (!viewer || !isStaff(viewer.role)) return [];
   if (!isDatabaseConfigured) return [];
   return db.select().from(leads).orderBy(desc(leads.createdAt));
 }
@@ -116,8 +118,10 @@ export async function getViewerLead(id: string, email: string) {
 
 /** Admin: the client directory. */
 export async function listUsers() {
+  const viewer = await getViewer();
+  if (!viewer || viewer.role !== "super_admin" || isReadOnlyAssistant(viewer)) return [];
   if (!isDatabaseConfigured) return [];
-  return db.select().from(users).orderBy(asc(users.name));
+  return db.select({ id: users.id, name: users.name, email: users.email, role: users.role }).from(users).orderBy(asc(users.name));
 }
 
 /**

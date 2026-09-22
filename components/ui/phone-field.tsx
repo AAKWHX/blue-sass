@@ -107,6 +107,12 @@ export function PhoneField({
   /** Letters are dropped as they are typed; Arabic-Indic digits are converted. */
   function onChange(value: string) {
     if (hasLetters(value)) setTouched(true);
+    if (value.trim().startsWith("+") || value.trim().startsWith("00")) {
+      const international = digitsOnly(value).replace(/^00/, "");
+      const matching = countries.filter(c => international.startsWith(c.dial)).sort((a, b) => b.dial.length - a.dial.length);
+      const match = matching.find(c => c.iso === iso) ?? matching[0];
+      if (match) { setIso(match.iso); setNational(international.slice(match.dial.length)); return; }
+    }
     setNational(digitsOnly(value));
   }
 
@@ -119,7 +125,7 @@ export function PhoneField({
   return (
     <div ref={rootRef} className="relative">
       <input type="hidden" name={countryName} value={iso} />
-      <input type="hidden" name={name} value={result.e164 ?? ""} />
+      <input type="hidden" name={name} value={result.e164 ?? (national ? `+${country.dial}${national}` : "")} />
 
       {/* Country selector and number share one bordered box, so the number
           keeps a usable width even inside a narrow grid column. */}
@@ -155,7 +161,7 @@ export function PhoneField({
           // below its intrinsic width and collapses the typing area.
           className="w-full min-w-0 flex-1 bg-transparent px-4 py-3 text-sm text-ink-hi outline-none placeholder:text-ink-faint"
           dir="ltr"
-          maxLength={country.max}
+          maxLength={20}
           placeholder={"0".repeat(country.max)}
           value={national}
           required={required}
@@ -235,4 +241,3 @@ export function PhoneField({
     </div>
   );
 }
-

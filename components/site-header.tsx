@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
-import { LogIn, Menu } from "lucide-react";
+import { LogIn, Menu, UserRound, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { signOutAction } from "@/app/actions/auth";
 import { useI18n } from "@/components/providers";
 import { LanguageSwitcher } from "@/components/ui/switchers";
@@ -16,9 +17,10 @@ import { BrandLogo } from "@/components/brand-logo";
 export interface SiteHeaderProps {
   /** Resolved on the server so the correct auth links render on first paint. */
   signedIn?: boolean;
+  userName?: string;
 }
 
-export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
+export function SiteHeader({ signedIn = false, userName }: SiteHeaderProps) {
   const { locale, t } = useI18n();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -49,6 +51,7 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
   }, []);
 
   const base = `/${locale}`;
+  const accountLabel = { ar: "حسابي", en: "My account", nl: "Mijn account", de: "Mein Konto", tr: "Hesabım", fr: "Mon compte", es: "Mi cuenta" }[locale];
   const extra = locale === "ar"
     ? { projects: "المشاريع", create: "اصنع مشروعًا", contact: "تواصل" }
     : { projects: "Projects", create: "Start a project", contact: "Contact" };
@@ -112,7 +115,13 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
         <div className="ms-auto flex shrink-0 items-center gap-2">
           <div className="flex items-center gap-2">
             {signedIn ? (
-              <Button asChild variant="neon" className="whitespace-nowrap !px-3 !py-2 !text-xs"><Link href={`${base}/portal`}>{locale === "ar" ? "دخول الموقع" : t.auth.dashboard}</Link></Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild><Button variant="ghostNeon" aria-label={accountLabel} className="max-w-36 !gap-1.5 !px-3 !py-2 !text-xs"><UserRound className="size-4 shrink-0"/><span className="truncate">{userName?.split(" ")[0] || accountLabel}</span><ChevronDown className="size-3 shrink-0"/></Button></DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild><Link href={`${base}/portal`}>{accountLabel}</Link></DropdownMenuItem>
+                  <form action={signOutAction}><input type="hidden" name="locale" value={locale}/><Button type="submit" variant="ghost" className="w-full justify-start">{t.auth.signOut}</Button></form>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Button asChild variant="neon" className="whitespace-nowrap !px-3 !py-2 !text-xs">
                 <Link href={`${base}/login`}>

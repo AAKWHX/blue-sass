@@ -46,7 +46,7 @@ const STATUS_TONE: Record<LeadStatus, string> = {
   lost: "border-rose-500/40 bg-rose-500/10 text-rose-300",
 };
 
-export function LeadsPanel({ leads, locale }: { leads: Lead[]; locale: string }) {
+export function LeadsPanel({ leads, locale, readOnly = false }: { leads: Lead[]; locale: string; readOnly?: boolean }) {
   const c = panelCopy[locale as keyof typeof panelCopy] ?? panelCopy.en;
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
@@ -137,7 +137,7 @@ export function LeadsPanel({ leads, locale }: { leads: Lead[]; locale: string })
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {lead.status === "won" || lead.status === "lost" ? null : (
+                      {readOnly || lead.status === "won" || lead.status === "lost" ? null : (
                         <form action={updateLeadStatusAction} className="flex gap-1.5">
                           <input type="hidden" name="id" value={lead.id} />
                           <input type="hidden" name="status" value={NEXT_STATUS[lead.status]} />

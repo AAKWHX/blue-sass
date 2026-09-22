@@ -32,7 +32,7 @@ export default async function LocaleLayout({
   if (!isLocale(locale)) notFound();
 
   // Resolved server-side so the header shows the right auth state immediately.
-  const signedIn = isDatabaseConfigured ? (await getViewer()) !== null : false;
+   const viewer = isDatabaseConfigured ? await getViewer() : null;
 
   return (
     <html lang={locale} dir={getDir(locale)} className={fontVariables} suppressHydrationWarning>
@@ -47,7 +47,7 @@ export default async function LocaleLayout({
         <Providers locale={locale}>
           {/* relative + z-content keeps every page above the fixed 3D field. */}
           <div className="relative z-content flex min-h-screen flex-col">
-            <SiteHeader signedIn={signedIn} />
+            <SiteHeader signedIn={Boolean(viewer)} userName={viewer?.name ?? undefined} />
             <main className="flex-1">{children}</main>
             <SiteFooter />
           </div>

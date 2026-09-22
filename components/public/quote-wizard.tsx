@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
+import { serviceCatalog } from "@/lib/service-catalog";
 
 const projectTypes: ProjectType[] = ["web", "mobile", "ai", "ecommerce", "erp", "brand"];
 const featuresByType: Record<ProjectType, FeatureKey[]> = {
@@ -63,7 +64,7 @@ const uiCopy: Record<QuoteLocale, { extras: string; extrasHint: string; project:
   es: { extras: "Extras y suscripciones", extrasHint: "Elija varios servicios. Los precios se muestran antes de enviar.", project: "Nombre del proyecto", projectExample: "p. ej., North Store", domain: "Dominio deseado", save: "Guardar solicitud", deposit: "Depósito de reserva", estimate: "Estimación", paymentOff: "El pago se activará al añadir las claves de los proveedores. Puede guardar ahora sin pagar." },
 };
 
-export function QuoteWizard({ initialType, initialEmail = "" }: { initialType?: string; initialEmail?: string; payments: { stripe: boolean; mollie: boolean } }) {
+export function QuoteWizard({ initialType, initialService, initialEmail = "" }: { initialType?: string; initialService?: string; initialEmail?: string; payments: { stripe: boolean; mollie: boolean } }) {
   const { locale, t } = useI18n();
   const [type, setType] = useState<ProjectType>(projectTypes.includes(initialType as ProjectType) ? initialType as ProjectType : "web");
   const [features, setFeatures] = useState<FeatureKey[]>(() => (["auth", "i18n"] as FeatureKey[]).filter(key => featuresByType[type].includes(key)));
@@ -75,7 +76,7 @@ export function QuoteWizard({ initialType, initialEmail = "" }: { initialType?: 
   const [performance, setPerformance] = useState<string[]>([]);
   const stepHeading = useRef<HTMLHeadingElement>(null);
   const detailsForm = useRef<HTMLFormElement>(null);
-  const [form, setForm] = useState({ name: "", email: initialEmail, company: "", notes: "" });
+  const [form, setForm] = useState({ name: "", email: initialEmail, company: "", notes: serviceCatalog(locale).find(item => item.slug === initialService)?.title ?? "" });
   const [state, formAction, pending] = useActionState<LeadState, FormData>(submitLeadAction, {
     ok: false,
     message: "",

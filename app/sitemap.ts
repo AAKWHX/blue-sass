@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { locales } from "@/lib/i18n";
+import { serviceSlugs } from "@/lib/service-catalog";
 
 const origin = "https://www.bluesass.nl";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = ["", "/quote", "/privacy", "/terms"];
+  const paths = ["", "/projects", "/contact", "/create-project", "/privacy", "/terms", ...serviceSlugs.map(slug => `/services/${slug}`)];
   return locales.flatMap((locale) => paths.map((path) => ({
     url: `${origin}/${locale}${path}`,
     lastModified: new Date(),

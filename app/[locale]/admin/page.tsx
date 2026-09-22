@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { AdminView } from "@/components/admin/admin-view";
 import { LeadsPanel } from "@/components/admin/leads-panel";
-import { getViewer, isStaff } from "@/lib/db/access";
+import { getViewer, isStaff, isReadOnlyAssistant } from "@/lib/db/access";
 import { listLeads } from "@/lib/db/queries";
 
 export const metadata = { title: "Administration — Blue Sass" };
@@ -26,8 +26,8 @@ export default async function AdminPage({
 
   return (
     <>
-      <LeadsPanel leads={leads} locale={locale} />
-      <AdminView demoMode={false} />
+      <LeadsPanel leads={leads} locale={locale} readOnly={isReadOnlyAssistant(viewer) || !["super_admin", "admin", "pm"].includes(viewer.role)} />
+      {viewer.role === "super_admin" && !isReadOnlyAssistant(viewer) && <AdminView demoMode={false} />}
     </>
   );
 }

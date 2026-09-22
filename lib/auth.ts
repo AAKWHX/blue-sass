@@ -15,6 +15,7 @@ import { db, isDatabaseConfigured } from "@/lib/db";
 import { accounts, sessions, users, verificationTokens } from "@/lib/db/schema";
 import type { AppRole } from "@/lib/db/schema";
 import { requireEmailVerification } from "@/lib/auth/policy";
+import { createHash } from "node:crypto";
 
 declare module "next-auth" {
   interface Session {
@@ -99,7 +100,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger, session }) {
+      const id = user?.id ?? token.uid ?? token.sub;
+      if (!isDatabaseConfigured || typeof id !== "string") return null;
+      const [record] = await db.select({ role: users.role, passwordHash: users.passwordHash }).from(users).where(eq(users.id, id)).limit(1);
+      if (!record) return null;
+      const revision = createHash("sha256").update(record.passwordHash ?? "oauth-only").digest("hex");
+      if (!user && token.credentialRevision !== revision) return null;
+      token.credentialRevision = revision;
       if (user) {
         token.uid = user.id;
         token.role = user.role ?? "client";
@@ -109,6 +117,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (trigger === "update" && session?.locale) {
         token.locale = session.locale as string;
       }
+      token.role = record.role;
       return token;
     },
     session({ session, token }) {

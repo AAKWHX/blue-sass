@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { PhoneField } from "@/components/ui/phone-field";
 import { validateEmail } from "@/lib/validation/contact";
 import { GoogleSignIn } from "@/components/auth/google-sign-in";
+import { recovery } from "@/lib/i18n/recovery";
 
 const orLabels = { ar: "أو", en: "or", nl: "of", de: "oder", tr: "veya", fr: "ou", es: "o" } as const;
 
@@ -77,7 +78,7 @@ function EmailField({
 }
 
 /** Shared "check your inbox" panel with the resend button. */
-export function VerifyNotice({ email, tone = "info" }: { email: string; tone?: "info" | "warn" }) {
+export function VerifyNotice({ email, tone = "info", deliveryFailed = false }: { email: string; tone?: "info" | "warn"; deliveryFailed?: boolean }) {
   const { t, locale } = useI18n();
   const [state, formAction, pending] = useActionState(resendVerificationAction, initial);
 
@@ -95,7 +96,7 @@ export function VerifyNotice({ email, tone = "info" }: { email: string; tone?: "
           <div>
             <p className="font-semibold text-ink-hi">{t.auth.verifySentTitle}</p>
             <p className="mt-1 text-sm text-ink-low" dir="auto">
-              {t.auth.verifySentBody.replace("{email}", email)}
+              {(deliveryFailed && !state.ok) || (state.message && !state.ok) ? t.auth.emailNotSent : t.auth.verifySentBody.replace("{email}", email)}
             </p>
           </div>
 
@@ -123,13 +124,14 @@ export function VerifyNotice({ email, tone = "info" }: { email: string; tone?: "
   );
 }
 
-export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }) {
+export function LoginForm({ googleEnabled = false, returnTo }: { googleEnabled?: boolean; returnTo?: string }) {
   const { t, locale } = useI18n();
   const [state, formAction, pending] = useActionState(loginAction, initialLogin);
 
   return (
-    <form action={formAction} className="glass-card space-y-5 p-7">
+    <form action={formAction} className="glass-card space-y-6 rounded-3xl border border-white/15 bg-gradient-to-b from-white/[0.06] to-transparent p-6 shadow-2xl sm:p-9">
       <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="next" value={returnTo ?? ""} />
 
       <div>
         <h1 className="text-2xl font-bold text-ink-hi">{t.auth.loginTitle}</h1>
@@ -140,7 +142,7 @@ export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }
 
       {googleEnabled && (
         <>
-          <GoogleSignIn />
+          <GoogleSignIn returnTo={returnTo} />
           <div className="flex items-center gap-3" aria-hidden="true">
             <span className="h-px flex-1 bg-line" />
             <span className="text-xs text-ink-faint">{orLabels[locale]}</span>
@@ -179,6 +181,7 @@ export function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }
         />
       </div>
 
+      <Link href={`/${locale}/forgot-password`} className="block text-sm font-medium text-ink-hi underline underline-offset-4">{recovery[locale].forgot}</Link>
       <Button type="submit" disabled={pending} className="w-full gap-2">
         {pending ? <Loader2 className="size-4 animate-spin" /> : <LogIn className="size-4" />}
         {pending ? t.auth.submitting : t.auth.signIn}
@@ -212,7 +215,7 @@ export function RegisterForm() {
             <AlertDescription className="text-amber-100">{state.message}</AlertDescription>
           </Alert>
         ) : null}
-        <VerifyNotice email={state.pendingEmail} />
+        <VerifyNotice email={state.pendingEmail} deliveryFailed={Boolean(state.message)} />
         <p className="text-center text-sm text-ink-low">
           {t.auth.haveAccount}{" "}
           <Link href={`/${locale}/login`} className="font-semibold text-neon-cyan hover:underline">
@@ -259,7 +262,7 @@ export function RegisterForm() {
             horizontal space than half a grid column gives them. */}
         <div>
           <Label htmlFor="phone" className="mb-1.5 block text-xs font-semibold text-ink-low">
-            {t.auth.phone}
+            {t.auth.phone} · {recovery[locale].optional}
           </Label>
           <PhoneField
             locale={locale}
@@ -280,7 +283,7 @@ export function RegisterForm() {
 
       <div>
         <Label htmlFor="company" className="mb-1.5 block text-xs font-semibold text-ink-low">
-          {t.auth.company}
+          {t.auth.company} · {recovery[locale].optional}
         </Label>
         <Input id="company" name="company" autoComplete="organization" className="field" dir="auto" />
       </div>

@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useI18n } from "@/components/providers";
 import { Button } from "@/components/ui/button";
 
-export function GoogleSignIn() {
+export function GoogleSignIn({ returnTo }: { returnTo?: string }) {
   const { locale, t } = useI18n();
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -16,7 +16,7 @@ export function GoogleSignIn() {
           setPending(true);
           setFailed(false);
           try {
-            await signIn("google", { redirectTo: `/${locale}/portal` });
+            await signIn("google", { redirectTo: returnTo ?? `/${locale}/portal` });
           } catch {
             setFailed(true);
             setPending(false);

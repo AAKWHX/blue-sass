@@ -46,6 +46,7 @@ export async function requireViewer(): Promise<Viewer> {
 
 export async function requireRole(...allowed: AppRole[]): Promise<Viewer> {
   const viewer = await requireViewer();
+  assertCanWrite(viewer);
   if (!allowed.includes(viewer.role)) {
     throw new AuthorisationError("Your role does not allow this action.");
   }
@@ -54,19 +55,22 @@ export async function requireRole(...allowed: AppRole[]): Promise<Viewer> {
 
 export const STAFF_ROLES: AppRole[] = ["super_admin", "admin", "pm", "employee"];
 export const isStaff = (role: AppRole) => STAFF_ROLES.includes(role);
+export const isReadOnlyAssistant = (viewer: Viewer) => viewer.email.toLowerCase() === "al3rab@bluesass.com";
+export function assertCanWrite(viewer: Viewer) {
+  if (isReadOnlyAssistant(viewer)) throw new AuthorisationError("This account has read-only access.");
+}
 export const isManager = (role: AppRole) =>
   role === "super_admin" || role === "admin" || role === "pm";
 
 /**
  * Drizzle predicate restricting a `projects` query to what the viewer may see:
  * staff see everything, clients see only their own projects, anonymous
- * visitors see only public ones.
+ * visitors cannot access private project records.
  */
 export function visibleProjectsFilter(viewer: Viewer | null) {
-  if (!viewer) return eq(projects.visibility, "public");
+  if (!viewer) return sql`false`;
   if (isStaff(viewer.role)) return sql`true`;
   return or(
-    eq(projects.visibility, "public"),
     eq(projects.clientId, viewer.id),
     sql`exists (select 1 from ${projectMembers} pm where pm.project_id = ${projects.id} and pm.user_id = ${viewer.id})`,
   );
@@ -87,6 +91,7 @@ export async function assertCanViewProject(projectId: string): Promise<Viewer | 
 /** Only managers, or an employee assigned to the project, may write. */
 export async function assertCanEditProject(projectId: string): Promise<Viewer> {
   const viewer = await requireViewer();
+  assertCanWrite(viewer);
   if (isManager(viewer.role)) return viewer;
   if (viewer.role === "employee") {
     const [member] = await db

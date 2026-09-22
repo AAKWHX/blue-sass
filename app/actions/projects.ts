@@ -15,6 +15,7 @@ import {
   assertCanEditProject,
   assertCanViewProject,
   requireViewer,
+  assertCanWrite,
 } from "@/lib/db/access";
 
 export interface MutationState {
@@ -97,6 +98,7 @@ export async function postFeedbackAction(
   }
 
   const viewer = await requireViewer();
+  assertCanWrite(viewer);
   await assertCanViewProject(parsed.data.projectId);
   await db.insert(feedback).values({
     projectId: parsed.data.projectId,
@@ -122,6 +124,7 @@ export async function postMessageAction(
   if (!parsed.success) return { ok: false, message: "Write a message first." };
 
   const viewer = await requireViewer();
+  assertCanWrite(viewer);
   await assertCanViewProject(parsed.data.projectId);
   await db.insert(messages).values({
     projectId: parsed.data.projectId,

@@ -2,8 +2,8 @@
  * Transactional email via Resend's REST API.
  *
  * Called with `fetch` rather than the SDK to keep the dependency list small and
- * to stay edge-compatible. When `RESEND_API_KEY` is absent (local dev, preview
- * builds) we log the link to the server console instead of failing signup.
+ * to stay edge-compatible. Missing configuration fails closed; verification
+ * links and reset codes are never written to logs.
  */
 import "server-only";
 
@@ -12,12 +12,12 @@ const API = "https://api.resend.com/emails";
 export const isEmailConfigured = Boolean(process.env.RESEND_API_KEY);
 
 function fromAddress(): string {
-  return process.env.EMAIL_FROM ?? "Blue Sass <onboarding@resend.dev>";
+  return process.env.EMAIL_FROM ?? "Blue Sass <help@bluesass.com>";
 }
 
 export interface SendResult {
   ok: boolean;
-  /** True when no provider is configured and the mail was only logged. */
+  /** True when no provider is configured and delivery was not attempted. */
   skipped?: boolean;
   error?: string;
 }
@@ -30,16 +30,14 @@ export async function sendEmail(options: {
 }): Promise<SendResult> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
-    console.warn(
-      `[email] RESEND_API_KEY is not set — email to ${options.to} was not sent.\n` +
-        `[email] subject: ${options.subject}\n${options.text}`,
-    );
-    return { ok: true, skipped: true };
+    console.warn("[email] Delivery is not configured.");
+    return { ok: false, skipped: true };
   }
 
   try {
     const response = await fetch(API, {
       method: "POST",
+      signal: AbortSignal.timeout(10000),
       headers: {
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
@@ -54,13 +52,12 @@ export async function sendEmail(options: {
     });
 
     if (!response.ok) {
-      const detail = await response.text().catch(() => "");
-      console.error(`[email] Resend responded ${response.status}: ${detail}`);
+      console.error(`[email] Delivery failed with status ${response.status}`);
       return { ok: false, error: `resend_${response.status}` };
     }
     return { ok: true };
-  } catch (error) {
-    console.error("[email] Resend request failed", error);
+  } catch {
+    console.error("[email] Resend request failed.");
     return { ok: false, error: "network" };
   }
 }

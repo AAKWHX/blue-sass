@@ -9,7 +9,7 @@ const sections = [
   { title: "Cookies and authentication", paragraphs: ["The website uses strictly necessary, secure cookies to maintain authenticated sessions and protect forms against cross-site request forgery. These cookies are required for the client portal to work."] },
   { title: "Storage, sharing, and retention", paragraphs: ["Information is processed using trusted hosting and database providers, including Vercel and Supabase. We share information only with service providers needed to operate the website, when required by law, or with your direction.", "We retain account and project information only as long as necessary for the purposes described here, legal obligations, dispute resolution, and security. You may request deletion of your account data, subject to applicable retention duties."] },
   { title: "Your rights", paragraphs: ["Depending on where you live, you may have rights to access, correct, export, restrict, object to processing, or delete your personal information. You may also revoke the Google connection from your Google Account settings at any time."] },
-  { title: "Contact", paragraphs: ["For privacy questions or requests, contact etskar@bluesass.nl. If you are in the European Economic Area, you may also lodge a complaint with your local data protection authority."] },
+  { title: "Contact", paragraphs: ["For privacy questions or requests, contact help@bluesass.com. If you are in the European Economic Area, you may also lodge a complaint with your local data protection authority."] },
 ];
 
 const arabicSections = [
@@ -17,7 +17,7 @@ const arabicSections = [
   { title: "كيف نستخدم المعلومات", paragraphs: ["نستخدم البيانات لتسجيل الدخول وتشغيل بوابة العميل والرد على الطلبات وتقديم الخدمات وحماية الموقع. لا نبيع البيانات الشخصية ولا نستخدم بيانات Google للإعلانات."] },
   { title: "ملفات الارتباط والحماية", paragraphs: ["نستخدم ملفات ارتباط ضرورية وآمنة للحفاظ على جلسة الدخول وحماية النماذج. هذه الملفات مطلوبة لعمل بوابة العميل."] },
   { title: "التخزين وحقوقك", paragraphs: ["تُعالج البيانات عبر مزودي استضافة وقواعد بيانات موثوقين مثل Vercel وSupabase. يمكنك طلب الوصول إلى بياناتك أو تصحيحها أو حذفها وفق القوانين السارية."] },
-  { title: "التواصل", paragraphs: ["لأي طلب متعلق بالخصوصية، تواصل معنا عبر etskar@bluesass.nl."] },
+  { title: "التواصل", paragraphs: ["لأي طلب متعلق بالخصوصية، تواصل معنا عبر help@bluesass.com."] },
 ];
 
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {

@@ -1,4 +1,6 @@
 "use server";
+import { revalidatePath } from "next/cache";
+import { quoteReturnPath } from "@/lib/auth/return-path";
 
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -151,8 +153,8 @@ export async function registerAction(
     // An unverified duplicate simply gets a fresh link instead of an error that
     // would leak nothing useful anyway.
     if (!existing.emailVerified && requireEmailVerification) {
-      await dispatchVerification(email, loc);
-      return { ok: true, message: "", pendingEmail: email };
+      const sent = await dispatchVerification(email, loc);
+      return { ok: true, message: sent ? "" : t.emailNotSent, pendingEmail: email };
     }
     return {
       ok: false,
@@ -188,6 +190,7 @@ export async function registerAction(
   // owner. Everything is still recorded in `users` for the admin to review.
   if (!requireEmailVerification) {
     await signIn("credentials", { email, password, redirect: false });
+    revalidatePath("/", "layout");
     redirect(`/${loc}/portal`);
   }
 
@@ -275,7 +278,8 @@ export async function loginAction(
     }
     throw error;
   }
-  redirect(`/${loc}/portal`);
+  revalidatePath("/", "layout");
+  redirect(quoteReturnPath(formData.get("next"), loc));
 }
 
 /* ------------------------------------------------------------------ *
@@ -314,7 +318,8 @@ export async function resendVerificationAction(
   // Always answer the same way: whether the address exists must not leak.
   if (record && !record.emailVerified) {
     lastSentAt.set(email, Date.now());
-    await dispatchVerification(email, record.locale || locale);
+      const sent = await dispatchVerification(email, record.locale || locale);
+      if (!sent) return { ok: false, message: t.emailNotSent };
   }
   return { ok: true, message: t.resendDone };
 }
