@@ -12,7 +12,12 @@ const API = "https://api.resend.com/emails";
 export const isEmailConfigured = Boolean(process.env.RESEND_API_KEY);
 
 function fromAddress(): string {
-  return process.env.EMAIL_FROM ?? "Blue Sass <help@bluesass.nl>";
+  // Keep delivery on the verified Resend domain even if an older Vercel
+  // variable is still present. A user-controlled recipient is never used here.
+  const configured = process.env.EMAIL_FROM?.trim();
+  return configured?.toLowerCase().endsWith("@bluesass.nl>")
+    ? configured
+    : "Blue Sass <help@bluesass.nl>";
 }
 
 export interface SendResult {
