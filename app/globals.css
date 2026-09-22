@@ -262,7 +262,7 @@
   }
 
   .field {
-    @apply w-full rounded-xl border border-line bg-white/[0.03] px-4 py-3 text-sm text-ink-hi
+    @apply w-full rounded-xl border border-line bg-white/[0.03] px-4 py-3 text-base md:text-sm text-ink-hi
            outline-none transition placeholder:text-ink-faint
            focus:border-neon-cyan/60 focus:ring-2 focus:ring-neon-cyan/20;
   }
@@ -1110,6 +1110,17 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (pointer: coarse) {
+  input:not([type="hidden"]), textarea, select {
+    font-size: max(16px, 1rem) !important;
+  }
+  html:focus-within { scroll-behavior: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

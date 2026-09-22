@@ -21,7 +21,7 @@ export function HeroVisual() {
   const ar = locale === "ar";
 
   return (
-    <div aria-label={ar ? "تصميم مواقع وتطبيقات وأنظمة ذكية" : "Websites, apps and intelligent systems"} className="relative mx-auto h-[min(88vw,430px)] w-[min(88vw,500px)] select-none">
+    <div aria-label={ar ? "تصميم مواقع وتطبيقات وأنظمة ذكية" : "Websites, apps and intelligent systems"} className="relative mx-auto h-[min(88vw,430px)] w-full max-w-[500px] select-none">
       <div className="hero-glow absolute inset-[10%]" />
       <motion.div animate={reduce ? undefined : { y: [0, -8, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-x-[5%] top-[12%] overflow-hidden rounded-2xl border border-white/20 bg-[#101216]/95 shadow-2xl [transform:perspective(900px)_rotateY(-8deg)_rotateX(4deg)]">
         <div className="flex h-9 items-center gap-1.5 border-b border-line px-4"><i className="size-2 rounded-full bg-white/30"/><i className="size-2 rounded-full bg-white/20"/><i className="size-2 rounded-full bg-white/10"/><span className="ms-3 text-[9px] text-ink-low">bluesass.nl</span></div>

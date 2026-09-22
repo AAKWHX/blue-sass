@@ -130,7 +130,7 @@ export function Services() {
               </AnimatePresence>
 
               {/* Wireframe visual — pure CSS/SVG, morphs per service */}
-              <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.16]">
+              <div aria-hidden className="pointer-events-none relative mb-6 h-44 overflow-hidden rounded-2xl border border-line bg-base/50 text-ink-hi sm:h-52">
                 <div className="absolute inset-0 cyber-grid [mask-image:radial-gradient(ellipse_60%_60%_at_70%_40%,black,transparent)]" />
                 <ServiceWireframe index={active} />
               </div>
@@ -144,7 +144,7 @@ export function Services() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -16, scale: 0.985 }}
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative flex h-full min-h-[320px] flex-col"
+                  className="relative flex min-h-[260px] flex-col"
                 >
                   {/* Big icon + title */}
                   <div className="flex items-start gap-5">

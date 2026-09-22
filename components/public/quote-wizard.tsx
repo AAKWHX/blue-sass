@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { CheckCircle2, Clock, CreditCard, Globe2, Loader2, Save, Wallet } from "lucide-react";
 import { useI18n } from "@/components/providers";
@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { BrandLogo } from "@/components/brand-logo";
 
 const projectTypes: ProjectType[] = ["web", "mobile", "ai", "ecommerce", "erp", "brand"];
 const featuresByType: Record<ProjectType, FeatureKey[]> = {
@@ -26,10 +27,21 @@ const speeds: Speed[] = ["relaxed", "standard", "rush"];
 const addOns = ["domain", "email", "hosting", "maintenance", "google", "analytics"] as const;
 type AddOn = (typeof addOns)[number];
 
-const addOnPrice: Record<AddOn, string> = {
-  domain: "€15 / year", email: "€6 / month", hosting: "€19 / month",
-  maintenance: "€79 / month", google: "€49 once", analytics: "€39 once",
+const addOnPrice: Record<AddOn, { amount: number; period: number }> = {
+  domain: { amount: 15, period: 0 }, email: { amount: 6, period: 1 }, hosting: { amount: 19, period: 1 },
+  maintenance: { amount: 79, period: 1 }, google: { amount: 49, period: 2 }, analytics: { amount: 39, period: 2 },
 };
+const billingPeriods = { ar: ["سنويًا", "شهريًا", "مرة واحدة"], en: ["yearly", "monthly", "one time"], nl: ["per jaar", "per maand", "eenmalig"], de: ["jährlich", "monatlich", "einmalig"], tr: ["yıllık", "aylık", "tek sefer"], fr: ["par an", "par mois", "une fois"], es: ["anual", "mensual", "pago único"] };
+const performanceCopy = {
+  ar: ["الأداء وسرعة التحميل", "تحسين الصور", "التخزين المؤقت", "التحميل التدريجي", "تُراجع متطلبات الأداء مع نطاق المشروع؛ لا تمثل وعدًا بزمن تحميل ثابت."],
+  en: ["Performance & loading", "Image optimization", "Caching", "Lazy loading", "Performance requirements are reviewed with scope; no fixed load time is guaranteed."],
+  nl: ["Prestaties en laden", "Afbeeldingen optimaliseren", "Caching", "Uitgesteld laden", "Prestatie-eisen worden met de scope besproken; er is geen vaste laadtijdgarantie."],
+  de: ["Leistung und Ladezeit", "Bildoptimierung", "Caching", "Verzögertes Laden", "Leistungsziele werden mit dem Umfang geprüft; keine feste Ladezeitgarantie."],
+  tr: ["Performans ve yükleme", "Görsel optimizasyonu", "Önbellek", "Ertelenmiş yükleme", "Performans gereksinimleri kapsamla değerlendirilir; sabit yükleme süresi garanti edilmez."],
+  fr: ["Performance et chargement", "Optimisation des images", "Mise en cache", "Chargement différé", "Les objectifs sont étudiés avec le périmètre ; aucun temps de chargement fixe n'est garanti."],
+  es: ["Rendimiento y carga", "Optimización de imágenes", "Caché", "Carga diferida", "Los objetivos se revisan con el alcance; no se garantiza un tiempo de carga fijo."],
+};
+const performanceKeys = ["images", "cache", "lazy"] as const;
 
 type QuoteLocale = "ar" | "en" | "nl" | "de" | "tr" | "fr" | "es";
 const addOnLabel: Record<AddOn, Record<QuoteLocale, string>> = {
@@ -51,12 +63,18 @@ const uiCopy: Record<QuoteLocale, { extras: string; extrasHint: string; project:
   es: { extras: "Extras y suscripciones", extrasHint: "Elija varios servicios. Los precios se muestran antes de enviar.", project: "Nombre del proyecto", projectExample: "p. ej., North Store", domain: "Dominio deseado", save: "Guardar solicitud", deposit: "Depósito de reserva", estimate: "Estimación", paymentOff: "El pago se activará al añadir las claves de los proveedores. Puede guardar ahora sin pagar." },
 };
 
-export function QuoteWizard({ initialType, initialEmail = "", payments }: { initialType?: string; initialEmail?: string; payments: { stripe: boolean; mollie: boolean } }) {
+export function QuoteWizard({ initialType, initialEmail = "" }: { initialType?: string; initialEmail?: string; payments: { stripe: boolean; mollie: boolean } }) {
   const { locale, t } = useI18n();
   const [type, setType] = useState<ProjectType>(projectTypes.includes(initialType as ProjectType) ? initialType as ProjectType : "web");
-  const [features, setFeatures] = useState<FeatureKey[]>(["auth", "i18n"]);
+  const [features, setFeatures] = useState<FeatureKey[]>(() => (["auth", "i18n"] as FeatureKey[]).filter(key => featuresByType[type].includes(key)));
   const [selectedAddOns, setSelectedAddOns] = useState<AddOn[]>([]);
   const [speed, setSpeed] = useState<Speed>("standard");
+  const [step, setStep] = useState(0);
+  const [projectName, setProjectName] = useState("");
+  const [domain, setDomain] = useState("");
+  const [performance, setPerformance] = useState<string[]>([]);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  const detailsForm = useRef<HTMLFormElement>(null);
   const [form, setForm] = useState({ name: "", email: initialEmail, company: "", notes: "" });
   const [state, formAction, pending] = useActionState<LeadState, FormData>(submitLeadAction, {
     ok: false,
@@ -78,6 +96,23 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
   }
 
   const copy = uiCopy[locale as QuoteLocale] ?? uiCopy.en;
+  const controls = {
+    ar: ["التالي", "فحص المشروع", "تعديل", "الدفع غير متاح حاليًا؛ يمكنك حفظ المشروع دون دفع."],
+    en: ["Next", "Review project", "Edit", "Payment is currently unavailable. You can save without paying."],
+    nl: ["Volgende", "Project controleren", "Bewerken", "Betalen is momenteel niet beschikbaar. Opslaan kan zonder betaling."],
+    de: ["Weiter", "Projekt prüfen", "Bearbeiten", "Zahlungen sind derzeit nicht verfügbar. Speichern ist ohne Zahlung möglich."],
+    tr: ["İleri", "Projeyi incele", "Düzenle", "Ödeme şu anda kullanılamıyor. Ödeme yapmadan kaydedebilirsiniz."],
+    fr: ["Suivant", "Vérifier le projet", "Modifier", "Le paiement est indisponible. Vous pouvez enregistrer sans payer."],
+    es: ["Siguiente", "Revisar proyecto", "Editar", "El pago no está disponible. Puede guardar sin pagar."],
+  }[locale];
+  const steps = [t.quote.fields.type, copy.extras, t.quote.fields.features, performanceCopy[locale][0], copy.project, controls[1]];
+  const priceLabel = (key: AddOn) => `${formatEUR(addOnPrice[key].amount, locale)} · ${billingPeriods[locale][addOnPrice[key].period]}`;
+  function goTo(next: number) {
+    if (next === 5 && !detailsForm.current?.reportValidity()) return;
+    setStep(next);
+    stepHeading.current?.focus({ preventScroll: true });
+    stepHeading.current?.scrollIntoView({ block: "start", behavior: "instant" });
+  }
 
   return (
     <section className="relative overflow-hidden section-y">
@@ -85,9 +120,12 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
       <div className="container-x relative z-content">
         <SectionHeading eyebrow={t.nav.quote} title={t.quote.title} subtitle={t.quote.subtitle} />
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4"><BrandLogo /><p className="text-sm text-ink-low" aria-live="polite">{step + 1} / {steps.length}</p></div>
+        <div role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={steps.length} aria-label={steps[step]} className="mt-4 flex gap-1">{steps.map((label, i) => <span key={label} className={clsx("h-1.5 flex-1 rounded-full", i <= step ? "bg-white" : "bg-white/15")} />)}</div>
+        <h2 ref={stepHeading} tabIndex={-1} className="mt-6 scroll-mt-24 text-2xl font-bold outline-none">{steps[step]}</h2>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
           <div className="space-y-6">
-            <div className="glass-card p-6">
+            <div hidden={step !== 0} className="glass-card p-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{t.quote.fields.type}</h3>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 {projectTypes.map((key) => (
@@ -109,7 +147,7 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
               </div>
             </div>
 
-            <div className="glass-card p-6">
+            <div hidden={step !== 1} className="glass-card p-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{copy.extras}</h3>
               <p className="mt-2 text-sm text-ink-low">{copy.extrasHint}</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -117,14 +155,14 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
                   const on = selectedAddOns.includes(key);
                   return <Button key={key} type="button" variant="unstyled" size="auto" onClick={() => toggleAddOn(key)} aria-pressed={on}
                     className={clsx("flex items-start justify-between gap-3 rounded-xl border p-4 text-start transition", on ? "border-neon-cyan/50 bg-neon-cyan/10" : "border-line-strong hover:border-neon-cyan/50")}>
-                    <span><span className="block text-sm font-semibold">{addOnLabel[key][locale as QuoteLocale] ?? addOnLabel[key].en}</span><span className="mt-1 block text-xs text-ink-low">{addOnPrice[key]}</span></span>
+                    <span><span className="block text-sm font-semibold">{addOnLabel[key][locale as QuoteLocale] ?? addOnLabel[key].en}</span><span className="mt-1 block text-xs text-ink-low">{priceLabel(key)}</span></span>
                     <CheckCircle2 className={clsx("mt-0.5 size-4 shrink-0", on ? "text-neon-cyan" : "text-ink-mid")} />
                   </Button>;
                 })}
               </div>
             </div>
 
-            <div className="glass-card p-6">
+            <div hidden={step !== 2} className="glass-card p-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{t.quote.fields.features}</h3>
               <p className="mt-2 text-sm text-ink-low">{locale === "ar" ? "اختر الآن الميزات المناسبة لهذا النوع من المشاريع." : "Now choose the features that fit this project type."}</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -153,7 +191,10 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
               </div>
             </div>
 
-            <div className="glass-card p-6">
+            <div hidden={step !== 3} className="glass-card p-6">
+              <h3 className="font-semibold">{performanceCopy[locale][0]}</h3>
+              <div className="my-5 grid gap-3 sm:grid-cols-3">{performanceKeys.map((key, i) => <Button key={key} type="button" variant="outline" aria-pressed={performance.includes(key)} className={clsx("h-auto min-h-12 whitespace-normal", performance.includes(key) && "border-white bg-white/10")} onClick={() => setPerformance(previous => previous.includes(key) ? previous.filter(item => item !== key) : [...previous, key])}>{performanceCopy[locale][i+1]}</Button>)}</div>
+              <p className="mb-8 text-sm leading-relaxed text-ink-low">{performanceCopy[locale][4]}</p>
               <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{t.quote.fields.timeline}</h3>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 {speeds.map((key) => (
@@ -177,7 +218,7 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
 
             {/* The calculator's output travels with the contact details so the
                 sales team sees the exact scope the visitor configured. */}
-            <form action={formAction} className="glass-card space-y-4 p-6">
+            <form ref={detailsForm} action={formAction} hidden={step < 4} onSubmit={(event) => { if (step !== 5) { event.preventDefault(); goTo(5); } }} className="glass-card space-y-4 p-6">
               <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
               <input type="hidden" name="locale" value={locale} />
               <input type="hidden" name="projectType" value={type} />
@@ -185,15 +226,21 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
               <input type="hidden" name="budgetEstimate" value={result.low} />
               <input type="hidden" name="timelineWeeks" value={result.weeks} />
               <input type="hidden" name="currency" value="EUR" />
+              <input type="hidden" name="speed" value={speed} />
+              <input type="hidden" name="performance" value={performance.join(",")} />
               <input type="hidden" name="addOns" value={selectedAddOns.join(",")} />
+              <div hidden={step !== 4} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <div><Label className="mb-1.5 block text-xs font-semibold text-ink-low">{copy.project}</Label><Input name="projectName" dir="auto" className="field" placeholder={copy.projectExample} /></div>
-                <div><Label className="mb-1.5 block text-xs font-semibold text-ink-low">{copy.domain}</Label><Input name="domain" dir="ltr" className="field" placeholder="example.com" /></div>
+                <div><Label htmlFor="project-name" className="mb-1.5 block text-xs font-semibold text-ink-low">{copy.project}</Label><Input id="project-name" required value={projectName} onChange={(e) => setProjectName(e.target.value)} name="projectName" dir="auto" className="field" placeholder={copy.projectExample} /></div>
+                <div><Label htmlFor="project-domain" className="mb-1.5 block text-xs font-semibold text-ink-low">{copy.domain}</Label><Input id="project-domain" value={domain} onChange={(e) => setDomain(e.target.value)} name="domain" dir="ltr" className="field" placeholder="example.com" /></div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="block">
-                  <Label className="mb-1.5 block text-xs font-semibold text-ink-low">{t.quote.fields.name}</Label>
+                  <Label htmlFor="quote-name" className="mb-1.5 block text-xs font-semibold text-ink-low">{t.quote.fields.name}</Label>
                   <Input
+                    id="quote-name"
+                    minLength={2}
+                    autoComplete="name"
                     required
                     name="name"
                     dir="auto"
@@ -203,10 +250,12 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
                   />
                 </div>
                 <div className="block">
-                  <Label className="mb-1.5 block text-xs font-semibold text-ink-low">{t.quote.fields.email}</Label>
+                  <Label htmlFor="quote-email" className="mb-1.5 block text-xs font-semibold text-ink-low">{t.quote.fields.email}</Label>
                   <Input
+                    id="quote-email"
                     required
                     type="email"
+                    readOnly
                     name="email"
                     dir="ltr"
                     className="field"
@@ -216,8 +265,10 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
                 </div>
               </div>
               <div className="block">
-                <Label className="mb-1.5 block text-xs font-semibold text-ink-low">{t.quote.fields.company}</Label>
+                <Label htmlFor="quote-company" className="mb-1.5 block text-xs font-semibold text-ink-low">{t.quote.fields.company}</Label>
                 <Input
+                  id="quote-company"
+                  autoComplete="organization"
                   name="company"
                   dir="auto"
                   className="field"
@@ -226,8 +277,10 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
                 />
               </div>
               <div className="block">
-                <Label className="mb-1.5 block text-xs font-semibold text-ink-low">{t.quote.fields.notes}</Label>
+                <Label htmlFor="quote-notes" className="mb-1.5 block text-xs font-semibold text-ink-low">{t.quote.fields.notes}</Label>
                 <Textarea
+                  id="quote-notes"
+                  maxLength={4000}
                   rows={4}
                   name="message"
                   dir="auto"
@@ -236,7 +289,9 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 />
               </div>
-              <Button type="submit" variant="neon" disabled={pending} className="w-full gap-2">
+              </div>
+              {step === 5 && <div className="space-y-4 break-words"><h3 className="text-xl font-bold">{projectName}</h3><dl className="grid gap-4 sm:grid-cols-2">{[[t.quote.fields.type, t.quote.types[type]], [copy.extras, selectedAddOns.map(key => addOnLabel[key][locale]).join(" · ") || "—"], [t.quote.fields.features, features.map(key => t.quote.features[key]).join(" · ") || "—"], [t.quote.fields.timeline, `${t.quote.speeds[speed]} · ${result.weeks} ${t.quote.weeks}`], [copy.domain, domain || "—"], [t.quote.fields.name, form.name], [t.quote.fields.email, form.email], [t.quote.fields.company, form.company || "—"], [t.quote.fields.notes, form.notes || "—"]].map(([label, value]) => <div key={label}><dt className="text-sm text-ink-low">{label}</dt><dd className="mt-1 whitespace-pre-wrap font-medium" dir="auto">{value}</dd></div>)}</dl><div className="flex flex-wrap gap-2">{steps.slice(0, 5).map((label, i) => <Button key={label} type="button" variant="outline" onClick={() => goTo(i)} disabled={pending}>{controls[2]}: {label}</Button>)}</div></div>}
+              <Button type="submit" variant="neon" hidden={step !== 5} disabled={pending || state.ok} className="w-full gap-2">
                 {pending ? <Loader2 className="size-4 animate-spin" /> : null}
                 {!pending ? <Save className="size-4" /> : null}
                 {pending ? t.auth.submitting : copy.save}
@@ -253,9 +308,10 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
                 )
               ) : null}
             </form>
+            <div className="flex items-center justify-between gap-3"><Button type="button" variant="outline" disabled={step === 0 || pending} onClick={() => goTo(step - 1)}>{t.common.back}</Button>{step < 5 && <Button type="button" variant="neon" onClick={() => goTo(step + 1)}>{step === 4 ? controls[1] : controls[0]}</Button>}</div>
           </div>
 
-          <aside className="lg:sticky lg:top-24 lg:self-start">
+          <aside className={clsx("lg:sticky lg:top-24 lg:block lg:self-start", step !== 5 && "hidden")}>
             <div className="glow-border neon-border bg-gradient-to-br from-neon-cyan/[0.10] via-transparent to-neon-magenta/[0.10] p-7">
               <span className="mono-label rounded-full border border-neon-cyan/30 bg-neon-cyan/[0.06] px-3 py-1.5">{t.quote.estimate}</span>
               <p className="tabular mt-5 text-4xl font-black text-gradient">
@@ -285,6 +341,8 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
               </dl>
 
               <div className="mt-6 space-y-2">
+                {selectedAddOns.map(key => <div key={key} className="flex flex-wrap justify-between gap-2 text-sm"><span>{addOnLabel[key][locale]}</span><span>{priceLabel(key)}</span></div>)}
+                {performance.map(key => <p key={key} className="text-sm text-ink-low">{performanceCopy[locale][performanceKeys.indexOf(key as typeof performanceKeys[number])+1]}</p>)}
                 {features.map((f) => (
                   <div key={f} className="flex items-center gap-2 text-xs text-ink-low">
                     <CheckCircle2 className="h-3.5 w-3.5 text-neon-cyan" />
@@ -297,10 +355,10 @@ export function QuoteWizard({ initialType, initialEmail = "", payments }: { init
                 {t.quote.disclaimer}
               </p>
               <div className="mt-5 grid grid-cols-2 gap-2">
-                <Button type="button" variant="outline" disabled={!payments.stripe} className="gap-2"><CreditCard className="size-4" />Stripe</Button>
-                <Button type="button" variant="outline" disabled={!payments.mollie} className="gap-2"><Globe2 className="size-4" />Mollie</Button>
+                <Button type="button" variant="outline" disabled className="gap-2"><CreditCard className="size-4" />Stripe</Button>
+                <Button type="button" variant="outline" disabled className="gap-2"><Globe2 className="size-4" />Mollie</Button>
               </div>
-              {!payments.stripe && !payments.mollie ? <p className="mt-3 text-center text-xs text-ink-low">{copy.paymentOff}</p> : null}
+              <p className="mt-3 text-center text-xs text-ink-low">{controls[3]}</p>
             </div>
           </aside>
         </div>

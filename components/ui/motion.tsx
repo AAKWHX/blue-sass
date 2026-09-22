@@ -45,13 +45,14 @@ export function Reveal({
   as?: "div" | "section" | "li" | "article" | "span";
 }) {
   const Component = motion[as] as typeof motion.div;
+  const reducedMotion = useReducedMotion();
   /* Re-animates both ways: reveals when the block scrolls in (either
      direction) and folds back when it leaves the viewport. */
   return (
     <Component
-      initial="hidden"
+      initial={reducedMotion ? false : "hidden"}
       whileInView="visible"
-      viewport={{ once: false, amount: 0.25 }}
+      viewport={{ once: true, amount: 0.05 }}
       variants={fadeUp}
       transition={{ delay }}
       className={className}

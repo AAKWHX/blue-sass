@@ -8,6 +8,7 @@ import { leads } from "@/lib/db/schema";
 import { getViewer, requireRole } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
 import { takeRateLimit } from "@/lib/rate-limit";
+import { estimate, featureCost, type FeatureKey } from "@/lib/pricing";
 
 export interface LeadState {
   ok: boolean;
@@ -35,7 +36,8 @@ const leadSchema = z.object({
   company: z.string().trim().optional(),
   phone: z.string().trim().optional(),
   locale: z.string().default("ar"),
-  projectType: z.string().default("website"),
+  projectType: z.enum(["web", "mobile", "ai", "ecommerce", "erp", "brand"]),
+  speed: z.enum(["relaxed", "standard", "rush"]).default("standard"),
   services: z.string().optional(),
   budgetEstimate: z.coerce.number().int().min(0).default(0),
   timelineWeeks: z.coerce.number().int().min(0).default(0),
@@ -44,6 +46,7 @@ const leadSchema = z.object({
   projectName: z.string().trim().max(120).optional(),
   domain: z.string().trim().max(160).optional(),
   addOns: z.string().optional(),
+  performance: z.string().max(100).optional(),
   website: z.string().max(0).optional(),
 });
 
@@ -76,8 +79,8 @@ export async function submitLeadAction(
   if (!isDatabaseConfigured) {
     // Preview mode: accept the submission so the UX can be demonstrated.
     return {
-      ok: true,
-      message: "Request received (preview mode — connect DATABASE_URL to persist it).",
+      ok: false,
+      message: "Saving is temporarily unavailable. Please try again later.",
     };
   }
 
@@ -88,9 +91,18 @@ export async function submitLeadAction(
     return { ok: false, message: "Use the email address of your signed-in account." };
   }
   const addOns = data.addOns ? data.addOns.split(",").filter(Boolean) : [];
+  const features = [...new Set((data.services ?? "").split(",").filter(Boolean))];
+  if (features.some((key) => !Object.hasOwn(featureCost, key)) || addOns.some((key) => !["domain", "email", "hosting", "maintenance", "google", "analytics"].includes(key))) {
+    return { ok: false, message: "Invalid project options." };
+  }
+  const calculated = estimate(data.projectType, features as FeatureKey[], data.speed);
+  const performance = (data.performance ?? "").split(",").filter(Boolean);
+  if (performance.some(key => !["images", "cache", "lazy"].includes(key))) return { ok: false, message: "Invalid performance options." };
   const details = [
     data.projectName ? `Project: ${data.projectName}` : "",
     data.domain ? `Domain: ${data.domain}` : "",
+    `Delivery: ${data.speed}`,
+    performance.length ? `Performance: ${performance.join(", ")}` : "",
     data.message || "",
   ].filter(Boolean).join("\n");
   await db.insert(leads).values({
@@ -101,9 +113,9 @@ export async function submitLeadAction(
     locale: data.locale,
     projectType: data.projectType,
     services: [...(data.services ? data.services.split(",").filter(Boolean) : []), ...addOns.map((item) => `addon:${item}`)],
-    budgetEstimate: data.budgetEstimate,
-    timelineWeeks: data.timelineWeeks,
-    currency: data.currency,
+    budgetEstimate: calculated.low,
+    timelineWeeks: calculated.weeks,
+    currency: "EUR",
     message: details || null,
   });
 

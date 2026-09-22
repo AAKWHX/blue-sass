@@ -89,8 +89,8 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
                    shadow-[0_0_12px_rgba(255,255,255,0.5)]"
       />
 
-      <div className="container-x flex h-16 items-center gap-4">
-        <Link href={base} className="shrink-0 transition-opacity hover:opacity-90"><BrandLogo /></Link>
+      <div className="container-x flex min-h-16 items-center gap-2 py-2 sm:gap-4">
+        <Link href={base} className="shrink-0 transition-opacity hover:opacity-90"><BrandLogo className="max-sm:gap-1 max-sm:[&>span]:hidden" /></Link>
 
         {/* Nav — animated underline sweep on hover */}
         <nav className="hidden items-center gap-1 lg:flex">
@@ -110,14 +110,9 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
         </nav>
 
         <div className="ms-auto flex shrink-0 items-center gap-2">
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="flex items-center gap-2">
             {signedIn ? (
-              <form action={signOutAction}>
-                <input type="hidden" name="locale" value={locale} />
-                <Button type="submit" variant="ghostNeon" className="whitespace-nowrap !px-3 !py-2 !text-xs">
-                  {t.auth.signOut}
-                </Button>
-              </form>
+              <Button asChild variant="neon" className="whitespace-nowrap !px-3 !py-2 !text-xs"><Link href={`${base}/portal`}>{locale === "ar" ? "دخول الموقع" : t.auth.dashboard}</Link></Button>
             ) : (
               <Button asChild variant="neon" className="whitespace-nowrap !px-3 !py-2 !text-xs">
                 <Link href={`${base}/login`}>
@@ -137,7 +132,7 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
                 variant="unstyled"
                 size="auto"
                 type="button"
-                aria-label="Menu"
+                aria-label={t.nav.menu}
                 className="rounded-xl border border-line-strong bg-white/[0.02] p-2.5 text-ink-mid transition-colors hover:border-neon-cyan/50 hover:text-white lg:hidden"
               >
                 <Menu className="h-4 w-4" />
@@ -164,6 +159,7 @@ export function SiteHeader({ signedIn = false }: SiteHeaderProps) {
                   </SheetClose>
                 ))}
               </nav>
+              {signedIn && <form action={signOutAction}><input type="hidden" name="locale" value={locale} /><Button type="submit" variant="ghostNeon">{t.auth.signOut}</Button></form>}
             </SheetContent>
           </Sheet>
         </div>
