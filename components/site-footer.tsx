@@ -66,7 +66,7 @@ export function SiteFooter() {
               </Link>
             </li>
             <li className="flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5" /> <a href="mailto:help@bluesass.com" className="hover:text-neon-cyan">help@bluesass.com</a>
+              <Mail className="h-3.5 w-3.5" /> <a href="mailto:help@bluesass.nl" className="hover:text-neon-cyan">help@bluesass.nl</a>
             </li>
             <li className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /><a href="tel:+31634543374" dir="ltr" className="hover:text-neon-cyan">+31 6 3454 3374</a></li>
           </ul>
