@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Mail, Phone } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { BrandLogo } from "@/components/brand-logo";
+import { serviceCatalog } from "@/lib/service-catalog";
 
 const legalLabels = {
   ar: { privacy: "سياسة الخصوصية", terms: "شروط الاستخدام" },
@@ -36,7 +37,7 @@ export function SiteFooter() {
         <div className="lg:col-span-2">
           <BrandLogo />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-low">
-            {t.services.subtitle}
+            {t.hero.subtitle}
           </p>
         </div>
 
@@ -44,9 +45,9 @@ export function SiteFooter() {
         <div>
           <h3 className="mono-label">{t.nav.services}</h3>
           <ul className="mt-4 space-y-2.5 text-sm text-ink-low">
-            {t.services.items.slice(0, 5).map((s, index) => (
+            {serviceCatalog(locale).map((s) => (
               <li key={s.title}>
-                <Link href={`${base}/services/${["web", "mobile", "ai", "cloud", "design"][index]}`} className="inline-flex items-center gap-1.5 transition-colors hover:text-neon-cyan">
+                <Link href={`${base}/services/${s.slug}`} className="inline-flex items-center gap-1.5 transition-colors hover:text-neon-cyan">
                   <ArrowRight className="h-3 w-3 shrink-0 flip-x opacity-0 transition-opacity duration-300 hover:opacity-100" />
                   {s.title}
                 </Link>
