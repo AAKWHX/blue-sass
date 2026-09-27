@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { leads, projectMilestones, projects, type ProjectStage } from "@/lib/db/schema";
-import { getViewer, requireRole } from "@/lib/db/access";
+import { getViewer, requireRole, assertCanWrite } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
 import { takeRateLimit } from "@/lib/rate-limit";
 import { estimate, featureCost, type FeatureKey } from "@/lib/pricing";
@@ -84,6 +84,7 @@ export async function submitLeadAction(
 ): Promise<LeadState> {
   const viewer = await getViewer();
   if (!viewer) return { ok: false, message: "Sign in before saving a project request." };
+  assertCanWrite(viewer);
   const parsed = leadSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
