@@ -9,10 +9,10 @@ function StageArt({ stage,label }: { stage:number; label:string }) {
 }
 export function DeliveryJourney() {
   const { t } = useI18n();
-  return <section className="section-y border-b border-line"><div className="container-x">
-    <Reveal><h2 className="text-3xl font-semibold sm:text-5xl">{t.process.title}</h2><p className="mt-4 max-w-2xl leading-7 text-ink-low">{t.process.subtitle}</p></Reveal>
-    <ol className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">{t.process.steps.map((step,i)=><Reveal as="li" key={step.title} delay={i*.05} className="group rounded-3xl border border-line bg-surface p-5">
-      <span className="inline-flex size-10 items-center justify-center rounded-full border border-white/25 text-sm font-semibold text-white">{String(i+1).padStart(2,'0')}</span><div className="my-5"><StageArt stage={i} label={step.title}/></div><h3 className="text-xl font-semibold">{step.title}</h3><p className="mt-3 text-sm leading-7 text-ink-low">{step.desc}</p>
+  return <section className="section-y relative overflow-hidden border-b border-line/70"><div className="container-x">
+    <Reveal className="grid gap-5 lg:grid-cols-[.7fr_1fr] lg:items-end"><h2 className="text-3xl font-semibold sm:text-5xl">{t.process.title}</h2><p className="max-w-2xl leading-8 text-ink-low lg:justify-self-end">{t.process.subtitle}</p></Reveal>
+    <ol className="journey-rail mt-12 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{t.process.steps.map((step,i)=><Reveal as="li" key={step.title} delay={i*.05} className="journey-card group">
+      <div className="flex items-center justify-between"><span className="journey-number">{String(i+1).padStart(2,'0')}</span><span className="h-px flex-1 bg-gradient-to-r from-white/30 to-transparent" /></div><div className="my-2 max-h-28 overflow-hidden opacity-65 transition-opacity duration-300 group-hover:opacity-100"><StageArt stage={i} label={step.title}/></div><h3 className="text-lg font-semibold">{step.title}</h3><p className="mt-2 text-sm leading-6 text-ink-low">{step.desc}</p>
     </Reveal>)}</ol>
   </div></section>;
 }

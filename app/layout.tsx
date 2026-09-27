@@ -2,10 +2,38 @@ import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bluesass.nl"),
-  title: "Blue Sass — Digital products built clearly",
+  applicationName: "Blue Sass | بلو ساس",
+  title: {
+    default: "Blue Sass | بلو ساس — مواقع وتطبيقات ومنتجات رقمية",
+    template: "%s | Blue Sass",
+  },
   description:
-    "Blue Sass designs and builds websites, apps, intelligent systems and digital brands.",
-  keywords: ["Blue Sass", "software agency", "web development", "mobile apps", "AI automation"],
+    "بلو ساس تصمّم وتطوّر المواقع والتطبيقات والأنظمة الذكية والمنتجات الرقمية من الفكرة حتى الإطلاق.",
+  keywords: [
+    "Blue Sass",
+    "بلو ساس",
+    "بلو ساس هولندا",
+    "تصميم مواقع",
+    "تطوير تطبيقات",
+    "شركة برمجيات",
+    "software agency",
+    "web development",
+    "mobile apps",
+    "AI automation",
+  ],
+  authors: [{ name: "Blue Sass", url: "https://www.bluesass.nl" }],
+  creator: "Blue Sass",
+  publisher: "Blue Sass",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/icon.png",
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  manifest: "/manifest.webmanifest",
+  category: "technology",
 };
 
 export const viewport: Viewport = {

@@ -21,7 +21,7 @@ export function SiteFooter() {
   const base = `/${locale}`;
 
   return (
-    <footer className="relative overflow-hidden border-t border-line bg-elevated/80 backdrop-blur-md">
+    <footer className="relative overflow-hidden border-t border-line bg-[#07090d]/92 backdrop-blur-md">
       {/* Top glow seam */}
       <div
         aria-hidden
@@ -32,19 +32,19 @@ export function SiteFooter() {
         className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[560px] -translate-x-1/2 rounded-full bg-neon-cyan/10 blur-[110px]"
       />
 
-      <div className="container-x relative grid gap-12 py-16 text-start md:grid-cols-2 lg:grid-cols-4">
+      <div className="container-x relative grid gap-12 py-16 text-start md:grid-cols-2 lg:grid-cols-4 lg:py-20">
         {/* Brand + newsletter */}
         <div className="lg:col-span-2">
           <BrandLogo />
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-low">
+          <p className="mt-5 max-w-md text-base leading-8 text-ink-low">
             {t.hero.subtitle}
           </p>
         </div>
 
         {/* Services */}
         <div>
-          <h3 className="mono-label">{t.nav.services}</h3>
-          <ul className="mt-4 space-y-2.5 text-sm text-ink-low">
+          <h3 className="text-base font-semibold text-ink-hi">{t.nav.services}</h3>
+          <ul className="mt-5 space-y-3 text-sm text-ink-low">
             {serviceCatalog(locale).map((s) => (
               <li key={s.title}>
                 <Link href={`${base}/services/${s.slug}`} className="inline-flex items-center gap-1.5 transition-colors hover:text-neon-cyan">
@@ -58,8 +58,8 @@ export function SiteFooter() {
 
         {/* Contact */}
         <div>
-          <h3 className="mono-label">{t.nav.contact}</h3>
-          <ul className="mt-4 space-y-2.5 text-sm text-ink-low">
+          <h3 className="text-base font-semibold text-ink-hi">{t.nav.contact}</h3>
+          <ul className="mt-5 space-y-3 text-sm text-ink-low">
             <li>
               <Link href={`${base}/quote`} className="hover:text-neon-cyan">
                 {t.nav.quote}

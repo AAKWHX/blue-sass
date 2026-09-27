@@ -21,16 +21,16 @@ export function CompanySection() {
   const { locale, t } = useI18n();
   const c = copy[locale];
   const reduced = useReducedMotion();
-  return <section className="container-x py-16 sm:py-24">
-    <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:items-center">
-      <div><BrandLogo /><h2 className="mt-6 max-w-xl text-3xl font-semibold leading-tight sm:text-4xl">{c[0]}</h2><p className="mt-5 max-w-xl leading-8 text-ink-low">{c[1]}</p><Button asChild variant="neon" className="mt-7"><Link href={`/${locale}/create-project`}>{c[8]}<ArrowRight className="size-4 flip-x" /></Link></Button></div>
-      <motion.div initial={reduced ? false : { opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative rounded-3xl border border-line bg-elevated p-5 sm:p-8">
+  return <section className="section-y border-b border-line/70"><div className="container-x">
+    <div className="grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+      <div><span className="mono-label">Blue Sass / 02</span><h2 className="mt-6 max-w-xl text-3xl font-semibold leading-tight sm:text-5xl">{c[0]}</h2><p className="mt-5 max-w-xl leading-8 text-ink-low">{c[1]}</p><Button asChild variant="neon" size="lg" className="mt-8"><Link href={`/${locale}/create-project`}>{c[8]}<ArrowRight className="size-4 flip-x" /></Link></Button></div>
+      <motion.div initial={reduced ? false : { opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="dashboard-preview relative overflow-hidden rounded-[2rem] border border-line bg-elevated/90 p-5 sm:p-8">
         <div className="flex items-center justify-between border-b border-line pb-4"><BrandLogo showName={false} /><span className="text-sm font-semibold">{t.auth.myProjects}</span></div>
         <div aria-hidden="true" className="mt-7 grid grid-cols-[1fr_auto] items-end gap-4"><div className="rounded-xl border border-line bg-base p-4"><Monitor className="size-9" /><div className="mt-5 h-2 w-3/4 rounded bg-white/30" /><div className="mt-3 h-2 w-1/2 rounded bg-white/15" /><div className="mt-6 grid grid-cols-3 gap-2">{[1,2,3].map(n => <span key={n} className="h-10 rounded bg-white/5" />)}</div></div><Smartphone className="h-36 w-16 text-ink-low" /></div>
         <p className="mt-5 text-sm text-ink-low">{c[5]}</p>
       </motion.div>
     </div>
-    <div className="mt-12 grid gap-6 md:grid-cols-3">{[FileText, Monitor, MessageCircle].map((Icon, i) => <article key={i} className="border-t border-line pt-6"><Icon className="size-7 text-ink-hi" /><h3 className="mt-4 text-lg font-semibold">{c[2+i*2]}</h3><p className="mt-3 text-sm leading-7 text-ink-low">{c[3+i*2]}</p></article>)}</div>
-    <div className="mt-8 flex flex-wrap gap-6 text-sm"><Link href={`/${locale}/contact`} className="underline underline-offset-4">{t.nav.contact}</Link><Link href={`/${locale}/portal`} className="underline underline-offset-4">{t.auth.myProjects}</Link></div>
-  </section>;
+    <div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-3">{[FileText, Monitor, MessageCircle].map((Icon, i) => <article key={i} className="bg-surface/95 p-6 transition-colors hover:bg-white/[0.055]"><Icon className="size-6 text-ink-hi" /><h3 className="mt-5 text-lg font-semibold">{c[2+i*2]}</h3><p className="mt-3 text-sm leading-7 text-ink-low">{c[3+i*2]}</p></article>)}</div>
+    <div className="mt-7 flex flex-wrap gap-6 text-sm"><Link href={`/${locale}/contact`} className="link-arrow">{t.nav.contact}</Link><Link href={`/${locale}/portal`} className="link-arrow">{t.auth.myProjects}</Link></div>
+  </div></section>;
 }

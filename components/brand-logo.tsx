@@ -6,9 +6,9 @@ export function BrandLogo({ className, showName = true }: { className?: string; 
       <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-10 w-10 shrink-0">
         <defs>
           <linearGradient id="blue-sass-mark" x1="7" y1="5" x2="42" y2="43" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#67E8F9" />
-            <stop offset="0.52" stopColor="#3B82F6" />
-            <stop offset="1" stopColor="#A855F7" />
+            <stop stopColor="#FFFFFF" />
+            <stop offset="0.52" stopColor="#D9DEE5" />
+            <stop offset="1" stopColor="#8A929D" />
           </linearGradient>
         </defs>
         <rect x="2" y="2" width="44" height="44" rx="14" fill="#08111F" stroke="url(#blue-sass-mark)" strokeWidth="1.5" />

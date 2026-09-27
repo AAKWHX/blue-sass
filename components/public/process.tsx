@@ -80,29 +80,25 @@ export function CallToAction() {
   const { locale, t } = useI18n();
 
   return (
-    <section className="pb-28">
+    <section className="section-y">
       <div className="container-x">
         <Reveal>
-          <div className="glow-border neon-border noise relative overflow-hidden bg-gradient-to-br from-neon-cyan/[0.12] via-neon-indigo/[0.08] to-neon-magenta/[0.12] p-12 text-center sm:p-20">
-            <ParticleField density={45} className="opacity-70" />
-            <div className="absolute inset-0 cyber-grid opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
-            {/* pulse-glow animates transform, so centring uses inset/margin —
-                a -translate-x-1/2 here would be clobbered by the animation. */}
-            <div className="aurora aurora-cyan animate-pulse-glow absolute inset-x-0 -bottom-24 mx-auto h-72 w-[600px] blur-[120px]" />
-
-            <h2 className="relative text-3xl sm:text-5xl">
-              <span className="text-gradient-hero">{t.quote.title}</span>
-            </h2>
-            <p className="relative mx-auto mt-5 max-w-xl leading-relaxed text-ink-low">
+          <div className="cta-panel relative overflow-hidden rounded-[2rem] border border-white/15 p-8 sm:p-12 lg:p-16">
+            <ParticleField density={32} className="opacity-35" />
+            <div className="absolute inset-0 cyber-grid opacity-25 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+            <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+              <div><span className="mono-label">Blue Sass / Next</span><h2 className="mt-5 max-w-3xl text-3xl sm:text-5xl">{t.quote.title}</h2>
+            <p className="mt-5 max-w-2xl leading-8 text-ink-low">
               {t.quote.subtitle}
-            </p>
-            <div className="relative mt-9 flex flex-wrap justify-center gap-3">
-              <Button asChild variant="neon" className="group !px-7 !py-3.5 !text-base">
-                <Link href={`/${locale}/quote`}>
+            </p></div>
+            <div className="flex flex-wrap gap-3 lg:justify-end">
+              <Button asChild variant="neon" size="lg" className="group">
+                <Link href={`/${locale}/create-project`}>
                   <span className="relative z-10">{t.hero.ctaPrimary}</span>
                   <ArrowRight className="relative z-10 h-4 w-4 shrink-0 flip-x transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
+            </div>
             </div>
           </div>
         </Reveal>

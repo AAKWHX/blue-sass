@@ -62,37 +62,15 @@ export function SiteHeader({ signedIn = false, userName }: SiteHeaderProps) {
     { href: `${base}/contact`, label: extra.contact },
   ];
 
-  // Always dark + frosted, never transparent: over the animated 3D field a
-  // transparent bar left the nav unreadable. Scrolling only deepens the tint
-  // and adds the shadow.
   return (
     <header
       className={cn(
-        // `sticky` already creates the positioning context for the hairline —
-        // adding `relative` here made tailwind-merge drop `sticky` entirely.
-        "sticky top-0 z-50 w-full border-b backdrop-blur-xl backdrop-saturate-150 transition-all duration-300",
-        "supports-[backdrop-filter]:bg-base/70",
-        scrolled
-          ? "border-line bg-base/90 shadow-[0_10px_40px_-24px_rgba(0,0,0,1)] supports-[backdrop-filter]:bg-base/85"
-          : "border-line/60 bg-base/80",
+        "sticky top-0 z-50 w-full px-3 pt-3 transition-all duration-300 sm:px-5",
+        scrolled ? "pb-2" : "pb-1",
       )}
     >
-      {/* Neon hairline along the bottom edge. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/45 to-transparent"
-      />
-
-      {/* Reading-progress line — neon gradient sweeping left→right (flips in RTL). */}
-      <motion.span
-        aria-hidden
-        style={{ scaleX: progress }}
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-inline-start
-                   bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-magenta
-                   shadow-[0_0_12px_rgba(255,255,255,0.5)]"
-      />
-
-      <div className="container-x flex min-h-16 items-center gap-2 py-2 sm:gap-4">
+      <div className={cn("header-shell container-x relative flex min-h-16 items-center gap-2 py-2 sm:gap-4", scrolled && "header-shell-scrolled")}>
+        <motion.span aria-hidden style={{ scaleX: progress }} className="absolute inset-x-5 bottom-0 h-px origin-inline-start bg-gradient-to-r from-transparent via-white/80 to-transparent" />
         <Link href={base} className="shrink-0 transition-opacity hover:opacity-90"><BrandLogo className="max-sm:gap-1 max-sm:[&>span]:hidden" /></Link>
 
         {/* Nav — animated underline sweep on hover */}
@@ -101,12 +79,12 @@ export function SiteHeader({ signedIn = false, userName }: SiteHeaderProps) {
             <Link
               key={l.href}
               href={l.href}
-              className="group/link relative whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-ink-low transition-colors hover:bg-white/[0.05] hover:text-white"
+              className="group/link relative whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium text-ink-low transition-colors hover:bg-white/[0.06] hover:text-white"
             >
               {l.label}
               <span
                 aria-hidden
-                className="absolute inset-x-3 bottom-1 h-px origin-inline-start scale-x-0 bg-gradient-to-r from-neon-cyan to-neon-magenta transition-transform duration-300 group-hover/link:scale-x-100"
+                className="absolute inset-x-4 bottom-1 h-px origin-inline-start scale-x-0 bg-white/80 transition-transform duration-300 group-hover/link:scale-x-100"
               />
             </Link>
           ))}
