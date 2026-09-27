@@ -62,7 +62,7 @@ const fr: Dictionary = {
     fields: { name: "Nom complet", email: "E-mail professionnel", company: "Société", type: "Type de projet", features: "Modules et fonctionnalités", timeline: "Rythme de livraison", budget: "Fourchette budgétaire", notes: "Autre information utile ?" },
     types: { web: "Plateforme web", mobile: "Application mobile", ai: "Système d'IA", ecommerce: "E-commerce", erp: "ERP / outils internes", brand: "Marque et design" },
     speeds: { relaxed: "Souple (meilleur prix)", standard: "Standard", rush: "Urgent (+40 %)" },
-    features: { auth: "Authentification et rôles", payments: "Paiements et facturation", dashboard: "Tableau de bord analytique", i18n: "Multilingue (7)", cms: "Gestion de contenu", api: "API publique", ai: "Assistant IA", realtime: "Temps réel et chat" },
+    features: { auth: "Authentification et rôles", payments: "Paiements et facturation", dashboard: "Tableau de bord analytique", i18n: "Multilingue (7)", cms: "Gestion de contenu", api: "API publique", ai: "Assistant IA", realtime: "Temps réel et chat", prototype: "Prototype d’interface interactif", identity: "Logo et système d’identité", appstore: "Préparation et publication sur les stores", offline: "Mode hors ligne", catalog: "Catalogue produits et stock", automation: "Automatisation et intégrations" },
     estimate: "Estimation indicative", weeks: "semaines", submit: "Demander une proposition détaillée",
     success: "Demande reçue. Notre équipe répond sous un jour ouvré.", disclaimer: "Les estimations sont indicatives et confirmées après un appel de cadrage.",
   },

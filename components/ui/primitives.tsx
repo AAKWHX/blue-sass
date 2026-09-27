@@ -47,16 +47,16 @@ export function Card({ className, children }: { className?: string; children: Re
 }
 
 const statusTone: Record<string, string> = {
-  done: "bg-neon-emerald/15 text-neon-emerald border-neon-emerald/35",
-  completed: "bg-neon-emerald/15 text-neon-emerald border-neon-emerald/35",
-  in_progress: "bg-neon-cyan/15 text-neon-cyan border-neon-cyan/35",
-  development: "bg-neon-cyan/15 text-neon-cyan border-neon-cyan/35",
-  testing: "bg-amber-400/15 text-amber-300 border-amber-400/35",
-  review: "bg-neon-purple/15 text-neon-purple border-neon-purple/35",
-  design: "bg-neon-indigo/15 text-neon-blue border-neon-indigo/35",
-  planning: "bg-neon-blue/15 text-neon-blue border-neon-blue/35",
-  blocked: "bg-rose-500/15 text-rose-300 border-rose-500/35",
-  todo: "bg-white/[0.06] text-ink-low border-line-strong",
+  done: "bg-emerald-100 text-emerald-800 border-emerald-300",
+  completed: "bg-emerald-100 text-emerald-800 border-emerald-300",
+  in_progress: "bg-sky-100 text-sky-800 border-sky-300",
+  development: "bg-sky-100 text-sky-800 border-sky-300",
+  testing: "bg-amber-100 text-amber-800 border-amber-300",
+  review: "bg-violet-100 text-violet-800 border-violet-300",
+  design: "bg-blue-100 text-blue-800 border-blue-300",
+  planning: "bg-slate-100 text-slate-800 border-slate-300",
+  blocked: "bg-rose-100 text-rose-800 border-rose-300",
+  todo: "bg-white text-ink-low border-line-strong",
 };
 
 export function StatusBadge({ status, label }: { status: string; label: string }) {

@@ -15,6 +15,7 @@ import {
   assertCanEditProject,
   assertCanViewProject,
   requireViewer,
+  requireRole,
   assertCanWrite,
 } from "@/lib/db/access";
 
@@ -54,6 +55,27 @@ const milestoneSchema = z.object({
   milestoneId: z.string().uuid(),
   status: z.enum(["todo", "in_progress", "blocked", "done"]),
 });
+
+const projectStageSchema = z.object({ projectId: z.string().uuid(), stage: z.enum(["planning", "design", "development", "testing", "review", "completed"]) });
+const stageOrder = ["planning", "design", "development", "testing", "review", "completed"] as const;
+
+/** Managers move the complete project workflow; the client sees the update immediately. */
+export async function setProjectStageAction(formData: FormData) {
+  if (!isDatabaseConfigured) return;
+  await requireRole("super_admin", "admin", "pm");
+  const parsed = projectStageSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return;
+  const targetIndex = stageOrder.indexOf(parsed.data.stage);
+  const rows = await db.select({ id: projectMilestones.id, stage: projectMilestones.stage }).from(projectMilestones).where(eq(projectMilestones.projectId, parsed.data.projectId));
+  for (const row of rows) {
+    const index = stageOrder.indexOf(row.stage);
+    const status = parsed.data.stage === "completed" || index < targetIndex ? "done" : index === targetIndex ? "in_progress" : "todo";
+    await db.update(projectMilestones).set({ status }).where(eq(projectMilestones.id, row.id));
+  }
+  await db.update(projects).set({ stage: parsed.data.stage, progress: parsed.data.stage === "completed" ? 100 : Math.round((targetIndex / (stageOrder.length - 1)) * 100), updatedAt: new Date() }).where(eq(projects.id, parsed.data.projectId));
+  revalidatePath("/[locale]/portal", "page");
+  revalidatePath("/[locale]/admin", "page");
+}
 
 /** Staff move a milestone; the client's progress bar updates automatically. */
 export async function setMilestoneStatusAction(

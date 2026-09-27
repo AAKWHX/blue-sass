@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import clsx from "clsx";
 import { CheckCircle2, Clock, CreditCard, Globe2, Loader2, Save, Wallet } from "lucide-react";
 import { useI18n } from "@/components/providers";
@@ -13,16 +14,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
-import { serviceCatalog } from "@/lib/service-catalog";
+import { serviceCatalog, serviceSlugs, type ServiceSlug } from "@/lib/service-catalog";
+import { serviceQuotePresets } from "@/lib/service-details";
+import { subscriptionAddOns, subscriptionIds, subscriptionPlans, type SubscriptionId } from "@/lib/subscriptions";
 
 const projectTypes: ProjectType[] = ["web", "mobile", "ai", "ecommerce", "erp", "brand"];
 const featuresByType: Record<ProjectType, FeatureKey[]> = {
   web: ["auth", "dashboard", "i18n", "cms", "api", "realtime"],
-  mobile: ["auth", "payments", "i18n", "api", "realtime"],
-  ai: ["auth", "dashboard", "api", "ai", "realtime"],
-  ecommerce: ["auth", "payments", "dashboard", "i18n", "cms", "api"],
-  erp: ["auth", "dashboard", "i18n", "api", "ai", "realtime"],
-  brand: ["i18n", "cms", "api"],
+  mobile: ["auth", "payments", "i18n", "api", "realtime", "appstore", "offline"],
+  ai: ["auth", "dashboard", "api", "ai", "realtime", "automation"],
+  ecommerce: ["auth", "payments", "dashboard", "i18n", "cms", "api", "catalog"],
+  erp: ["auth", "dashboard", "i18n", "api", "ai", "realtime", "offline", "automation"],
+  brand: ["identity", "prototype", "i18n"],
 };
 const speeds: Speed[] = ["relaxed", "standard", "rush"];
 const addOns = ["domain", "email", "hosting", "maintenance", "google", "analytics"] as const;
@@ -43,6 +46,7 @@ const performanceCopy = {
   es: ["Rendimiento y carga", "Optimización de imágenes", "Caché", "Carga diferida", "Los objetivos se revisan con el alcance; no se garantiza un tiempo de carga fijo."],
 };
 const performanceKeys = ["images", "cache", "lazy"] as const;
+const portalLabel = { ar: "عرض المشروع في لوحة العميل", en: "View project dashboard", nl: "Projectdashboard bekijken", de: "Projekt-Dashboard öffnen", tr: "Proje panelini görüntüle", fr: "Voir le tableau de bord", es: "Ver panel del proyecto" } as const;
 
 type QuoteLocale = "ar" | "en" | "nl" | "de" | "tr" | "fr" | "es";
 const addOnLabel: Record<AddOn, Record<QuoteLocale, string>> = {
@@ -66,9 +70,14 @@ const uiCopy: Record<QuoteLocale, { extras: string; extrasHint: string; project:
 
 export function QuoteWizard({ initialType, initialService, initialEmail = "" }: { initialType?: string; initialService?: string; initialEmail?: string; payments: { stripe: boolean; mollie: boolean } }) {
   const { locale, t } = useI18n();
-  const [type, setType] = useState<ProjectType>(projectTypes.includes(initialType as ProjectType) ? initialType as ProjectType : "web");
-  const [features, setFeatures] = useState<FeatureKey[]>(() => (["auth", "i18n"] as FeatureKey[]).filter(key => featuresByType[type].includes(key)));
-  const [selectedAddOns, setSelectedAddOns] = useState<AddOn[]>([]);
+  const serviceSlug = serviceSlugs.includes(initialService as ServiceSlug) ? initialService as ServiceSlug : null;
+  const servicePreset = serviceSlug ? serviceQuotePresets[serviceSlug] : null;
+  const requestedPlan = initialService?.startsWith("subscription-") ? initialService.replace("subscription-", "") as SubscriptionId : null;
+  const planId = requestedPlan && subscriptionIds.includes(requestedPlan) ? requestedPlan : null;
+  const resolvedType = servicePreset?.type ?? (projectTypes.includes(initialType as ProjectType) ? initialType as ProjectType : "web");
+  const [type, setType] = useState<ProjectType>(resolvedType);
+  const [features, setFeatures] = useState<FeatureKey[]>(() => servicePreset ? [...servicePreset.features] as FeatureKey[] : (["auth", "i18n"] as FeatureKey[]).filter(key => featuresByType[resolvedType].includes(key)));
+  const [selectedAddOns, setSelectedAddOns] = useState<AddOn[]>(() => planId ? subscriptionAddOns[planId] as AddOn[] : []);
   const [speed, setSpeed] = useState<Speed>("standard");
   const [step, setStep] = useState(0);
   const [projectName, setProjectName] = useState("");
@@ -76,14 +85,14 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
   const [performance, setPerformance] = useState<string[]>([]);
   const stepHeading = useRef<HTMLHeadingElement>(null);
   const detailsForm = useRef<HTMLFormElement>(null);
-  const [form, setForm] = useState({ name: "", email: initialEmail, company: "", notes: serviceCatalog(locale).find(item => item.slug === initialService)?.title ?? "" });
+  const [form, setForm] = useState({ name: "", email: initialEmail, company: "", notes: planId ? `${subscriptionPlans(locale).find(plan => plan.id === planId)?.name ?? ""} · ${locale === "ar" ? "اشتراك شهري" : "Monthly subscription"}` : serviceCatalog(locale).find(item => item.slug === initialService)?.title ?? "" });
   const [state, formAction, pending] = useActionState<LeadState, FormData>(submitLeadAction, {
     ok: false,
     message: "",
   });
 
   const result = useMemo(() => estimate(type, features, speed), [type, features, speed]);
-  const availableFeatures = featuresByType[type];
+  const availableFeatures = servicePreset ? [...servicePreset.options] as FeatureKey[] : featuresByType[type];
 
   function toggleFeature(key: FeatureKey) {
     setFeatures((prev) => (prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]));
@@ -122,14 +131,14 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
         <SectionHeading eyebrow={t.nav.quote} title={t.quote.title} subtitle={t.quote.subtitle} />
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4"><BrandLogo /><p className="text-sm text-ink-low" aria-live="polite">{step + 1} / {steps.length}</p></div>
-        <div role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={steps.length} aria-label={steps[step]} className="mt-4 flex gap-1">{steps.map((label, i) => <span key={label} className={clsx("h-1.5 flex-1 rounded-full", i <= step ? "bg-white" : "bg-white/15")} />)}</div>
+        <div role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={steps.length} aria-label={steps[step]} className="mt-4 flex gap-1">{steps.map((label, i) => <span key={label} className={clsx("h-1.5 flex-1 rounded-full", i <= step ? "bg-neon-blue" : "bg-black/10")} />)}</div>
         <h2 ref={stepHeading} tabIndex={-1} className="mt-6 scroll-mt-24 text-2xl font-bold outline-none">{steps[step]}</h2>
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
           <div className="space-y-6">
             <div hidden={step !== 0} className="glass-card p-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{t.quote.fields.type}</h3>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                {projectTypes.map((key) => (
+                {(servicePreset ? [resolvedType] : projectTypes).map((key) => (
                   <Button variant="unstyled" size="auto"
                     key={key}
                     type="button"
@@ -194,7 +203,7 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
 
             <div hidden={step !== 3} className="glass-card p-6">
               <h3 className="font-semibold">{performanceCopy[locale][0]}</h3>
-              <div className="my-5 grid gap-3 sm:grid-cols-3">{performanceKeys.map((key, i) => <Button key={key} type="button" variant="outline" aria-pressed={performance.includes(key)} className={clsx("h-auto min-h-12 whitespace-normal", performance.includes(key) && "border-white bg-white/10")} onClick={() => setPerformance(previous => previous.includes(key) ? previous.filter(item => item !== key) : [...previous, key])}>{performanceCopy[locale][i+1]}</Button>)}</div>
+              <div className="my-5 grid gap-3 sm:grid-cols-3">{performanceKeys.map((key, i) => <Button key={key} type="button" variant="outline" aria-pressed={performance.includes(key)} className={clsx("h-auto min-h-12 whitespace-normal", performance.includes(key) && "border-neon-blue bg-neon-cyan/30")} onClick={() => setPerformance(previous => previous.includes(key) ? previous.filter(item => item !== key) : [...previous, key])}>{performanceCopy[locale][i+1]}</Button>)}</div>
               <p className="mb-8 text-sm leading-relaxed text-ink-low">{performanceCopy[locale][4]}</p>
               <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{t.quote.fields.timeline}</h3>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -300,14 +309,15 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
               {state.message ? (
                 state.ok ? (
                   <Alert variant="success" role="alert">
-                    <AlertDescription>{t.quote.success}</AlertDescription>
+                    <AlertDescription>{state.message || t.quote.success}</AlertDescription>
                   </Alert>
                 ) : (
                   <Alert role="alert" className="border-rose-500/40 bg-rose-500/10">
-                    <AlertDescription className="text-rose-200">{state.message}</AlertDescription>
+                    <AlertDescription className="text-rose-800">{state.message}</AlertDescription>
                   </Alert>
                 )
               ) : null}
+              {state.ok ? <Button asChild variant="ghostNeon" className="w-full"><Link href={`/${locale}/portal`}>{portalLabel[locale]}</Link></Button> : null}
             </form>
             <div className="flex items-center justify-between gap-3"><Button type="button" variant="outline" disabled={step === 0 || pending} onClick={() => goTo(step - 1)}>{t.common.back}</Button>{step < 5 && <Button type="button" variant="neon" onClick={() => goTo(step + 1)}>{step === 4 ? controls[1] : controls[0]}</Button>}</div>
           </div>
@@ -315,7 +325,7 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
           <aside className={clsx("lg:sticky lg:top-24 lg:block lg:self-start", step !== 5 && "hidden")}>
             <div className="glow-border neon-border bg-gradient-to-br from-neon-cyan/[0.10] via-transparent to-neon-magenta/[0.10] p-7">
               <span className="mono-label rounded-full border border-neon-cyan/30 bg-neon-cyan/[0.06] px-3 py-1.5">{t.quote.estimate}</span>
-              <p className="tabular mt-5 text-4xl font-black text-gradient">
+              <p className="tabular mt-5 text-4xl font-black text-black">
                 {formatEUR(result.low, locale)}
               </p>
               <p className="text-sm font-semibold text-ink-low">— {formatEUR(result.high, locale)}</p>

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { leads } from "@/lib/db/schema";
+import { leads, projectMilestones, projects, type ProjectStage } from "@/lib/db/schema";
 import { getViewer, requireRole } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
 import { takeRateLimit } from "@/lib/rate-limit";
@@ -49,6 +49,23 @@ const leadSchema = z.object({
   performance: z.string().max(100).optional(),
   website: z.string().max(0).optional(),
 });
+
+const milestoneTitles: Record<string, string[]> = {
+  ar: ["التخطيط واعتماد النطاق", "تصميم تجربة المستخدم والواجهات", "التطوير والربط", "الاختبار وضمان الجودة", "مراجعة العميل والتعديلات", "الإطلاق والتسليم"],
+  en: ["Planning and scope approval", "UX and interface design", "Development and integrations", "Testing and quality assurance", "Client review and refinements", "Launch and handover"],
+  nl: ["Planning en scopegoedkeuring", "UX- en interfaceontwerp", "Ontwikkeling en koppelingen", "Testen en kwaliteitscontrole", "Klantreview en aanpassingen", "Lancering en overdracht"],
+  de: ["Planung und Freigabe", "UX- und Oberflächendesign", "Entwicklung und Anbindungen", "Tests und Qualitätssicherung", "Kundenprüfung und Anpassungen", "Start und Übergabe"],
+  tr: ["Planlama ve kapsam onayı", "UX ve arayüz tasarımı", "Geliştirme ve bağlantılar", "Test ve kalite kontrol", "Müşteri incelemesi ve düzenlemeler", "Yayın ve teslim"],
+  fr: ["Planification et validation", "UX et conception d’interface", "Développement et intégrations", "Tests et assurance qualité", "Revue client et ajustements", "Lancement et transfert"],
+  es: ["Planificación y aprobación", "UX y diseño de interfaz", "Desarrollo e integraciones", "Pruebas y control de calidad", "Revisión y ajustes del cliente", "Lanzamiento y entrega"],
+};
+const stages: ProjectStage[] = ["planning", "design", "development", "testing", "review", "completed"];
+const savedMessages: Record<string, string> = {
+  ar: "تم حفظ الطلب وإنشاء مساحة المشروع في لوحة حسابك.", en: "Your request is saved and its project workspace is ready in your dashboard.",
+  nl: "Uw aanvraag is opgeslagen en de projectruimte staat klaar in uw dashboard.", de: "Ihre Anfrage wurde gespeichert und der Projektbereich ist im Dashboard verfügbar.",
+  tr: "Talebiniz kaydedildi ve proje alanı panelinizde hazır.", fr: "Votre demande est enregistrée et l’espace projet est prêt dans votre tableau de bord.",
+  es: "Su solicitud está guardada y el espacio del proyecto está listo en su panel.",
+};
 
 /**
  * Public quote submission. Saves the calculator output alongside the contact
@@ -105,22 +122,49 @@ export async function submitLeadAction(
     performance.length ? `Performance: ${performance.join(", ")}` : "",
     data.message || "",
   ].filter(Boolean).join("\n");
-  await db.insert(leads).values({
-    name: data.name,
-    email: data.email,
-    company: data.company || null,
-    phone: data.phone || null,
-    locale: data.locale,
-    projectType: data.projectType,
-    services: [...(data.services ? data.services.split(",").filter(Boolean) : []), ...addOns.map((item) => `addon:${item}`)],
-    budgetEstimate: calculated.low,
-    timelineWeeks: calculated.weeks,
-    currency: "EUR",
-    message: details || null,
+  const projectName = data.projectName || `${data.projectType.toUpperCase()} project`;
+  const now = new Date();
+  const deadline = new Date(now.getTime() + calculated.weeks * 7 * 86_400_000);
+  const titles = milestoneTitles[data.locale] ?? milestoneTitles.en;
+  await db.transaction(async (tx) => {
+    await tx.insert(leads).values({
+      name: data.name, email: data.email, company: data.company || null, phone: data.phone || null,
+      locale: data.locale, projectType: data.projectType,
+      services: [...(data.services ? data.services.split(",").filter(Boolean) : []), ...addOns.map((item) => `addon:${item}`)],
+      budgetEstimate: calculated.low, timelineWeeks: calculated.weeks, currency: "EUR", message: details || null,
+      convertedUserId: viewer.id,
+    });
+    const [project] = await tx.insert(projects).values({
+      slug: `request-${Date.now()}-${viewer.id.slice(0, 8)}`,
+      name: projectName,
+      summary: details || `Requested ${data.projectType} project`,
+      clientId: viewer.id,
+      stage: "planning",
+      progress: 0,
+      visibility: "private",
+      industry: data.projectType,
+      budget: calculated.low,
+      currency: "EUR",
+      startDate: now,
+      deadline,
+      estimatedHours: Math.max(24, calculated.weeks * 32),
+      hoursLogged: 0,
+      tech: features,
+    }).returning({ id: projects.id });
+    await tx.insert(projectMilestones).values(stages.map((stage, index) => ({
+      projectId: project.id,
+      title: titles[index],
+      stage,
+      status: index === 0 ? "in_progress" as const : "todo" as const,
+      dueDate: new Date(now.getTime() + Math.max(1, Math.round(calculated.weeks * (index + 1) / stages.length)) * 7 * 86_400_000),
+      estimatedHours: Math.max(4, Math.round(calculated.weeks * 32 / stages.length)),
+      orderIndex: index,
+    })));
   });
 
   revalidatePath("/[locale]/admin", "page");
-  return { ok: true, message: "Thank you — your request is saved. We reply within one business day." };
+  revalidatePath("/[locale]/portal", "page");
+  return { ok: true, message: savedMessages[data.locale] ?? savedMessages.en };
 }
 
 /** Admin: move a lead through the sales pipeline. */

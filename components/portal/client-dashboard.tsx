@@ -49,8 +49,17 @@ import type {
   Lead,
 } from "@/lib/db/schema";
 
-const STAGES: ProjectStage[] = ["planning", "design", "development", "testing", "review"];
+const STAGES: ProjectStage[] = ["planning", "design", "development", "testing", "review", "completed"];
 const initialState: MutationState = { ok: false, message: "" };
+const detailCopy = {
+  ar: { details: "تفاصيل المشروع", budget: "الميزانية", start: "تاريخ البدء", deadline: "موعد التسليم" },
+  en: { details: "Project details", budget: "Budget", start: "Start date", deadline: "Deadline" },
+  nl: { details: "Projectdetails", budget: "Budget", start: "Startdatum", deadline: "Deadline" },
+  de: { details: "Projektdetails", budget: "Budget", start: "Startdatum", deadline: "Abgabetermin" },
+  tr: { details: "Proje ayrıntıları", budget: "Bütçe", start: "Başlangıç", deadline: "Teslim tarihi" },
+  fr: { details: "Détails du projet", budget: "Budget", start: "Début", deadline: "Échéance" },
+  es: { details: "Detalles del proyecto", budget: "Presupuesto", start: "Inicio", deadline: "Entrega" },
+} as const;
 
 export interface DashboardProject {
   project: Project;
@@ -135,6 +144,17 @@ function MediaCard({ file }: { file: ProjectFile }) {
   );
 }
 
+function SavedOrders({ orders }: { orders: Lead[] }) {
+  const { locale } = useI18n();
+  if (!orders.length) return null;
+  const title = { ar: "الطلبات المحفوظة", en: "Saved requests", nl: "Opgeslagen aanvragen", de: "Gespeicherte Anfragen", tr: "Kayıtlı talepler", fr: "Demandes enregistrées", es: "Solicitudes guardadas" }[locale];
+  const estimateLabel = { ar: "التقدير", en: "Estimate", nl: "Schatting", de: "Schätzung", tr: "Tahmin", fr: "Estimation", es: "Estimación" }[locale];
+  return <section className="mt-5 rounded-3xl border border-black bg-white p-5 sm:p-6">
+    <div className="flex items-center gap-2"><ReceiptText className="size-5 text-neon-blue"/><h2 className="text-lg font-bold text-black">{title}</h2></div>
+    <div className="mt-4 grid gap-4 sm:grid-cols-2">{orders.map((order) => <Link key={order.id} href={`/${locale}/portal/orders/${order.id}`} className="block rounded-2xl border border-black/15 bg-base p-5 transition hover:-translate-y-1 hover:border-black"><div className="flex items-center justify-between gap-3"><span className="font-bold text-black">{order.projectType}</span><Badge variant="outline">{order.status}</Badge></div><p className="mt-3 text-sm text-ink-low">{order.services.join(" · ")}</p><div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-xs"><span className="flex items-center gap-2 text-ink-low"><ReceiptText className="size-4" />{estimateLabel}</span><span className="font-bold text-black">{new Intl.NumberFormat(locale, { style: "currency", currency: order.currency, maximumFractionDigits: 0 }).format(order.budgetEstimate)}</span></div></Link>)}</div>
+  </section>;
+}
+
 export function ClientDashboard({ viewerName, viewerCompany, projects, orders }: ClientDashboardProps) {
   const { t, locale } = useI18n();
   const [index, setIndex] = useState(0);
@@ -160,7 +180,7 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
             {orders.length ? (locale === "ar" ? "طلباتك محفوظة هنا. سنحوّل الطلب إلى مشروع بعد اعتماد النطاق والدفعة الأولى." : "Your requests are saved here. They become projects after scope and deposit approval.") : t.auth.noProjects}
           </p>
         </div>
-        {orders.length ? <div className="mt-5 grid gap-4 sm:grid-cols-2">{orders.map((order) => <Link key={order.id} href={`/${locale}/portal/orders/${order.id}`} className="glass-card block p-5 transition hover:border-neon-cyan/50"><div className="flex items-center justify-between gap-3"><span className="font-bold">{order.projectType}</span><Badge variant="outline">{order.status}</Badge></div><p className="mt-3 text-sm text-ink-low">{order.services.join(" · ")}</p><div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-xs"><span className="flex items-center gap-2 text-ink-low"><ReceiptText className="size-4" />{locale === "ar" ? "التقدير" : "Estimate"}</span><span className="font-bold">{new Intl.NumberFormat(locale, { style: "currency", currency: order.currency, maximumFractionDigits: 0 }).format(order.budgetEstimate)}</span></div></Link>)}</div> : null}
+        <SavedOrders orders={orders} />
         </div>
       </section>
     );
@@ -168,8 +188,9 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
 
   const active = projects[Math.min(index, projects.length - 1)];
   const { project, milestones, files, summary } = active;
-  const stageIndex = STAGES.indexOf(project.stage === "completed" ? "review" : project.stage);
+  const stageIndex = STAGES.indexOf(project.stage);
   const dateFmt = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" });
+  const detailsText = detailCopy[locale];
 
   return (
     <section className="relative py-12">
@@ -179,16 +200,18 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
             <span className="mono-label rounded-full border border-neon-cyan/30 bg-neon-cyan/[0.06] px-3 py-1.5">
               {t.auth.dashboard}
             </span>
-            <h1 className="mt-3 text-3xl font-black tracking-tight text-gradient" dir="auto">
+            <h1 className="mt-3 text-3xl font-black tracking-tight text-black" dir="auto">
               {t.portal.welcome}, {viewerName}
             </h1>
             {viewerCompany ? <p className="mt-1 text-sm text-ink-low">{viewerCompany}</p> : null}
           </div>
           <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-neon-emerald">
             <ShieldCheck className="size-4" />
-            End-to-end encrypted workspace
+            {locale === "ar" ? "مساحة مشروع آمنة" : "Secure project workspace"}
           </div>
         </header>
+
+        <SavedOrders orders={orders} />
 
         {projects.length > 1 ? (
           <div className="mt-5 flex flex-wrap gap-2">
@@ -203,7 +226,7 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
                   "rounded-xl border px-4 py-2.5 text-sm font-semibold transition",
                   i === index
                     ? "border-neon-cyan/50 bg-neon-cyan/10 text-neon-cyan shadow-glow-cyan"
-                    : "border-line-strong text-ink-low hover:border-neon-cyan/50 hover:text-white",
+                    : "border-line-strong bg-white text-ink-low hover:border-neon-blue hover:text-black",
                 )}
               >
                 {p.project.name}
@@ -237,7 +260,7 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
                 </p>
               </div>
 
-              <ol className="mt-8 grid gap-3 sm:grid-cols-5">
+              <ol className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {STAGES.map((stage, i) => {
                   const done = i < stageIndex || project.stage === "completed";
                   const current = i === stageIndex && project.stage !== "completed";
@@ -310,7 +333,7 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
                     {milestones.map((m) => (
                       <li
                         key={m.id}
-                        className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line-strong bg-white/[0.02] p-4"
+                        className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line-strong bg-white p-4"
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-ink-hi" dir="auto">
@@ -336,7 +359,7 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
 
                   <ul className="space-y-3">
                     {active.feedback.map((f) => (
-                      <li key={f.id} className="rounded-xl border border-line-strong bg-white/[0.02] p-4">
+                      <li key={f.id} className="rounded-xl border border-line-strong bg-white p-4">
                         <div className="flex items-center justify-between gap-2">
                           <Badge variant="outline">{f.category}</Badge>
                           {f.resolved ? (
@@ -390,7 +413,7 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
                 <div className="glass-card space-y-5 p-6">
                   <ul className="space-y-3">
                     {active.messages.map((m) => (
-                      <li key={m.id} className="rounded-xl border border-line-strong bg-white/[0.02] p-4">
+                      <li key={m.id} className="rounded-xl border border-line-strong bg-white p-4">
                         <p className="text-sm text-ink-mid" dir="auto">
                           {m.body}
                         </p>
@@ -445,6 +468,15 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
                   {t.auth.daysLeft}
                 </p>
               ) : null}
+            </div>
+
+            <div className="glass-card p-5">
+              <p className="text-xs font-bold uppercase tracking-widest text-ink-low">{detailsText.details}</p>
+              <dl className="mt-4 space-y-3 text-sm">
+                <div className="flex items-center justify-between gap-3"><dt className="text-ink-low">{detailsText.budget}</dt><dd className="font-bold text-black">{new Intl.NumberFormat(locale, { style: "currency", currency: project.currency, maximumFractionDigits: 0 }).format(project.budget)}</dd></div>
+                <div className="flex items-center justify-between gap-3"><dt className="text-ink-low">{detailsText.start}</dt><dd className="font-semibold text-black">{project.startDate ? dateFmt.format(project.startDate) : "—"}</dd></div>
+                <div className="flex items-center justify-between gap-3"><dt className="text-ink-low">{detailsText.deadline}</dt><dd className="font-semibold text-black">{project.deadline ? dateFmt.format(project.deadline) : "—"}</dd></div>
+              </dl>
             </div>
 
             <div className="glass-card p-5">

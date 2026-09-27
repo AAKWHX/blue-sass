@@ -1,6 +1,6 @@
 export type ProjectType = "web" | "mobile" | "ai" | "ecommerce" | "erp" | "brand";
 export type Speed = "relaxed" | "standard" | "rush";
-export type FeatureKey = "auth" | "payments" | "dashboard" | "i18n" | "cms" | "api" | "ai" | "realtime";
+export type FeatureKey = "auth" | "payments" | "dashboard" | "i18n" | "cms" | "api" | "ai" | "realtime" | "prototype" | "identity" | "appstore" | "offline" | "catalog" | "automation";
 
 export const baseCost: Record<ProjectType, { price: number; weeks: number }> = {
   web: { price: 24000, weeks: 8 },
@@ -20,6 +20,12 @@ export const featureCost: Record<FeatureKey, { price: number; weeks: number }> =
   api: { price: 5500, weeks: 1 },
   ai: { price: 14000, weeks: 3 },
   realtime: { price: 10000, weeks: 2 },
+  prototype: { price: 4500, weeks: 1 },
+  identity: { price: 7000, weeks: 2 },
+  appstore: { price: 3500, weeks: 1 },
+  offline: { price: 6500, weeks: 2 },
+  catalog: { price: 6000, weeks: 1.5 },
+  automation: { price: 9000, weeks: 2 },
 };
 
 export const speedModifier: Record<Speed, { price: number; weeks: number }> = {

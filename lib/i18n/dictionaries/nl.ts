@@ -62,7 +62,7 @@ const nl: Dictionary = {
     fields: { name: "Volledige naam", email: "Zakelijk e-mailadres", company: "Bedrijf", type: "Projecttype", features: "Modules & functies", timeline: "Levertempo", budget: "Budgetrange", notes: "Nog iets dat we moeten weten?" },
     types: { web: "Webplatform", mobile: "Mobiele app", ai: "AI-systeem", ecommerce: "E-commerce", erp: "ERP / interne tools", brand: "Merk & design" },
     speeds: { relaxed: "Rustig (beste prijs)", standard: "Standaard", rush: "Spoed (+40%)" },
-    features: { auth: "Authenticatie & rollen", payments: "Betalingen & facturatie", dashboard: "Analytics-dashboard", i18n: "Meertalig (7)", cms: "Contentbeheer", api: "Publieke API", ai: "AI-assistent", realtime: "Realtime & chat" },
+    features: { auth: "Authenticatie & rollen", payments: "Betalingen & facturatie", dashboard: "Analytics-dashboard", i18n: "Meertalig (7)", cms: "Contentbeheer", api: "Publieke API", ai: "AI-assistent", realtime: "Realtime & chat", prototype: "Interactief interfaceprototype", identity: "Logo en huisstijlsysteem", appstore: "Appstore-voorbereiding en publicatie", offline: "Offline modus", catalog: "Productcatalogus en voorraad", automation: "Workflowautomatisering en koppelingen" },
     estimate: "Indicatieve schatting", weeks: "weken", submit: "Vraag een voorstel aan",
     success: "Aanvraag ontvangen. We reageren binnen één werkdag.", disclaimer: "Schattingen zijn indicatief en worden bevestigd na een discovery-gesprek.",
   },
