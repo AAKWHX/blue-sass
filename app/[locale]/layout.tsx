@@ -4,8 +4,7 @@ import { Providers } from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { fontVariables } from "@/lib/fonts";
-import { CursorGlow, ScrollProgress } from "@/components/ui/chrome";
-import { AuroraBackdrop } from "@/components/ui/aurora-backdrop";
+import { ScrollProgress } from "@/components/ui/chrome";
 import { getDir, isLocale, locales } from "@/lib/i18n";
 import { getViewer } from "@/lib/db/access";
 import { isDatabaseConfigured } from "@/lib/db";
@@ -56,13 +55,17 @@ const seo = {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
-  const copy = seo[locale];
+  // Brand search results intentionally use the Arabic brand title and
+  // description across every locale, as requested. Locale-specific terms are
+  // still included as keywords and hreflang keeps each language discoverable.
+  const copy = seo.ar;
+  const localeKeywords = seo[locale].keywords;
   const languages = Object.fromEntries(locales.map((language) => [language, `/${language}`]));
 
   return {
     title: copy.title,
     description: copy.description,
-    keywords: [...copy.keywords],
+    keywords: [...copy.keywords, ...localeKeywords],
     alternates: {
       canonical: `/${locale}`,
       languages: { ...languages, "x-default": "/en" },
@@ -135,11 +138,6 @@ export default async function LocaleLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
         />
-        {/* The full-page shader backdrop: Aurora + MoltenMetal. Fixed and
-            never interactive. The old three.js ambient field used to render
-            on top of this at the same z-index and hid it, so it is gone. */}
-        <AuroraBackdrop />
-        <CursorGlow />
         <ScrollProgress />
 
         <Providers locale={locale}>

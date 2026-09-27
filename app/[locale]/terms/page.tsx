@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/public/legal-page";
 
-export const metadata: Metadata = { title: "Terms of Service — Blue Sass", description: "Terms governing use of the Blue Sass website and client portal." };
+export const metadata: Metadata = { title: "شروط الاستخدام — بلو ساس", description: "الشروط المنظمة لاستخدام موقع بلو ساس وبوابة العملاء." };
 
 const sections = [
   { title: "Using the website", paragraphs: ["You may use this website and its client portal only for lawful purposes. You must not attempt to disrupt the service, access another user's account, bypass security controls, introduce malicious code, or use automated systems in a way that harms the service or other users."] },

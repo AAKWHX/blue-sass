@@ -2,152 +2,63 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { motion, useScroll, useSpring } from "framer-motion";
-import { LogIn, Menu, UserRound, ChevronDown } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
+import { ArrowUpLeft, ChevronDown, LogIn, Menu, UserRound } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
 import { useI18n } from "@/components/providers";
-import { LanguageSwitcher } from "@/components/ui/switchers";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { LanguageSwitcher } from "@/components/ui/switchers";
 
-export interface SiteHeaderProps {
-  /** Resolved on the server so the correct auth links render on first paint. */
-  signedIn?: boolean;
-  userName?: string;
-}
+export interface SiteHeaderProps { signedIn?: boolean; userName?: string }
+
+const navCopy = {
+  ar: { home: "الرئيسية", about: "من نحن", services: "الخدمات", projects: "أعمالنا", contact: "اتصل بنا", start: "ابدأ مشروعك", account: "حسابي" },
+  en: { home: "Home", about: "About", services: "Services", projects: "Work", contact: "Contact", start: "Start a project", account: "My account" },
+  nl: { home: "Home", about: "Over ons", services: "Diensten", projects: "Werk", contact: "Contact", start: "Start een project", account: "Mijn account" },
+  de: { home: "Start", about: "Über uns", services: "Leistungen", projects: "Projekte", contact: "Kontakt", start: "Projekt starten", account: "Mein Konto" },
+  tr: { home: "Ana sayfa", about: "Hakkımızda", services: "Hizmetler", projects: "Projeler", contact: "İletişim", start: "Proje başlat", account: "Hesabım" },
+  fr: { home: "Accueil", about: "À propos", services: "Services", projects: "Projets", contact: "Contact", start: "Démarrer", account: "Mon compte" },
+  es: { home: "Inicio", about: "Nosotros", services: "Servicios", projects: "Proyectos", contact: "Contacto", start: "Empezar proyecto", account: "Mi cuenta" },
+} as const;
 
 export function SiteHeader({ signedIn = false, userName }: SiteHeaderProps) {
   const { locale, t } = useI18n();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  /* Reading-progress bar — runs entirely on the compositor (scaleX on a
-     GPU layer), so it costs nothing while scrolling. */
-  const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 28, mass: 0.4 });
-
-  /**
-   * Close the mobile menu on navigation by DERIVING it during render rather
-   * than firing an effect. The effect version rendered the open menu on the
-   * new route first and closed it on a second pass; this closes it in the
-   * same commit and costs no extra render.
-   */
   const [lastPath, setLastPath] = useState(pathname);
-  if (pathname !== lastPath) {
-    setLastPath(pathname);
-    setOpen(false);
-  }
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  if (pathname !== lastPath) { setLastPath(pathname); setOpen(false); }
 
   const base = `/${locale}`;
-  const accountLabel = { ar: "حسابي", en: "My account", nl: "Mijn account", de: "Mein Konto", tr: "Hesabım", fr: "Mon compte", es: "Mi cuenta" }[locale];
-  const extra = locale === "ar"
-    ? { projects: "المشاريع", create: "اصنع مشروعًا", contact: "تواصل" }
-    : { projects: "Projects", create: "Start a project", contact: "Contact" };
+  const c = navCopy[locale];
   const links = [
-    { href: `${base}#services`, label: t.nav.services },
-    { href: `${base}/projects`, label: extra.projects },
-    { href: `${base}/create-project`, label: extra.create },
-    { href: `${base}/contact`, label: extra.contact },
+    { href: base, label: c.home },
+    { href: `${base}/about`, label: c.about },
+    { href: `${base}/services`, label: c.services },
+    { href: `${base}/projects`, label: c.projects },
+    { href: `${base}/contact`, label: c.contact },
   ];
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full px-3 pt-3 transition-all duration-300 sm:px-5",
-        scrolled ? "pb-2" : "pb-1",
-      )}
-    >
-      <div className={cn("header-shell container-x relative flex min-h-16 items-center gap-2 py-2 sm:gap-4", scrolled && "header-shell-scrolled")}>
-        <motion.span aria-hidden style={{ scaleX: progress }} className="absolute inset-x-5 bottom-0 h-px origin-inline-start bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-        <Link href={base} className="shrink-0 transition-opacity hover:opacity-90"><BrandLogo className="max-sm:gap-1 max-sm:[&>span]:hidden" /></Link>
-
-        {/* Nav — animated underline sweep on hover */}
-        <nav className="hidden items-center gap-1 lg:flex">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="group/link relative whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium text-ink-low transition-colors hover:bg-white/[0.06] hover:text-white"
-            >
-              {l.label}
-              <span
-                aria-hidden
-                className="absolute inset-x-4 bottom-1 h-px origin-inline-start scale-x-0 bg-white/80 transition-transform duration-300 group-hover/link:scale-x-100"
-              />
-            </Link>
-          ))}
+    <header className="sticky top-0 z-50 border-b border-black/10 bg-black text-white">
+      <div className="container-x flex min-h-[82px] items-center gap-4 py-2">
+        <Link href={base} className="shrink-0 [&_svg]:h-12 [&_svg]:w-12 [&>span>span]:!text-white"><BrandLogo /></Link>
+        <nav className="mx-auto hidden items-center gap-1 lg:flex">
+          {links.map((link) => <Link key={link.href} href={link.href} className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${pathname === link.href ? "bg-white/10 text-neon-cyan" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>{link.label}</Link>)}
         </nav>
-
-        <div className="ms-auto flex shrink-0 items-center gap-2">
-          <div className="flex items-center gap-2">
-            {signedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild><Button variant="ghostNeon" aria-label={accountLabel} className="max-w-36 !gap-1.5 !px-3 !py-2 !text-xs"><UserRound className="size-4 shrink-0"/><span className="truncate">{userName?.split(" ")[0] || accountLabel}</span><ChevronDown className="size-3 shrink-0"/></Button></DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild><Link href={`${base}/portal`}>{accountLabel}</Link></DropdownMenuItem>
-                  <form action={signOutAction}><input type="hidden" name="locale" value={locale}/><Button type="submit" variant="ghost" className="w-full justify-start">{t.auth.signOut}</Button></form>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button asChild variant="neon" className="whitespace-nowrap !px-3 !py-2 !text-xs">
-                <Link href={`${base}/login`}>
-                  <LogIn className="h-4 w-4 shrink-0" />
-                  {t.auth.signIn}
-                </Link>
-              </Button>
-            )}
-          </div>
-
+        <div className="ms-auto flex items-center gap-2 lg:ms-0">
           <LanguageSwitcher />
-
-          {/* Radix Sheet: focus trap, scroll lock, Escape and focus restore. */}
+          {signedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><Button variant="unstyled" size="auto" className="rounded-xl border border-white/20 px-3 py-2 text-white"><UserRound className="size-4"/><span className="hidden sm:inline">{userName?.split(" ")[0] || c.account}</span><ChevronDown className="size-3"/></Button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end"><DropdownMenuItem asChild><Link href={`${base}/portal`}>{c.account}</Link></DropdownMenuItem><form action={signOutAction}><input type="hidden" name="locale" value={locale}/><Button type="submit" variant="ghost" className="w-full justify-start">{t.auth.signOut}</Button></form></DropdownMenuContent>
+            </DropdownMenu>
+          ) : <Button asChild variant="unstyled" size="auto" className="hidden rounded-xl bg-neon-cyan px-5 py-3 font-bold text-black transition hover:bg-white sm:inline-flex"><Link href={`${base}/create-project`}>{c.start}<ArrowUpLeft className="size-4 flip-x"/></Link></Button>}
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="unstyled"
-                size="auto"
-                type="button"
-                aria-label={t.nav.menu}
-                className="rounded-xl border border-line-strong bg-white/[0.02] p-2.5 text-ink-mid transition-colors hover:border-neon-cyan/50 hover:text-white lg:hidden"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="end" className="lg:hidden">
-              <SheetHeader>
-                <SheetTitle>{t.nav.menu}</SheetTitle>
-              </SheetHeader>
-              <nav className="flex flex-col gap-1">
-                {[
-                  ...links,
-                  signedIn
-                    ? { href: `${base}/portal`, label: t.auth.dashboard }
-                    : { href: `${base}/login`, label: t.auth.signIn },
-                ].map((l) => (
-                  <SheetClose asChild key={l.href}>
-                    <Link
-                      href={l.href}
-                      className="rounded-lg px-3 py-2.5 text-start text-sm font-medium text-ink-mid transition-colors hover:bg-white/[0.05] hover:text-white"
-                    >
-                      {l.label}
-                    </Link>
-                  </SheetClose>
-                ))}
-              </nav>
-              {signedIn && <form action={signOutAction}><input type="hidden" name="locale" value={locale} /><Button type="submit" variant="ghostNeon">{t.auth.signOut}</Button></form>}
-            </SheetContent>
+            <SheetTrigger asChild><Button variant="unstyled" size="auto" aria-label={t.nav.menu} className="rounded-xl border border-white/20 p-2.5 text-white lg:hidden"><Menu className="size-5"/></Button></SheetTrigger>
+            <SheetContent side="end" className="bg-[#f7f3ee] text-black lg:hidden"><SheetHeader><SheetTitle><BrandLogo /></SheetTitle></SheetHeader><nav className="mt-8 flex flex-col gap-2">{links.map((link) => <SheetClose asChild key={link.href}><Link href={link.href} className="rounded-xl border border-black/10 bg-white px-4 py-3 font-semibold">{link.label}</Link></SheetClose>)}</nav><Button asChild variant="neon" className="mt-6 w-full"><Link href={`${base}/create-project`}>{c.start}</Link></Button>{!signedIn && <Button asChild variant="ghostNeon" className="mt-2 w-full"><Link href={`${base}/login`}><LogIn className="size-4"/>{t.auth.signIn}</Link></Button>}</SheetContent>
           </Sheet>
         </div>
       </div>

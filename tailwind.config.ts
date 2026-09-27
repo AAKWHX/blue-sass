@@ -6,12 +6,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        /* ---- Strict dark palette ---- */
-        base: "#000000", // page background — true black
-        elevated: "#070809", // raised sections
-        surface: "#0B0C0E", // cards — darkest neutral grey
-        line: "#1A1D23", // hairline borders
-        "line-strong": "#2E333C",
+        base: "#F7F3EE",
+        elevated: "#FFFFFF",
+        surface: "#FFFCF8",
+        line: "#D8D2CB",
+        "line-strong": "#181818",
 
         /* ---- Monochrome neon (was RGB) ----
            Every hue slot now maps to white/grey at that role's relative
@@ -20,23 +19,23 @@ const config: Config = {
            accents, indigo/purple the soft secondary, emerald stays green
            (status semantics) but desaturated. */
         neon: {
-          cyan: "#FFFFFF",
-          teal: "#F2F4F6",
-          sky: "#E8ECF0",
-          blue: "#DDE2E8",
-          indigo: "#AEB6BF",
-          purple: "#AEB6BF",
-          magenta: "#FFFFFF",
-          pink: "#DDE2E8",
-          emerald: "#6FE39C",
+          cyan: "#79CBEA",
+          teal: "#4CBAD9",
+          sky: "#BDEBFA",
+          blue: "#1769E0",
+          indigo: "#3158C7",
+          purple: "#7254C7",
+          magenta: "#FF735F",
+          pink: "#FF9B8C",
+          emerald: "#159A65",
         },
 
         /* ---- Text ramp (WCAG-checked on #07090E) ---- */
         ink: {
-          hi: "#FFFFFF", // headings   21:1
-          mid: "#CBD5E1", // body       14.3:1
-          low: "#94A3B8", // secondary  8.9:1
-          faint: "#64748B", // meta       4.9:1
+          hi: "#080808",
+          mid: "#242424",
+          low: "#5B5B5B",
+          faint: "#7A7A7A",
         },
       },
       zIndex: {
@@ -51,10 +50,10 @@ const config: Config = {
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       boxShadow: {
-        "glow-cyan": "0 0 30px -8px rgba(255, 255, 255, 0.5)",
-        "glow-magenta": "0 0 30px -8px rgba(255, 255, 255, 0.4)",
-        "glow-purple": "0 0 30px -8px rgba(255, 255, 255, 0.3)",
-        card: "0 24px 70px -35px rgba(0, 0, 0, 1)",
+        "glow-cyan": "0 18px 45px -20px rgba(23, 105, 224, 0.35)",
+        "glow-magenta": "0 18px 45px -20px rgba(255, 115, 95, 0.35)",
+        "glow-purple": "0 18px 45px -20px rgba(114, 84, 199, 0.3)",
+        card: "0 24px 70px -35px rgba(44, 53, 70, .28)",
       },
       keyframes: {
         float: { "0%,100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-12px)" } },

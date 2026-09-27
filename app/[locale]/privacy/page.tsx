@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/public/legal-page";
 
-export const metadata: Metadata = { title: "Privacy Policy — Blue Sass", description: "How Blue Sass collects, uses, and protects personal information." };
+export const metadata: Metadata = { title: "سياسة الخصوصية — بلو ساس", description: "كيف تجمع بلو ساس البيانات الشخصية وتستخدمها وتحميها." };
 
 const sections = [
   { title: "Information we collect", paragraphs: ["When you request a quote, create an account, or contact us, we may collect your name, email address, company details, project requirements, and the content of your message.", "If you choose Sign in with Google, Google provides us with your verified email address, name, profile image, and a provider-specific account identifier. We do not receive your Google password and we do not request access to your Google Drive, contacts, or other Google services."] },

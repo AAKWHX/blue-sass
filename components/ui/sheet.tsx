@@ -62,7 +62,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="absolute end-4 top-4 rounded-lg p-2 text-ink-low transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-ring outline-none">
+        <SheetPrimitive.Close className="absolute end-4 top-4 rounded-lg p-2 text-ink-low transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-ring outline-none">
           <X className="size-4" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>

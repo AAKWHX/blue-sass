@@ -7,7 +7,6 @@ import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { SectionHeading } from "@/components/ui/primitives";
 import { Reveal, StaggerGroup, StaggerItem, TiltCard } from "@/components/ui/motion";
-import { ParticleField } from "@/components/ui/backgrounds";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -78,21 +77,21 @@ export function Process() {
 
 export function CallToAction() {
   const { locale, t } = useI18n();
+  const ar = locale === "ar";
 
   return (
-    <section className="section-y">
+    <section className="section-y bg-base">
       <div className="container-x">
         <Reveal>
-          <div className="cta-panel relative overflow-hidden rounded-[2rem] border border-white/15 p-8 sm:p-12 lg:p-16">
-            <ParticleField density={32} className="opacity-35" />
-            <div className="absolute inset-0 cyber-grid opacity-25 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+          <div className="relative overflow-hidden rounded-[2rem] border border-black bg-neon-cyan p-8 sm:p-12 lg:p-16">
+            <span aria-hidden className="absolute -end-12 -top-14 text-[13rem] font-black leading-none text-white/45">B</span>
             <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
-              <div><span className="mono-label">Blue Sass / Next</span><h2 className="mt-5 max-w-3xl text-3xl sm:text-5xl">{t.quote.title}</h2>
-            <p className="mt-5 max-w-2xl leading-8 text-ink-low">
+              <div><span className="text-sm font-bold text-black/60">BLUE SASS / NEXT</span><h2 className="mt-5 max-w-3xl text-3xl font-bold text-black sm:text-6xl">{ar ? "جاهز نحول فكرتك إلى منتج حقيقي؟" : t.quote.title}</h2>
+            <p className="mt-5 max-w-2xl leading-8 text-black/65">
               {t.quote.subtitle}
             </p></div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
-              <Button asChild variant="neon" size="lg" className="group">
+              <Button asChild variant="unstyled" size="auto" className="group rounded-xl bg-black px-7 py-4 font-bold text-white transition hover:bg-neon-blue">
                 <Link href={`/${locale}/create-project`}>
                   <span className="relative z-10">{t.hero.ctaPrimary}</span>
                   <ArrowRight className="relative z-10 h-4 w-4 shrink-0 flip-x transition-transform group-hover:translate-x-1" />

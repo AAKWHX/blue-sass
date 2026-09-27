@@ -1,18 +1,22 @@
 "use client";
+
+import { ArrowDown, CircleCheck, Code2, Lightbulb, Palette, Rocket } from "lucide-react";
 import { useI18n } from "@/components/providers";
-import { Reveal } from "@/components/ui/motion";
-function StageArt({ stage,label }: { stage:number; label:string }) {
-  return <svg viewBox="0 0 320 180" role="img" aria-label={label} className="w-full motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:-translate-y-1" fill="none">
-    <rect x="28" y="20" width="264" height="140" rx="12" fill="#050608" stroke="#AEB6BF"/>
-    {stage===0 ? [0,1,2].map(i=><g key={i}><rect x={49+i*77} y="42" width="65" height="18" rx="5" fill="#E8ECF0"/>{Array.from({length:3-i},(_,j)=><rect key={j} x={49+i*77} y={71+j*22} width="65" height="15" rx="4" fill="#232630"/>)}</g>) : stage===1 ? <><rect x="50" y="42" width="105" height="95" rx="7" stroke="#E8ECF0"/><circle cx="103" cy="77" r="20" fill="#AEB6BF"/><path d="M175 50h88m-88 20h60m-60 20h80" stroke="#AEB6BF" strokeWidth="7"/><rect x="175" y="115" width="70" height="20" rx="10" fill="#E8ECF0"/></> : stage===2 ? <path d="m107 59-34 31 34 31m106-62 34 31-34 31m-42-73-22 86" stroke="#E8ECF0" strokeWidth="6" strokeLinecap="round"/> : stage===3 ? [0,1,2].map(i=><g key={i}><path d={`m53 ${54+i*32} 7 7 14-17`} stroke="#6FE39C" strokeWidth="3"/><path d={`M96 ${53+i*32}h145`} stroke="#AEB6BF" strokeWidth="8"/></g>) : <><circle cx="160" cy="90" r="45" stroke="#E8ECF0"/><path d="m137 90 15 15 33-36" stroke="#6FE39C" strokeWidth="5" strokeLinecap="round"/></>}
-  </svg>;
-}
+import { Reveal, motion } from "@/components/ui/motion";
+
+const icons = [Lightbulb, Palette, Code2, CircleCheck, Rocket];
+
 export function DeliveryJourney() {
-  const { t } = useI18n();
-  return <section className="section-y relative overflow-hidden border-b border-line/70"><div className="container-x">
-    <Reveal className="grid gap-5 lg:grid-cols-[.7fr_1fr] lg:items-end"><h2 className="text-3xl font-semibold sm:text-5xl">{t.process.title}</h2><p className="max-w-2xl leading-8 text-ink-low lg:justify-self-end">{t.process.subtitle}</p></Reveal>
-    <ol className="journey-rail mt-12 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{t.process.steps.map((step,i)=><Reveal as="li" key={step.title} delay={i*.05} className="journey-card group">
-      <div className="flex items-center justify-between"><span className="journey-number">{String(i+1).padStart(2,'0')}</span><span className="h-px flex-1 bg-gradient-to-r from-white/30 to-transparent" /></div><div className="my-2 max-h-28 overflow-hidden opacity-65 transition-opacity duration-300 group-hover:opacity-100"><StageArt stage={i} label={step.title}/></div><h3 className="text-lg font-semibold">{step.title}</h3><p className="mt-2 text-sm leading-6 text-ink-low">{step.desc}</p>
-    </Reveal>)}</ol>
-  </div></section>;
+  const { locale, t } = useI18n();
+  const ar = locale === "ar";
+  return (
+    <section className="section-y bg-base">
+      <div className="container-x">
+        <Reveal className="text-center"><span className="text-sm font-bold text-neon-magenta">✦ {ar ? "طريقة العمل" : "Our process"}</span><h2 className="mt-3 text-4xl font-bold text-black sm:text-6xl">{t.process.title}</h2><p className="mx-auto mt-5 max-w-2xl leading-8 text-ink-low">{t.process.subtitle}</p></Reveal>
+        <div className="relative mt-14 grid gap-4 md:grid-cols-5">
+          {t.process.steps.map((step, index) => { const Icon = icons[index]; return <Reveal key={step.title} delay={index * .06}><motion.article whileHover={{ y: -7, rotate: index % 2 ? .6 : -.6 }} className={`relative h-full min-h-72 rounded-2xl border border-black p-5 ${index === 4 ? "bg-neon-cyan" : "bg-white"}`}><span className="grid size-12 place-items-center rounded-full bg-black text-white"><Icon className="size-5"/></span><span className="absolute end-5 top-5 font-mono text-xs font-black">0{index + 1}</span><h3 className="mt-12 text-xl font-bold text-black">{step.title}</h3><p className="mt-3 text-sm leading-7 text-black/65">{step.desc}</p>{index < 4 && <ArrowDown className="absolute -bottom-3 end-6 z-10 size-6 rounded-full border border-black bg-neon-cyan p-1 text-black md:-end-3 md:bottom-6 md:-rotate-90"/>}</motion.article></Reveal>; })}
+        </div>
+      </div>
+    </section>
+  );
 }

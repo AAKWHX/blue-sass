@@ -17,25 +17,25 @@
 .dark {
   --radius: 0.75rem;
 
-  --background: #05070e;
-  --foreground: #ffffff;
-  --card: #0d111a;
-  --card-foreground: #ffffff;
-  --popover: #0b0f18;
-  --popover-foreground: #ffffff;
-  --primary: #ffffff;
-  --primary-foreground: #000000;
-  --secondary: #14171d;
-  --secondary-foreground: #cbd5e1;
-  --muted: #14171d;
-  --muted-foreground: #94a3b8;
-  --accent: #e8ecf0;
-  --accent-foreground: #000000;
+  --background: #f7f3ee;
+  --foreground: #080808;
+  --card: #ffffff;
+  --card-foreground: #080808;
+  --popover: #ffffff;
+  --popover-foreground: #080808;
+  --primary: #79cbea;
+  --primary-foreground: #080808;
+  --secondary: #eee9e2;
+  --secondary-foreground: #242424;
+  --muted: #eee9e2;
+  --muted-foreground: #5b5b5b;
+  --accent: #1769e0;
+  --accent-foreground: #ffffff;
   --destructive: #f87171;
   --destructive-foreground: #ffffff;
-  --border: #1a1d23;
-  --input: #1a1d23;
-  --ring: #ffffff;
+  --border: #d8d2cb;
+  --input: #d8d2cb;
+  --ring: #1769e0;
 }
 
 /* Expose the tokens to Tailwind v4 so `bg-background`, `text-muted-foreground`,
@@ -117,8 +117,9 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    color-scheme: dark;
-    background-color: #05070e;
+    color-scheme: light;
+    background-color: #f7f3ee;
+    overflow-x: clip;
   }
 
   /* Between sections the shader backdrop showed through the rounding seams
@@ -132,6 +133,7 @@
     font-family: var(--font-sans);
     @apply bg-base text-ink-mid antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overflow-x: clip;
   }
 
   ::selection {
@@ -185,8 +187,8 @@
     /* bg raised 60 -> 88 and blur md -> xl: the animated shader backdrop
        showed straight through the old value and left card text washed out
        and hard to read. */
-    @apply relative rounded-2xl border border-line bg-surface/88 backdrop-blur-xl;
-    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+    @apply relative rounded-2xl border border-line bg-white/90 backdrop-blur-xl;
+    box-shadow: 0 18px 50px -35px rgb(20 37 60 / 0.3);
   }
 
   .glass-card {
@@ -198,11 +200,11 @@
     @apply transition-all duration-300;
   }
   .glow-hover:hover {
-    @apply border-white/45;
+    @apply border-black/25;
     box-shadow:
-      inset 0 1px 0 0 rgb(255 255 255 / 0.06),
-      0 0 0 1px rgb(255 255 255 / 0.14),
-      0 22px 60px -28px rgb(255 255 255 / 0.3);
+      inset 0 1px 0 0 rgb(255 255 255 / 0.7),
+      0 0 0 1px rgb(0 0 0 / 0.06),
+      0 22px 60px -28px rgb(23 105 224 / 0.28);
   }
 
   .glow-border {
@@ -221,16 +223,16 @@
     @apply relative inline-flex select-none items-center justify-center gap-2 rounded-xl px-5 py-3
            text-sm font-semibold tracking-tight transition-colors duration-200
            overflow-hidden text-white;
-    background: #ffffff;
+    background: #79cbea;
     animation: none;
     box-shadow: none;
     border-radius: 9999px;
     min-height: 46px;
-    color: #000000;
+    color: #080808;
   }
   .btn-primary:hover {
-    background: #e8ecf0;
-    box-shadow: 0 12px 34px -18px rgb(255 255 255 / 0.7);
+    background: #a6ddf1;
+    box-shadow: 0 12px 34px -18px rgb(23 105 224 / 0.45);
   }
   /* Shimmering sweep across the CTA */
   .btn-primary::after {
@@ -246,10 +248,10 @@
   .btn-ghost {
     @apply relative inline-flex select-none items-center justify-center gap-2 rounded-xl px-5 py-3
            text-sm font-semibold tracking-tight transition-colors duration-200
-           border border-line-strong bg-white/[0.02] text-ink-mid;
+           border border-black bg-transparent text-ink-hi;
   }
   .btn-ghost:hover {
-    @apply border-neon-cyan/50 bg-neon-cyan/[0.06] text-white;
+    @apply border-black bg-black text-white;
   }
 
   .btn-ghost { border-radius: 9999px; min-height: 46px; }
@@ -257,12 +259,12 @@
   [data-slot="button"]:disabled { cursor: not-allowed; }
 
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white/[0.03]
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white
            px-3 py-1 text-xs font-medium tracking-tight text-ink-low;
   }
 
   .field {
-    @apply w-full rounded-xl border border-line bg-white/[0.03] px-4 py-3 text-base md:text-sm text-ink-hi
+    @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-base md:text-sm text-ink-hi
            outline-none transition placeholder:text-ink-faint
            focus:border-neon-cyan/60 focus:ring-2 focus:ring-neon-cyan/20;
   }
@@ -669,8 +671,8 @@
     inset-inline: 0;
     height: 2px;
     pointer-events: none;
-    background: linear-gradient(90deg, #ffffff, #c3cbd4);
-    box-shadow: 0 0 14px rgb(255 255 255 / 0.45);
+    background: linear-gradient(90deg, #79cbea, #1769e0);
+    box-shadow: none;
     transform-origin: left center;
   }
   [dir="rtl"] .scroll-progress {
@@ -1102,14 +1104,14 @@
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #07090e;
+  background: #f7f3ee;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #b9b3ac;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #6d6a66;
 }
 
 /* ------------------------------------------------------------------

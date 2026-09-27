@@ -4,7 +4,7 @@ import { getDictionary, isLocale } from "@/lib/i18n";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Start a project — Blue Sass" };
+export const metadata = { title: "ابدأ مشروعك مع بلو ساس", description: "أرسل فكرة موقعك أو تطبيقك واحصل على خطة واضحة للتصميم والتطوير." };
 
 export default async function CreateProjectPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: rawLocale } = await params;

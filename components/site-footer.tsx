@@ -1,87 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Mail, Phone } from "lucide-react";
+import { ArrowUpLeft, Mail, Phone } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { BrandLogo } from "@/components/brand-logo";
-import { serviceCatalog } from "@/lib/service-catalog";
 
-const legalLabels = {
-  ar: { privacy: "سياسة الخصوصية", terms: "شروط الاستخدام" },
-  en: { privacy: "Privacy policy", terms: "Terms of service" },
-  nl: { privacy: "Privacybeleid", terms: "Gebruiksvoorwaarden" },
-  de: { privacy: "Datenschutz", terms: "Nutzungsbedingungen" },
-  tr: { privacy: "Gizlilik politikası", terms: "Kullanım koşulları" },
-  fr: { privacy: "Confidentialité", terms: "Conditions d’utilisation" },
-  es: { privacy: "Privacidad", terms: "Términos de uso" },
+const copy = {
+  ar: { pages: "صفحات الموقع", about: "من نحن", services: "الخدمات", work: "أعمالنا", contact: "اتصل بنا", start: "ابدأ مشروعك" },
+  en: { pages: "Pages", about: "About", services: "Services", work: "Work", contact: "Contact", start: "Start a project" },
+  nl: { pages: "Pagina’s", about: "Over ons", services: "Diensten", work: "Werk", contact: "Contact", start: "Start een project" },
+  de: { pages: "Seiten", about: "Über uns", services: "Leistungen", work: "Projekte", contact: "Kontakt", start: "Projekt starten" },
+  tr: { pages: "Sayfalar", about: "Hakkımızda", services: "Hizmetler", work: "Projeler", contact: "İletişim", start: "Proje başlat" },
+  fr: { pages: "Pages", about: "À propos", services: "Services", work: "Projets", contact: "Contact", start: "Démarrer" },
+  es: { pages: "Páginas", about: "Nosotros", services: "Servicios", work: "Proyectos", contact: "Contacto", start: "Empezar" },
 } as const;
 
 export function SiteFooter() {
   const { locale, t } = useI18n();
+  const c = copy[locale];
   const base = `/${locale}`;
-
-  return (
-    <footer className="relative overflow-hidden border-t border-line bg-[#07090d]/92 backdrop-blur-md">
-      {/* Top glow seam */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/60 to-transparent"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[560px] -translate-x-1/2 rounded-full bg-neon-cyan/10 blur-[110px]"
-      />
-
-      <div className="container-x relative grid gap-12 py-16 text-start md:grid-cols-2 lg:grid-cols-4 lg:py-20">
-        {/* Brand + newsletter */}
-        <div className="lg:col-span-2">
-          <BrandLogo />
-          <p className="mt-5 max-w-md text-base leading-8 text-ink-low">
-            {t.hero.subtitle}
-          </p>
-        </div>
-
-        {/* Services */}
-        <div>
-          <h3 className="text-base font-semibold text-ink-hi">{t.nav.services}</h3>
-          <ul className="mt-5 space-y-3 text-sm text-ink-low">
-            {serviceCatalog(locale).map((s) => (
-              <li key={s.title}>
-                <Link href={`${base}/services/${s.slug}`} className="inline-flex items-center gap-1.5 transition-colors hover:text-neon-cyan">
-                  <ArrowRight className="h-3 w-3 shrink-0 flip-x opacity-0 transition-opacity duration-300 hover:opacity-100" />
-                  {s.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Contact */}
-        <div>
-          <h3 className="text-base font-semibold text-ink-hi">{t.nav.contact}</h3>
-          <ul className="mt-5 space-y-3 text-sm text-ink-low">
-            <li>
-              <Link href={`${base}/quote`} className="hover:text-neon-cyan">
-                {t.nav.quote}
-              </Link>
-            </li>
-            <li className="flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5" /> <a href="mailto:help@bluesass.nl" className="hover:text-neon-cyan">help@bluesass.nl</a>
-            </li>
-            <li className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /><a href="tel:+31634543374" dir="ltr" className="hover:text-neon-cyan">+31 6 3454 3374</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="relative border-t border-line py-5 text-center text-xs text-ink-faint">
-        <div className="container-x flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <span>© {new Date().getFullYear()} Blue Sass. {t.footer.rights}</span>
-          <span className="flex items-center gap-4">
-            <Link href={`${base}/privacy`} className="transition-colors hover:text-neon-cyan">{legalLabels[locale].privacy}</Link>
-            <Link href={`${base}/terms`} className="transition-colors hover:text-neon-cyan">{legalLabels[locale].terms}</Link>
-          </span>
-        </div>
-      </div>
-    </footer>
-  );
+  return <footer className="border-t border-white/10 bg-black text-white"><div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.3fr_.7fr_.7fr] lg:py-20">
+    <div><BrandLogo className="[&>span]:!text-white"/><p className="mt-5 max-w-md text-base leading-8 text-white/60">{t.hero.subtitle}</p><Link href={`${base}/create-project`} className="mt-7 inline-flex items-center gap-2 rounded-xl bg-neon-cyan px-5 py-3 font-bold text-black">{c.start}<ArrowUpLeft className="size-4 flip-x"/></Link></div>
+    <div><h3 className="text-lg font-bold text-white">{c.pages}</h3><ul className="mt-5 space-y-3 text-sm text-white/60"><li><Link href={`${base}/about`} className="hover:text-neon-cyan">{c.about}</Link></li><li><Link href={`${base}/services`} className="hover:text-neon-cyan">{c.services}</Link></li><li><Link href={`${base}/projects`} className="hover:text-neon-cyan">{c.work}</Link></li><li><Link href={`${base}/contact`} className="hover:text-neon-cyan">{c.contact}</Link></li></ul></div>
+    <div><h3 className="text-lg font-bold text-white">{c.contact}</h3><ul className="mt-5 space-y-4 text-sm text-white/60"><li><a href="mailto:help@bluesass.nl" className="flex items-center gap-2 hover:text-neon-cyan"><Mail className="size-4"/>help@bluesass.nl</a></li><li><a href="tel:+31634543374" dir="ltr" className="flex items-center gap-2 hover:text-neon-cyan"><Phone className="size-4"/>+31 6 3454 3374</a></li></ul></div>
+  </div><div className="border-t border-white/10 py-5"><div className="container-x flex flex-col justify-between gap-3 text-xs text-white/45 sm:flex-row"><span>© {new Date().getFullYear()} Blue Sass. {t.footer.rights}</span><div className="flex gap-5"><Link href={`${base}/privacy`}>Privacy</Link><Link href={`${base}/terms`}>Terms</Link></div></div></div></footer>;
 }

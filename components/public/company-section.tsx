@@ -1,36 +1,27 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { FileText, Monitor, Smartphone, MessageCircle, ArrowRight } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
+import { ArrowUpLeft, CheckCircle2 } from "lucide-react";
 import { useI18n } from "@/components/providers";
-import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
+import { Reveal, motion } from "@/components/ui/motion";
 
 const copy = {
-  ar: ["فكرتك واضحة. مشروعك في مكان واحد.", "اختر الخدمة التي تحتاجها، راجع تفاصيل طلبك، وتواصل معنا من حسابك.", "تفاصيل قبل الالتزام", "راجع الميزات والتقدير قبل حفظ الطلب. يمكنك إرسال طلبك دون الدفع.", "مكان واحد لمشروعك", "تابع الطلب والملفات وملاحظات المشروع من حسابك.", "تواصل مباشر", "لديك سؤال عن الفكرة أو نطاق العمل؟ تواصل مع Blue Sass.", "ابدأ مشروعك"],
-  en: ["Your idea. Your project. One place.", "Choose a service, review your request and contact us from your account.", "Details before commitment", "Review features and estimates before saving. Submit without paying.", "One project workspace", "Follow your request, files and feedback from your account.", "Direct contact", "Questions about your idea or scope? Contact Blue Sass.", "Start your project"],
-  nl: ["Uw idee en project op één plek.", "Kies een dienst, controleer uw aanvraag en neem contact op via uw account.", "Details vooraf", "Bekijk functies en ramingen voordat u opslaat. Aanvragen kan zonder betaling.", "Eén projectomgeving", "Volg uw aanvraag, bestanden en feedback vanuit uw account.", "Direct contact", "Vragen over uw idee of omvang? Neem contact op met Blue Sass.", "Start uw project"],
-  de: ["Ihre Idee. Ihr Projekt. Ein Ort.", "Wählen Sie eine Leistung, prüfen Sie Ihre Anfrage und kontaktieren Sie uns.", "Details vor der Zusage", "Prüfen Sie Funktionen und Schätzungen. Speichern ist ohne Zahlung möglich.", "Ein Projektbereich", "Verfolgen Sie Anfrage, Dateien und Feedback in Ihrem Konto.", "Direkter Kontakt", "Fragen zur Idee oder zum Umfang? Kontaktieren Sie Blue Sass.", "Projekt starten"],
-  tr: ["Fikriniz ve projeniz tek yerde.", "Hizmet seçin, talebinizi inceleyin ve hesabınızdan bize ulaşın.", "Karardan önce ayrıntılar", "Kaydetmeden önce özellikleri ve tahminleri inceleyin. Ödemeden talep gönderin.", "Tek proje alanı", "Talebinizi, dosyalarınızı ve geri bildirimleri hesabınızdan takip edin.", "Doğrudan iletişim", "Fikriniz veya kapsam hakkında sorunuz mu var? Blue Sass ile iletişime geçin.", "Projenizi başlatın"],
-  fr: ["Votre idée et votre projet au même endroit.", "Choisissez un service, vérifiez votre demande et contactez-nous.", "Les détails avant de décider", "Vérifiez les options et estimations. Enregistrez sans payer.", "Un espace pour votre projet", "Suivez votre demande, vos fichiers et vos retours depuis votre compte.", "Contact direct", "Une question sur votre idée ou le périmètre ? Contactez Blue Sass.", "Démarrer votre projet"],
-  es: ["Su idea y su proyecto en un solo lugar.", "Elija un servicio, revise su solicitud y contacte con nosotros.", "Detalles antes de decidir", "Revise opciones y estimaciones. Guarde sin pagar.", "Un espacio para su proyecto", "Siga su solicitud, archivos y comentarios desde su cuenta.", "Contacto directo", "¿Preguntas sobre su idea o alcance? Contacte con Blue Sass.", "Iniciar proyecto"],
-};
+  ar: ["عن بلو ساس", "نحن لا نبني صفحات فقط، بل نصنع تجربة رقمية كاملة تخدم هدف مشروعك وتحوّل الزائر إلى عميل.", "فريق واحد للتصميم والتطوير", "تجربة واضحة على كل شاشة", "دعم مستمر بعد الإطلاق"],
+  en: ["About Blue Sass", "We do not just build pages. We create complete digital experiences that serve your business and turn visitors into customers.", "One design and development team", "A clear experience on every screen", "Ongoing support after launch"],
+  nl: ["Over Blue Sass", "Wij bouwen complete digitale ervaringen die uw bedrijf ondersteunen en bezoekers omzetten in klanten.", "Eén ontwerp- en ontwikkelteam", "Helder op ieder scherm", "Doorlopende ondersteuning"],
+  de: ["Über Blue Sass", "Wir schaffen vollständige digitale Erlebnisse, die Ihr Unternehmen unterstützen und Besucher in Kunden verwandeln.", "Ein Team für Design und Entwicklung", "Klar auf jedem Bildschirm", "Support nach dem Launch"],
+  tr: ["Blue Sass hakkında", "İşinizi destekleyen ve ziyaretçileri müşterilere dönüştüren eksiksiz dijital deneyimler oluşturuyoruz.", "Tek tasarım ve geliştirme ekibi", "Her ekranda net deneyim", "Lansman sonrası destek"],
+  fr: ["À propos de Blue Sass", "Nous créons des expériences numériques complètes qui servent votre activité et transforment les visiteurs en clients.", "Une seule équipe design et développement", "Clair sur chaque écran", "Support continu"],
+  es: ["Sobre Blue Sass", "Creamos experiencias digitales completas que impulsan su negocio y convierten visitantes en clientes.", "Un equipo de diseño y desarrollo", "Claridad en cada pantalla", "Soporte continuo"],
+} as const;
 
 export function CompanySection() {
-  const { locale, t } = useI18n();
+  const { locale } = useI18n();
   const c = copy[locale];
-  const reduced = useReducedMotion();
-  return <section className="section-y border-b border-line/70"><div className="container-x">
-    <div className="grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center">
-      <div><span className="mono-label">Blue Sass / 02</span><h2 className="mt-6 max-w-xl text-3xl font-semibold leading-tight sm:text-5xl">{c[0]}</h2><p className="mt-5 max-w-xl leading-8 text-ink-low">{c[1]}</p><Button asChild variant="neon" size="lg" className="mt-8"><Link href={`/${locale}/create-project`}>{c[8]}<ArrowRight className="size-4 flip-x" /></Link></Button></div>
-      <motion.div initial={reduced ? false : { opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="dashboard-preview relative overflow-hidden rounded-[2rem] border border-line bg-elevated/90 p-5 sm:p-8">
-        <div className="flex items-center justify-between border-b border-line pb-4"><BrandLogo showName={false} /><span className="text-sm font-semibold">{t.auth.myProjects}</span></div>
-        <div aria-hidden="true" className="mt-7 grid grid-cols-[1fr_auto] items-end gap-4"><div className="rounded-xl border border-line bg-base p-4"><Monitor className="size-9" /><div className="mt-5 h-2 w-3/4 rounded bg-white/30" /><div className="mt-3 h-2 w-1/2 rounded bg-white/15" /><div className="mt-6 grid grid-cols-3 gap-2">{[1,2,3].map(n => <span key={n} className="h-10 rounded bg-white/5" />)}</div></div><Smartphone className="h-36 w-16 text-ink-low" /></div>
-        <p className="mt-5 text-sm text-ink-low">{c[5]}</p>
-      </motion.div>
-    </div>
-    <div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-3">{[FileText, Monitor, MessageCircle].map((Icon, i) => <article key={i} className="bg-surface/95 p-6 transition-colors hover:bg-white/[0.055]"><Icon className="size-6 text-ink-hi" /><h3 className="mt-5 text-lg font-semibold">{c[2+i*2]}</h3><p className="mt-3 text-sm leading-7 text-ink-low">{c[3+i*2]}</p></article>)}</div>
-    <div className="mt-7 flex flex-wrap gap-6 text-sm"><Link href={`/${locale}/contact`} className="link-arrow">{t.nav.contact}</Link><Link href={`/${locale}/portal`} className="link-arrow">{t.auth.myProjects}</Link></div>
+  return <section className="section-y bg-black text-white"><div className="container-x grid items-center gap-12 lg:grid-cols-2">
+    <Reveal><span className="text-sm font-bold text-neon-cyan">✦ {c[0]}</span><h2 className="mt-4 max-w-2xl text-4xl font-bold leading-tight text-white sm:text-6xl">{c[1]}</h2><ul className="mt-8 space-y-4">{c.slice(2).map(item => <li key={item} className="flex items-center gap-3 text-white/80"><CheckCircle2 className="size-5 text-neon-cyan"/>{item}</li>)}</ul><div className="mt-9 flex flex-wrap gap-3"><Button asChild variant="neon" size="lg"><Link href={`/${locale}/about`}>{c[0]}<ArrowUpLeft className="size-4 flip-x"/></Link></Button><Button asChild variant="unstyled" size="auto" className="rounded-xl border border-white px-6 py-3 font-bold text-white hover:bg-white hover:text-black"><Link href={`/${locale}/contact`}>{locale === "ar" ? "تواصل معنا" : "Contact us"}</Link></Button></div></Reveal>
+    <Reveal delay={.1} className="relative"><span className="absolute -end-5 -top-5 size-40 rounded-full bg-neon-cyan"/><motion.div whileHover={{ rotate: -1, scale: 1.01 }} className="relative overflow-hidden rounded-[2rem] border-2 border-white"><Image src="/media/teamwork-3d.webp" alt={locale === "ar" ? "فريق بلو ساس يعمل على تجربة رقمية" : "Blue Sass team creating a digital experience"} width={1536} height={1024} className="h-auto w-full"/></motion.div></Reveal>
   </div></section>;
 }

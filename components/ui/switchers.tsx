@@ -44,8 +44,8 @@ export function LanguageSwitcher() {
           size="auto"
           type="button"
           aria-label={t.common.language}
-          className="inline-flex items-center gap-2 rounded-xl border border-line-strong bg-white/[0.02] px-3 py-2
-                     text-sm font-medium text-ink-mid transition-colors hover:border-neon-cyan/50 hover:text-white"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/[0.04] px-3 py-2
+                     text-sm font-medium text-white transition-colors hover:border-neon-cyan hover:text-neon-cyan"
         >
           <Globe className="h-4 w-4 shrink-0" />
           <span className="hidden sm:inline">{localeMeta[locale].native}</span>
