@@ -25,7 +25,7 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         className={cn(
-          "z-overlay min-w-[10rem] overflow-hidden rounded-xl border border-line bg-popover p-1 text-ink-mid shadow-card backdrop-blur-xl",
+          "z-overlay min-w-[10rem] max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto rounded-xl border border-line bg-popover p-1 text-ink-mid shadow-card",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
           className,
         )}
@@ -45,7 +45,7 @@ function DropdownMenuItem({
       data-slot="dropdown-menu-item"
       className={cn(
         "relative flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none transition-colors",
-        "focus:bg-neon-cyan/10 focus:text-white",
+        "focus:bg-neon-cyan focus:text-black",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         inset && "ps-8",
         className,
@@ -67,7 +67,7 @@ function DropdownMenuCheckboxItem({
       checked={checked}
       className={cn(
         "relative flex cursor-pointer select-none items-center gap-2 rounded-lg py-2 pe-3 ps-8 text-sm outline-none transition-colors",
-        "focus:bg-neon-cyan/10 focus:text-white data-[state=checked]:text-neon-cyan",
+        "focus:bg-neon-cyan focus:text-black data-[state=checked]:font-bold data-[state=checked]:text-black",
         className,
       )}
       {...props}

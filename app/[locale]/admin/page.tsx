@@ -5,6 +5,8 @@ import { getViewer, isStaff, isReadOnlyAssistant } from "@/lib/db/access";
 import { listLeads } from "@/lib/db/queries";
 import { listViewerProjects } from "@/lib/db/queries";
 import { ProjectStatusPanel } from "@/components/admin/project-status-panel";
+import { PortfolioEditor } from "@/components/admin/portfolio-editor";
+import { portfolioEntries } from "@/lib/db/portfolio";
 
 export const metadata = { title: "Administration — Blue Sass" };
 
@@ -25,11 +27,14 @@ export default async function AdminPage({
   if (!isStaff(viewer.role)) redirect(`/${locale}/portal`);
 
   const [leads, projects] = await Promise.all([listLeads(), listViewerProjects()]);
+  const canPublish = !isReadOnlyAssistant(viewer) && ["super_admin", "admin", "pm"].includes(viewer.role);
+  const portfolio = canPublish ? await portfolioEntries(true) : [];
 
   return (
     <>
       <LeadsPanel leads={leads} locale={locale} readOnly={isReadOnlyAssistant(viewer) || !["super_admin", "admin", "pm"].includes(viewer.role)} />
       {!isReadOnlyAssistant(viewer) && ["super_admin", "admin", "pm"].includes(viewer.role) && <ProjectStatusPanel projects={projects} locale={locale} />}
+      {canPublish && <PortfolioEditor entries={portfolio}/>}
       {viewer.role === "super_admin" && !isReadOnlyAssistant(viewer) && <AdminView demoMode={false} />}
     </>
   );

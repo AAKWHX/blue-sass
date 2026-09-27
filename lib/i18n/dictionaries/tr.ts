@@ -1,6 +1,13 @@
 import type { Dictionary } from "./en";
 
+import { experience } from "../experience";
+import { pricingCopy } from "../pricing-copy";
+import { deliveryDetails } from "../delivery-details";
+
 const tr: Dictionary = {
+  experience: experience("tr"),
+  pricing: pricingCopy("tr"),
+  deliveryDetails: deliveryDetails["tr"],
   brand: { name: "Blue Sass", product: "Studio", tagline: "Büyümeye hazır dijital ürünler." },
   nav: { menu: "Menü", home: "Ana Sayfa", services: "Hizmetler", portfolio: "Portföy", process: "Süreç", quote: "Teklif Al", portal: "Müşteri Portalı", admin: "Yönetim / ERP", contact: "İletişim" },
   common: {
@@ -61,7 +68,7 @@ const tr: Dictionary = {
     title: "Proje hesaplayıcı", subtitle: "Kapsamınızı oluşturun, bir dakikadan kısa sürede yaklaşık bütçe ve süre alın.",
     fields: { name: "Ad soyad", email: "Kurumsal e-posta", company: "Şirket", type: "Proje türü", features: "Modüller ve özellikler", timeline: "Teslim hızı", budget: "Bütçe aralığı", notes: "Eklemek istediğiniz bir şey var mı?" },
     types: { web: "Web platformu", mobile: "Mobil uygulama", ai: "Yapay zekâ sistemi", ecommerce: "E-ticaret", erp: "ERP / iç araçlar", brand: "Marka ve tasarım" },
-    speeds: { relaxed: "Esnek (en iyi fiyat)", standard: "Standart", rush: "Acil (+%40)" },
+    speeds: { relaxed: "Esnek takvim", standard: "Standart", rush: "Acil (+%40)" },
     features: { auth: "Kimlik doğrulama ve roller", payments: "Ödeme ve faturalama", dashboard: "Analitik panosu", i18n: "Çok dillilik (7)", cms: "İçerik yönetimi", api: "Genel API", ai: "Yapay zekâ asistanı", realtime: "Gerçek zamanlı ve sohbet", prototype: "Etkileşimli arayüz prototipi", identity: "Logo ve kimlik sistemi", appstore: "Uygulama mağazası hazırlığı ve yayın", offline: "Çevrimdışı çalışma", catalog: "Ürün kataloğu ve stok", automation: "İş akışı otomasyonu ve bağlantılar" },
     estimate: "Yaklaşık tahmin", weeks: "hafta", submit: "Detaylı teklif iste",
     success: "Talebiniz alındı. Ekibimiz bir iş günü içinde dönüş yapar.", disclaimer: "Tahminler yaklaşıktır ve keşif görüşmesinden sonra kesinleşir.",

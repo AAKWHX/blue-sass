@@ -25,7 +25,6 @@ import {
   PackageCheck,
   ReceiptText,
   Send,
-  ShieldCheck,
 } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { ProgressBar, StatusBadge } from "@/components/ui/primitives";
@@ -155,7 +154,7 @@ function SavedOrders({ orders }: { orders: Lead[] }) {
   </section>;
 }
 
-export function ClientDashboard({ viewerName, viewerCompany, projects, orders }: ClientDashboardProps) {
+export function ClientDashboard({ viewerName, projects, orders }: ClientDashboardProps) {
   const { t, locale } = useI18n();
   const [index, setIndex] = useState(0);
   const [feedbackState, feedbackAction, feedbackPending] = useActionState(
@@ -195,22 +194,6 @@ export function ClientDashboard({ viewerName, viewerCompany, projects, orders }:
   return (
     <section className="relative py-12">
       <div className="container-x relative z-content">
-        <header className="glass-card flex flex-wrap items-center justify-between gap-5 p-6">
-          <div>
-            <span className="mono-label rounded-full border border-neon-cyan/30 bg-neon-cyan/[0.06] px-3 py-1.5">
-              {t.auth.dashboard}
-            </span>
-            <h1 className="mt-3 text-3xl font-black tracking-tight text-black" dir="auto">
-              {t.portal.welcome}, {viewerName}
-            </h1>
-            {viewerCompany ? <p className="mt-1 text-sm text-ink-low">{viewerCompany}</p> : null}
-          </div>
-          <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-neon-emerald">
-            <ShieldCheck className="size-4" />
-            {locale === "ar" ? "مساحة مشروع آمنة" : "Secure project workspace"}
-          </div>
-        </header>
-
         <SavedOrders orders={orders} />
 
         {projects.length > 1 ? (

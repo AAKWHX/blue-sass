@@ -1,4 +1,11 @@
+import { experience } from "../experience";
+import { pricingCopy } from "../pricing-copy";
+import { deliveryDetails } from "../delivery-details";
+
 const en = {
+  experience: experience("en"),
+  pricing: pricingCopy("en"),
+  deliveryDetails: deliveryDetails["en"],
   brand: { name: "Blue Sass", product: "Studio", tagline: "Digital products built to grow." },
   nav: {
     menu: "Menu",
@@ -109,7 +116,7 @@ const en = {
       notes: "Anything else we should know?",
     },
     types: { web: "Web platform", mobile: "Mobile app", ai: "AI system", ecommerce: "E-commerce", erp: "ERP / internal tools", brand: "Brand & design" },
-    speeds: { relaxed: "Relaxed (best price)", standard: "Standard", rush: "Rush (+40%)" },
+    speeds: { relaxed: "Flexible schedule", standard: "Standard", rush: "Rush (+40%)" },
     features: {
       auth: "Authentication & roles",
       payments: "Payments & billing",

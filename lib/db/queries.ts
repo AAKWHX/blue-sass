@@ -33,7 +33,7 @@ export async function listPublicProjects(): Promise<Project[]> {
 /** Projects the signed-in viewer may open. */
 export async function listViewerProjects(): Promise<Project[]> {
   const viewer = await getViewer();
-  if (!isDatabaseConfigured) return mock.viewerProjectsFallback(viewer?.role ?? "client");
+  if (!viewer || !isDatabaseConfigured) return [];
   return db
     .select()
     .from(projects)
@@ -50,7 +50,7 @@ export interface ProjectDetail {
 }
 
 export async function getProjectDetail(projectId: string): Promise<ProjectDetail | null> {
-  if (!isDatabaseConfigured) return mock.projectDetailFallback(projectId);
+  if (!isDatabaseConfigured) return null;
 
   const viewer = await getViewer();
   const [project] = await db
@@ -92,7 +92,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
       .orderBy(asc(messages.createdAt)),
   ]);
 
-  return { project, milestones: ms, files: fs, feedback: fb, messages: msgs };
+  return { project, milestones: ms, files: fs.filter(file => !file.url.startsWith("urn:bluesass:")), feedback: fb, messages: msgs };
 }
 
 /** Admin: every lead captured by the public quote form. */

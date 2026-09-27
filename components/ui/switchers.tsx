@@ -32,12 +32,12 @@ export function LanguageSwitcher() {
     // React value; the compiler cannot distinguish the two.
     // eslint-disable-next-line react-hooks/immutability
     document.cookie = `awwa-locale=${next}; path=/; max-age=31536000; samesite=lax`;
-    router.push(segments.join("/") || `/${next}`);
+    router.push((segments.join("/") || `/${next}`) + window.location.search + window.location.hash);
     router.refresh();
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false} dir={locale === "ar" ? "rtl" : "ltr"}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="unstyled"

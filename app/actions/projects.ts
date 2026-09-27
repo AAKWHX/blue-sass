@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import {
@@ -19,6 +19,8 @@ import {
   assertCanWrite,
 } from "@/lib/db/access";
 
+import { lifecycleState, lockProject, recordLifecycle, type ProjectTransaction } from "@/lib/db/project-lifecycle";
+
 export interface MutationState {
   ok: boolean;
   message: string;
@@ -30,17 +32,18 @@ const unconfigured: MutationState = {
 };
 
 /** Recomputes `progress` and `stage` from the milestone list. */
-async function recalcProgress(projectId: string) {
-  const rows = await db
+async function recalcProgress(projectId: string, tx: ProjectTransaction, actorId: string) {
+  const rows = await tx
     .select({ status: projectMilestones.status, stage: projectMilestones.stage })
     .from(projectMilestones)
-    .where(eq(projectMilestones.projectId, projectId));
+    .where(eq(projectMilestones.projectId, projectId)).orderBy(asc(projectMilestones.orderIndex));
 
   if (rows.length === 0) return;
   const done = rows.filter((r) => r.status === "done").length;
   const progress = Math.round((done / rows.length) * 100);
   const active = rows.find((r) => r.status !== "done");
-  await db
+  if (progress === 100 || active?.stage !== "planning" || rows.some(r => r.stage !== "planning" && r.status !== "todo")) await recordLifecycle(tx, projectId, "locked", actorId);
+  await tx
     .update(projects)
     .set({
       progress,
@@ -62,19 +65,26 @@ const stageOrder = ["planning", "design", "development", "testing", "review", "c
 /** Managers move the complete project workflow; the client sees the update immediately. */
 export async function setProjectStageAction(formData: FormData) {
   if (!isDatabaseConfigured) return;
-  await requireRole("super_admin", "admin", "pm");
+  const viewer = await requireRole("super_admin", "admin", "pm");
   const parsed = projectStageSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
-  const targetIndex = stageOrder.indexOf(parsed.data.stage);
-  const rows = await db.select({ id: projectMilestones.id, stage: projectMilestones.stage }).from(projectMilestones).where(eq(projectMilestones.projectId, parsed.data.projectId));
-  for (const row of rows) {
-    const index = stageOrder.indexOf(row.stage);
-    const status = parsed.data.stage === "completed" || index < targetIndex ? "done" : index === targetIndex ? "in_progress" : "todo";
-    await db.update(projectMilestones).set({ status }).where(eq(projectMilestones.id, row.id));
-  }
-  await db.update(projects).set({ stage: parsed.data.stage, progress: parsed.data.stage === "completed" ? 100 : Math.round((targetIndex / (stageOrder.length - 1)) * 100), updatedAt: new Date() }).where(eq(projects.id, parsed.data.projectId));
-  revalidatePath("/[locale]/portal", "page");
+  await db.transaction(async tx => {
+    const project = await lockProject(tx, parsed.data.projectId);
+    if (!project || (await lifecycleState(project.id, tx)).cancelled) return;
+    const targetIndex = stageOrder.indexOf(parsed.data.stage);
+    if (project.stage !== "planning" || parsed.data.stage !== "planning") await recordLifecycle(tx, project.id, "locked", viewer.id);
+    const rows = await tx.select({ id: projectMilestones.id, stage: projectMilestones.stage }).from(projectMilestones).where(eq(projectMilestones.projectId, project.id));
+    for (const row of rows) {
+      const index = stageOrder.indexOf(row.stage);
+      const status = parsed.data.stage === "completed" || index < targetIndex ? "done" : index === targetIndex ? "in_progress" : "todo";
+      await tx.update(projectMilestones).set({ status }).where(eq(projectMilestones.id, row.id));
+    }
+    await tx.update(projects).set({ stage: parsed.data.stage, progress: parsed.data.stage === "completed" ? 100 : Math.round((targetIndex / 5) * 100), updatedAt: new Date() }).where(eq(projects.id, project.id));
+  });
+  revalidatePath("/[locale]/portal", "layout");
   revalidatePath("/[locale]/admin", "page");
+  revalidatePath("/[locale]/projects", "page");
+  revalidatePath("/[locale]", "page");
 }
 
 /** Staff move a milestone; the client's progress bar updates automatically. */
@@ -86,19 +96,21 @@ export async function setMilestoneStatusAction(
   const parsed = milestoneSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, message: "Invalid milestone update." };
 
-  await assertCanEditProject(parsed.data.projectId);
-  await db
-    .update(projectMilestones)
-    .set({ status: parsed.data.status })
-    .where(
-      and(
-        eq(projectMilestones.id, parsed.data.milestoneId),
-        eq(projectMilestones.projectId, parsed.data.projectId),
-      ),
-    );
-  await recalcProgress(parsed.data.projectId);
-  revalidatePath("/[locale]/portal", "page");
+  const viewer = await assertCanEditProject(parsed.data.projectId);
+  const changed = await db.transaction(async tx => {
+    const project = await lockProject(tx, parsed.data.projectId);
+    if (!project || (await lifecycleState(project.id, tx)).cancelled) return false;
+    if (project.stage !== "planning") await recordLifecycle(tx, project.id, "locked", viewer.id);
+    const rows = await tx.update(projectMilestones).set({ status: parsed.data.status }).where(and(eq(projectMilestones.id, parsed.data.milestoneId), eq(projectMilestones.projectId, project.id))).returning({ id: projectMilestones.id });
+    if (!rows.length) return false;
+    await recalcProgress(project.id, tx, viewer.id);
+    return true;
+  });
+  if (!changed) return { ok: false, message: "Project is cancelled or milestone was not found." };
+  revalidatePath("/[locale]/portal", "layout");
   revalidatePath("/[locale]/admin", "page");
+  revalidatePath("/[locale]/projects", "page");
+  revalidatePath("/[locale]", "page");
   return { ok: true, message: "Milestone updated." };
 }
 
@@ -128,7 +140,7 @@ export async function postFeedbackAction(
     category: parsed.data.category,
     body: parsed.data.body,
   });
-  revalidatePath("/[locale]/portal", "page");
+  revalidatePath("/[locale]/portal", "layout");
   return { ok: true, message: "Feedback sent." };
 }
 
@@ -153,14 +165,14 @@ export async function postMessageAction(
     senderId: viewer.id,
     body: parsed.data.body,
   });
-  revalidatePath("/[locale]/portal", "page");
+  revalidatePath("/[locale]/portal", "layout");
   return { ok: true, message: "Message sent." };
 }
 
 const mediaSchema = z.object({
   projectId: z.string().uuid(),
   name: z.string().trim().min(1),
-  url: z.string().url("Enter a valid URL."),
+  url: z.string().url("Enter a valid URL.").refine(value => value.startsWith("https://"), "Use an HTTPS URL."),
   kind: z.enum(["image", "video", "demo", "document"]),
   category: z.enum(["design", "document", "contract", "source", "invoice", "media"]),
   visibleToClient: z.coerce.boolean().default(true),
@@ -194,7 +206,9 @@ export async function addProjectMediaAction(
     visibleToClient: parsed.data.visibleToClient,
     uploadedBy: viewer.id,
   });
-  revalidatePath("/[locale]/portal", "page");
+  revalidatePath("/[locale]/portal", "layout");
   revalidatePath("/[locale]/admin", "page");
+  revalidatePath("/[locale]/projects", "page");
+  revalidatePath("/[locale]", "page");
   return { ok: true, message: "Deliverable published." };
 }

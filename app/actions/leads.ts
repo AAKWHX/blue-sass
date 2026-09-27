@@ -9,6 +9,11 @@ import { getViewer, requireRole } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
 import { takeRateLimit } from "@/lib/rate-limit";
 import { estimate, featureCost, type FeatureKey } from "@/lib/pricing";
+import { findServiceTemplate } from "@/lib/service-templates";
+import { isLocale } from "@/lib/i18n/config";
+import { serviceQuotePresets } from "@/lib/service-details";
+import { websitePackage, websitePackageName } from "@/lib/website-packages";
+import { pricingCopy } from "@/lib/i18n/pricing-copy";
 
 export interface LeadState {
   ok: boolean;
@@ -44,6 +49,8 @@ const leadSchema = z.object({
   currency: z.string().default("EUR"),
   message: z.string().trim().max(4000).optional(),
   projectName: z.string().trim().max(120).optional(),
+  templateId: z.string().max(40).optional(),
+  kind: z.string().max(40).optional(),
   domain: z.string().trim().max(160).optional(),
   addOns: z.string().optional(),
   performance: z.string().max(100).optional(),
@@ -112,10 +119,21 @@ export async function submitLeadAction(
   if (features.some((key) => !Object.hasOwn(featureCost, key)) || addOns.some((key) => !["domain", "email", "hosting", "maintenance", "google", "analytics"].includes(key))) {
     return { ok: false, message: "Invalid project options." };
   }
-  const calculated = estimate(data.projectType, features as FeatureKey[], data.speed);
+  const pack = websitePackage(data.kind);
+  if (data.kind && (!pack || pack.type !== data.projectType || pack.features.some(key => !features.includes(key)))) return { ok: false, message: "Invalid website package." };
+  const calculated = estimate(data.projectType, features as FeatureKey[], data.speed, pack);
+  const locale = isLocale(data.locale) ? data.locale : "en";
+  const pricing = pricingCopy(locale);
+  const template = findServiceTemplate(data.templateId, isLocale(data.locale) ? data.locale : "en");
+  if (data.templateId && (!template || serviceQuotePresets[template.service].type !== data.projectType)) return { ok: false, message: "Invalid template." };
   const performance = (data.performance ?? "").split(",").filter(Boolean);
   if (performance.some(key => !["images", "cache", "lazy"].includes(key))) return { ok: false, message: "Invalid performance options." };
   const details = [
+    pack ? `${websitePackageName(pack.id,locale)} (${pack.id})` : "",
+    `${pricing.base}: EUR ${calculated.baseLow}–${calculated.baseHigh}`,
+    `BUILD10: 10% · ${pricing.discount}: EUR ${calculated.discount} · EUR ${calculated.low}–${calculated.high}`,
+    pricing.tax,
+    template ? `Template: ${template.name} (${template.id})` : "",
     data.projectName ? `Project: ${data.projectName}` : "",
     data.domain ? `Domain: ${data.domain}` : "",
     `Delivery: ${data.speed}`,

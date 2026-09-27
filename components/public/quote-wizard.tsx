@@ -16,6 +16,8 @@ import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
 import { serviceCatalog, serviceSlugs, type ServiceSlug } from "@/lib/service-catalog";
 import { serviceQuotePresets } from "@/lib/service-details";
+import { findServiceTemplate } from "@/lib/service-templates";
+import { websitePackage, websitePackageName } from "@/lib/website-packages";
 import { subscriptionAddOns, subscriptionIds, subscriptionPlans, type SubscriptionId } from "@/lib/subscriptions";
 
 const projectTypes: ProjectType[] = ["web", "mobile", "ai", "ecommerce", "erp", "brand"];
@@ -68,15 +70,18 @@ const uiCopy: Record<QuoteLocale, { extras: string; extrasHint: string; project:
   es: { extras: "Extras y suscripciones", extrasHint: "Elija varios servicios. Los precios se muestran antes de enviar.", project: "Nombre del proyecto", projectExample: "p. ej., North Store", domain: "Dominio deseado", save: "Guardar solicitud", deposit: "Depósito de reserva", estimate: "Estimación", paymentOff: "El pago se activará al añadir las claves de los proveedores. Puede guardar ahora sin pagar." },
 };
 
-export function QuoteWizard({ initialType, initialService, initialEmail = "" }: { initialType?: string; initialService?: string; initialEmail?: string; payments: { stripe: boolean; mollie: boolean } }) {
+export function QuoteWizard({ initialType, initialService, initialTemplate, initialKind, initialEmail = "" }: { initialType?: string; initialService?: string; initialTemplate?: string; initialKind?: string; initialEmail?: string; payments: { stripe: boolean; mollie: boolean } }) {
   const { locale, t } = useI18n();
+  const pack = websitePackage(initialKind);
+  const candidate = findServiceTemplate(initialTemplate, locale);
+  const template = candidate?.service === initialService ? candidate : undefined;
   const serviceSlug = serviceSlugs.includes(initialService as ServiceSlug) ? initialService as ServiceSlug : null;
   const servicePreset = serviceSlug ? serviceQuotePresets[serviceSlug] : null;
   const requestedPlan = initialService?.startsWith("subscription-") ? initialService.replace("subscription-", "") as SubscriptionId : null;
   const planId = requestedPlan && subscriptionIds.includes(requestedPlan) ? requestedPlan : null;
-  const resolvedType = servicePreset?.type ?? (projectTypes.includes(initialType as ProjectType) ? initialType as ProjectType : "web");
+  const resolvedType = pack?.type ?? servicePreset?.type ?? (projectTypes.includes(initialType as ProjectType) ? initialType as ProjectType : "web");
   const [type, setType] = useState<ProjectType>(resolvedType);
-  const [features, setFeatures] = useState<FeatureKey[]>(() => servicePreset ? [...servicePreset.features] as FeatureKey[] : (["auth", "i18n"] as FeatureKey[]).filter(key => featuresByType[resolvedType].includes(key)));
+  const [features, setFeatures] = useState<FeatureKey[]>(() => pack ? [...pack.features] : template ? [...template.features] : servicePreset ? [...servicePreset.features] as FeatureKey[] : (["auth", "i18n"] as FeatureKey[]).filter(key => featuresByType[resolvedType].includes(key)));
   const [selectedAddOns, setSelectedAddOns] = useState<AddOn[]>(() => planId ? subscriptionAddOns[planId] as AddOn[] : []);
   const [speed, setSpeed] = useState<Speed>("standard");
   const [step, setStep] = useState(0);
@@ -91,13 +96,15 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
     message: "",
   });
 
-  const result = useMemo(() => estimate(type, features, speed), [type, features, speed]);
-  const availableFeatures = servicePreset ? [...servicePreset.options] as FeatureKey[] : featuresByType[type];
+  const result = useMemo(() => estimate(type, features, speed, pack), [type, features, speed, pack]);
+  const availableFeatures = pack ? [...new Set([...featuresByType[type], ...pack.features])] : servicePreset ? [...servicePreset.options] as FeatureKey[] : featuresByType[type];
 
   function toggleFeature(key: FeatureKey) {
+    if (pack?.features.includes(key)) return;
     setFeatures((prev) => (prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]));
   }
   function chooseType(next: ProjectType) {
+    if (pack) return;
     setType(next);
     setFeatures((previous) => previous.filter((feature) => featuresByType[next].includes(feature)));
   }
@@ -129,6 +136,9 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-backdrop h-80 cyber-grid opacity-40 [mask-image:linear-gradient(black,transparent)]" />
       <div className="container-x relative z-content">
         <SectionHeading eyebrow={t.nav.quote} title={t.quote.title} subtitle={t.quote.subtitle} />
+        {pack && <p className="mt-5 rounded-xl bg-neon-cyan p-4 font-bold">{websitePackageName(pack.id, locale)}</p>}
+        <p className="mt-4 text-sm leading-7 text-ink-low">{t.pricing.promotion} · {t.pricing.terms}</p>
+        {template && <p className="mt-5 rounded-xl border border-black bg-neon-cyan p-4 font-bold">{t.experience.selectedTemplate}: {template.name}</p>}
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4"><BrandLogo /><p className="text-sm text-ink-low" aria-live="polite">{step + 1} / {steps.length}</p></div>
         <div role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={steps.length} aria-label={steps[step]} className="mt-4 flex gap-1">{steps.map((label, i) => <span key={label} className={clsx("h-1.5 flex-1 rounded-full", i <= step ? "bg-neon-blue" : "bg-black/10")} />)}</div>
@@ -138,7 +148,7 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
             <div hidden={step !== 0} className="glass-card p-6">
               <h3 className="text-sm font-bold uppercase tracking-widest text-ink-low">{t.quote.fields.type}</h3>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                {(servicePreset ? [resolvedType] : projectTypes).map((key) => (
+                {(servicePreset || pack ? [resolvedType] : projectTypes).map((key) => (
                   <Button variant="unstyled" size="auto"
                     key={key}
                     type="button"
@@ -183,6 +193,7 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
                       key={key}
                       type="button"
                       onClick={() => toggleFeature(key)}
+                      disabled={pack?.features.includes(key)}
                       aria-pressed={on}
                       className={clsx(
                         "flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-start text-sm transition",
@@ -231,6 +242,9 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
             <form ref={detailsForm} action={formAction} hidden={step < 4} onSubmit={(event) => { if (step !== 5) { event.preventDefault(); goTo(5); } }} className="glass-card space-y-4 p-6">
               <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
               <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="templateId" value={template?.id ?? ""} />
+              <input type="hidden" name="kind" value={pack?.id ?? ""} />
+              {template && <p className="rounded-xl bg-neon-cyan/20 p-4 text-sm font-semibold">{t.experience.selectedTemplate}: {template.name}</p>}
               <input type="hidden" name="projectType" value={type} />
               <input type="hidden" name="services" value={features.join(",")} />
               <input type="hidden" name="budgetEstimate" value={result.low} />
@@ -329,6 +343,7 @@ export function QuoteWizard({ initialType, initialService, initialEmail = "" }: 
                 {formatEUR(result.low, locale)}
               </p>
               <p className="text-sm font-semibold text-ink-low">— {formatEUR(result.high, locale)}</p>
+              <dl className="mt-4 space-y-2 text-xs"><div className="flex justify-between gap-2"><dt>{t.pricing.base}</dt><dd>{formatEUR(result.baseLow,locale)}</dd></div><div className="flex justify-between gap-2"><dt>{t.pricing.discount} · 10%</dt><dd>−{formatEUR(result.discount,locale)}</dd></div></dl><p className="mt-3 text-xs leading-6 text-ink-low">{t.pricing.tax}</p>
 
               <dl className="mt-6 space-y-3 text-sm">
                 <div className="flex items-center justify-between">

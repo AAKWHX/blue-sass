@@ -1,40 +1,4 @@
-import { redirect } from "next/navigation";
-import { ClientDashboard, type DashboardProject } from "@/components/portal/client-dashboard";
-import { PortalNav } from "@/components/portal/portal-nav";
-import { getViewer } from "@/lib/db/access";
-import { getProjectDetail, listViewerLeads, listViewerProjects, summariseProgress } from "@/lib/db/queries";
-
-export const metadata = { title: "Client Portal — Blue Sass" };
-
-/**
- * With a database connected this is the real, per-account dashboard.
- * Without one it falls back to the demo portal so the preview still works.
- */
-export default async function PortalPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-
-
-  const viewer = await getViewer();
-  if (!viewer) redirect(`/${locale}/login`);
-
-  const [rows, orders] = await Promise.all([listViewerProjects(), listViewerLeads(viewer.email)]);
-  const details = await Promise.all(rows.map((row) => getProjectDetail(row.id)));
-
-  const projects: DashboardProject[] = details
-    .filter((d): d is NonNullable<typeof d> => d !== null)
-    .map((detail) => ({ ...detail, summary: summariseProgress(detail) }));
-
-  return <>
-    <PortalNav locale={locale} />
-    <ClientDashboard
-      viewerName={viewer.name ?? viewer.email}
-      viewerCompany={null}
-      projects={projects}
-      orders={orders}
-    />
-  </>;
+import { ProjectList } from "@/components/portal/project-list";
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+ return <ProjectList locale={(await params).locale} filter="all"/>;
 }

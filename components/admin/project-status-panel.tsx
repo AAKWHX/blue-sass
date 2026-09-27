@@ -1,3 +1,4 @@
+import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { FolderKanban } from "lucide-react";
 import { setProjectStageAction } from "@/app/actions/projects";
 import { Button } from "@/components/ui/button";
@@ -16,16 +17,17 @@ const copy = {
   es: { title: "Estado de proyectos", empty: "Aún no hay proyectos.", move: "Mover a" },
 } as const;
 
-export function ProjectStatusPanel({ projects, locale }: { projects: Project[]; locale: string }) {
+export async function ProjectStatusPanel({ projects, locale }: { projects: Project[]; locale: string }) {
   if (!isLocale(locale)) return null;
   const c = copy[locale];
   const t = getDictionary(locale);
+  const states = new Map(await Promise.all(projects.map(async project => [project.id, await lifecycleState(project.id)] as const)));
   return <section className="container-x pt-6"><div className="rounded-3xl border border-black bg-white p-6">
     <h2 className="flex items-center gap-2 text-lg font-bold text-black"><FolderKanban className="size-5 text-neon-blue"/>{c.title}</h2>
     {!projects.length ? <p className="mt-5 text-sm text-ink-low">{c.empty}</p> : <div className="mt-5 space-y-4">{projects.map(project => <article key={project.id} className="rounded-2xl border border-black/15 bg-base p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-bold text-black">{project.name}</h3><p className="mt-1 text-xs text-ink-low">{project.summary}</p></div><StatusBadge status={project.stage} label={t.status[project.stage]}/></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-bold text-black">{project.name}</h3><p className="mt-1 text-xs text-ink-low">{project.summary}</p></div><StatusBadge status={project.stage} label={states.get(project.id)?.cancelled ? t.experience.cancelled : t.status[project.stage]}/></div>
       <ProgressBar value={project.progress} className="mt-4"/>
-      <form action={setProjectStageAction} className="mt-4 flex flex-wrap gap-2"><input type="hidden" name="projectId" value={project.id}/>{stages.map(stage => <Button key={stage} type="submit" name="stage" value={stage} variant="outline" size="sm" disabled={stage === project.stage} className={stage === project.stage ? "border-neon-blue bg-neon-cyan/25" : ""}>{c.move} {t.status[stage]}</Button>)}</form>
+      <form action={setProjectStageAction} className="mt-4 flex flex-wrap gap-2"><input type="hidden" name="projectId" value={project.id}/>{stages.map(stage => <Button key={stage} type="submit" name="stage" value={stage} variant="outline" size="sm" disabled={stage === project.stage || states.get(project.id)?.cancelled} className={stage === project.stage ? "border-neon-blue bg-neon-cyan/25" : ""}>{c.move} {t.status[stage]}</Button>)}</form>
     </article>)}</div>}
   </div></section>;
 }

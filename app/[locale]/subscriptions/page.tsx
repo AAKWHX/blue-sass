@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpLeft, Check, Clock3, Headphones, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { isLocale } from "@/lib/i18n";
+import { getDictionary, isLocale } from "@/lib/i18n";
+import { subscriptionDetails } from "@/lib/subscription-details";
 import { subscriptionPlans } from "@/lib/subscriptions";
 
 const copy = {
@@ -22,6 +23,7 @@ export default async function SubscriptionsPage({ params }: { params: Promise<{ 
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const c = copy[locale];
+  const details = getDictionary(locale).experience;
   const plans = subscriptionPlans(locale);
   return <main className="bg-base">
     <section className="container-x py-16 text-center sm:py-24">
@@ -30,16 +32,17 @@ export default async function SubscriptionsPage({ params }: { params: Promise<{ 
       <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-ink-low">{c.subtitle}</p>
       <div className="mt-14 grid gap-5 lg:grid-cols-3">
         {plans.map((plan, index) => <article key={plan.id} className={`relative flex flex-col rounded-3xl border border-black p-7 text-start ${index === 1 ? "bg-neon-cyan" : "bg-white"}`}>
-          {index === 1 && <span className="absolute end-5 top-5 rounded-full bg-black px-3 py-1 text-xs font-bold text-white">{c.popular}</span>}
           <h2 className="text-3xl font-bold text-black">{plan.name}</h2>
           <p className="mt-3 min-h-16 leading-7 text-black/65">{plan.description}</p>
           <p className="mt-7 text-black"><strong className="text-5xl font-black">€{plan.price}</strong> <span className="text-sm">/ {c.monthly}</span></p>
+          <h3 className="mt-7 font-bold">{details.receive}</h3><ul className="mt-3 space-y-3">{subscriptionDetails[locale][index].map(point => <li key={point} className="flex gap-2 text-sm leading-7 text-black/75"><Check className="mt-1 size-4 shrink-0"/>{point}</li>)}</ul>
           <ul className="mt-8 space-y-3">{plan.features.map(feature => <li key={feature} className="flex gap-2 text-sm font-semibold text-black"><Check className="mt-0.5 size-4 shrink-0" />{feature}</li>)}</ul>
           <dl className="mt-8 grid gap-3 border-t border-black/15 pt-6 text-sm"><div className="flex items-center justify-between gap-3"><dt className="flex items-center gap-2 text-black/60"><Clock3 className="size-4" />{c.response}</dt><dd className="font-bold text-black">{plan.response}</dd></div><div className="flex items-center justify-between gap-3"><dt className="flex items-center gap-2 text-black/60"><Headphones className="size-4" />{c.hours}</dt><dd className="font-bold text-black">{plan.hours}</dd></div></dl>
           <Button asChild variant={index === 1 ? "unstyled" : "neon"} className={`mt-8 w-full ${index === 1 ? "bg-black text-white hover:bg-black/80" : ""}`}><Link href={`/${locale}/quote?type=web&service=subscription-${plan.id}`}>{c.choose}<ArrowUpLeft className="size-4 flip-x" /></Link></Button>
         </article>)}
       </div>
     </section>
+    <section className="container-x pb-12"><h2 className="text-2xl font-bold">{details.limits}</h2><p className="mt-4 max-w-4xl text-sm leading-8 text-ink-low">{details.planLimits}</p><p className="mt-3 font-semibold">{details.planRequestNote}</p></section>
     <section className="bg-black py-14 text-white"><div className="container-x flex flex-col items-center justify-between gap-6 text-center md:flex-row md:text-start"><div><ShieldCheck className="size-8 text-neon-cyan"/><h2 className="mt-4 text-2xl font-bold text-white">{c.compare}</h2><p className="mt-3 max-w-3xl text-sm leading-7 text-white/60">{c.note}</p></div><Button asChild variant="unstyled" className="shrink-0 bg-neon-cyan px-6 py-3 font-bold text-black"><Link href={`/${locale}/contact`}>{c.talk}</Link></Button></div></section>
   </main>;
 }

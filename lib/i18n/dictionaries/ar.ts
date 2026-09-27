@@ -1,6 +1,13 @@
 import type { Dictionary } from "./en";
 
+import { experience } from "../experience";
+import { pricingCopy } from "../pricing-copy";
+import { deliveryDetails } from "../delivery-details";
+
 const ar: Dictionary = {
+  experience: experience("ar"),
+  pricing: pricingCopy("ar"),
+  deliveryDetails: deliveryDetails["ar"],
   brand: { name: "بلو ساس", product: "Blue Sass", tagline: "نحوّل فكرتك إلى منتج رقمي واضح وسهل الاستخدام." },
   nav: {
     menu: "القائمة",
@@ -111,7 +118,7 @@ const ar: Dictionary = {
       notes: "أي تفاصيل إضافية؟",
     },
     types: { web: "منصة ويب", mobile: "تطبيق جوال", ai: "نظام ذكاء اصطناعي", ecommerce: "متجر إلكتروني", erp: "أنظمة ERP داخلية", brand: "هوية وتصميم" },
-    speeds: { relaxed: "مرن (أفضل سعر)", standard: "قياسي", rush: "عاجل (+40%)" },
+    speeds: { relaxed: "جدول مرن", standard: "قياسي", rush: "عاجل (+40%)" },
     features: {
       auth: "تسجيل الدخول والصلاحيات",
       payments: "المدفوعات والفوترة",

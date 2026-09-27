@@ -1,6 +1,13 @@
 import type { Dictionary } from "./en";
 
+import { experience } from "../experience";
+import { pricingCopy } from "../pricing-copy";
+import { deliveryDetails } from "../delivery-details";
+
 const es: Dictionary = {
+  experience: experience("es"),
+  pricing: pricingCopy("es"),
+  deliveryDetails: deliveryDetails["es"],
   brand: { name: "Blue Sass", product: "Studio", tagline: "Productos digitales preparados para crecer." },
   nav: { menu: "Menú", home: "Inicio", services: "Servicios", portfolio: "Portafolio", process: "Proceso", quote: "Presupuesto", portal: "Portal del cliente", admin: "Administración / ERP", contact: "Contacto" },
   common: {
@@ -61,7 +68,7 @@ const es: Dictionary = {
     title: "Calculadora de proyecto", subtitle: "Define tu alcance y obtén presupuesto y plazo orientativos en menos de un minuto.",
     fields: { name: "Nombre completo", email: "Correo corporativo", company: "Empresa", type: "Tipo de proyecto", features: "Módulos y funciones", timeline: "Ritmo de entrega", budget: "Rango de presupuesto", notes: "¿Algo más que debamos saber?" },
     types: { web: "Plataforma web", mobile: "App móvil", ai: "Sistema de IA", ecommerce: "E-commerce", erp: "ERP / herramientas internas", brand: "Marca y diseño" },
-    speeds: { relaxed: "Flexible (mejor precio)", standard: "Estándar", rush: "Urgente (+40 %)" },
+    speeds: { relaxed: "Calendario flexible", standard: "Estándar", rush: "Urgente (+40 %)" },
     features: { auth: "Autenticación y roles", payments: "Pagos y facturación", dashboard: "Panel analítico", i18n: "Multiidioma (7)", cms: "Gestión de contenidos", api: "API pública", ai: "Asistente de IA", realtime: "Tiempo real y chat", prototype: "Prototipo interactivo de interfaz", identity: "Logotipo y sistema de identidad", appstore: "Preparación y publicación en tiendas", offline: "Modo sin conexión", catalog: "Catálogo de productos e inventario", automation: "Automatización de flujos e integraciones" },
     estimate: "Estimación orientativa", weeks: "semanas", submit: "Solicitar propuesta detallada",
     success: "Solicitud recibida. Nuestro equipo responde en un día laborable.", disclaimer: "Las estimaciones son orientativas y se confirman tras una llamada de descubrimiento.",

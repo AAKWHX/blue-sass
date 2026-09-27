@@ -1,6 +1,13 @@
 import type { Dictionary } from "./en";
 
+import { experience } from "../experience";
+import { pricingCopy } from "../pricing-copy";
+import { deliveryDetails } from "../delivery-details";
+
 const nl: Dictionary = {
+  experience: experience("nl"),
+  pricing: pricingCopy("nl"),
+  deliveryDetails: deliveryDetails["nl"],
   brand: { name: "Blue Sass", product: "Studio", tagline: "Digitale producten die meegroeien." },
   nav: { menu: "Menu", home: "Home", services: "Diensten", portfolio: "Portfolio", process: "Werkwijze", quote: "Offerte", portal: "Klantportaal", admin: "Beheer / ERP", contact: "Contact" },
   common: {
@@ -61,7 +68,7 @@ const nl: Dictionary = {
     title: "Projectcalculator", subtitle: "Stel uw scope samen en ontvang binnen een minuut een indicatief budget en tijdlijn.",
     fields: { name: "Volledige naam", email: "Zakelijk e-mailadres", company: "Bedrijf", type: "Projecttype", features: "Modules & functies", timeline: "Levertempo", budget: "Budgetrange", notes: "Nog iets dat we moeten weten?" },
     types: { web: "Webplatform", mobile: "Mobiele app", ai: "AI-systeem", ecommerce: "E-commerce", erp: "ERP / interne tools", brand: "Merk & design" },
-    speeds: { relaxed: "Rustig (beste prijs)", standard: "Standaard", rush: "Spoed (+40%)" },
+    speeds: { relaxed: "Flexibele planning", standard: "Standaard", rush: "Spoed (+40%)" },
     features: { auth: "Authenticatie & rollen", payments: "Betalingen & facturatie", dashboard: "Analytics-dashboard", i18n: "Meertalig (7)", cms: "Contentbeheer", api: "Publieke API", ai: "AI-assistent", realtime: "Realtime & chat", prototype: "Interactief interfaceprototype", identity: "Logo en huisstijlsysteem", appstore: "Appstore-voorbereiding en publicatie", offline: "Offline modus", catalog: "Productcatalogus en voorraad", automation: "Workflowautomatisering en koppelingen" },
     estimate: "Indicatieve schatting", weeks: "weken", submit: "Vraag een voorstel aan",
     success: "Aanvraag ontvangen. We reageren binnen één werkdag.", disclaimer: "Schattingen zijn indicatief en worden bevestigd na een discovery-gesprek.",

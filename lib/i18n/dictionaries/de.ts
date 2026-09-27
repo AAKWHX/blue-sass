@@ -1,6 +1,13 @@
 import type { Dictionary } from "./en";
 
+import { experience } from "../experience";
+import { pricingCopy } from "../pricing-copy";
+import { deliveryDetails } from "../delivery-details";
+
 const de: Dictionary = {
+  experience: experience("de"),
+  pricing: pricingCopy("de"),
+  deliveryDetails: deliveryDetails["de"],
   brand: { name: "Blue Sass", product: "Studio", tagline: "Digitale Produkte für nachhaltiges Wachstum." },
   nav: { menu: "Menü", home: "Start", services: "Leistungen", portfolio: "Portfolio", process: "Vorgehen", quote: "Angebot", portal: "Kundenportal", admin: "Verwaltung / ERP", contact: "Kontakt" },
   common: {
@@ -61,7 +68,7 @@ const de: Dictionary = {
     title: "Projektrechner", subtitle: "Scope zusammenstellen und in unter einer Minute Budget- und Zeitindikation erhalten.",
     fields: { name: "Vollständiger Name", email: "Geschäftliche E-Mail", company: "Unternehmen", type: "Projekttyp", features: "Module & Funktionen", timeline: "Liefertempo", budget: "Budgetrahmen", notes: "Weitere Hinweise?" },
     types: { web: "Webplattform", mobile: "Mobile App", ai: "KI-System", ecommerce: "E-Commerce", erp: "ERP / interne Tools", brand: "Marke & Design" },
-    speeds: { relaxed: "Entspannt (bester Preis)", standard: "Standard", rush: "Eilig (+40 %)" },
+    speeds: { relaxed: "Flexibler Zeitplan", standard: "Standard", rush: "Eilig (+40 %)" },
     features: { auth: "Authentifizierung & Rollen", payments: "Zahlungen & Abrechnung", dashboard: "Analytics-Dashboard", i18n: "Mehrsprachig (7)", cms: "Content-Management", api: "Öffentliche API", ai: "KI-Assistent", realtime: "Realtime & Chat", prototype: "Interaktiver Oberflächenprototyp", identity: "Logo und Markensystem", appstore: "App-Store-Vorbereitung und Veröffentlichung", offline: "Offline-Modus", catalog: "Produktkatalog und Bestand", automation: "Workflow-Automatisierung und Anbindungen" },
     estimate: "Richtwert", weeks: "Wochen", submit: "Detailliertes Angebot anfordern",
     success: "Anfrage erhalten. Wir antworten innerhalb eines Werktags.", disclaimer: "Schätzungen sind unverbindlich und werden nach dem Discovery-Call bestätigt.",
