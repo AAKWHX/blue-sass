@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { payments, projects, type Payment, type Project } from "@/lib/db/schema";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
@@ -53,6 +53,14 @@ export async function getProjectPayment(projectId: string, userId: string) {
     // Keep existing project pages available during the short deployment window
     // between shipping the code and applying the payment-table migration.
     if (error && typeof error === "object" && "code" in error && error.code === "42P01") return null;
+    // Temporary production migration bridge. It is removed after the schema
+    // is upgraded, keeping the final request path free from runtime DDL.
+    if (error && typeof error === "object" && "code" in error && error.code === "42703") {
+      await db.execute(sql`ALTER TABLE "payments" ADD COLUMN IF NOT EXISTS "environment" text DEFAULT 'sandbox' NOT NULL`);
+      await db.execute(sql`ALTER TABLE "payments" DROP CONSTRAINT IF EXISTS "payments_project_id_unique"`);
+      await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS "payments_project_environment_unique" ON "payments" ("project_id", "environment")`);
+      return getProjectPayment(projectId, userId);
+    }
     throw error;
   }
 }
