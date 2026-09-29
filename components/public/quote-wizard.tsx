@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { CheckCircle2, Clock, CreditCard, Globe2, Loader2, Save, Wallet } from "lucide-react";
+import { CheckCircle2, Clock, CreditCard, Loader2, Save, Wallet } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { SectionHeading } from "@/components/ui/primitives";
 import { estimate, formatEUR, type FeatureKey, type ProjectType, type Speed } from "@/lib/pricing";
@@ -70,7 +70,7 @@ const uiCopy: Record<QuoteLocale, { extras: string; extrasHint: string; project:
   es: { extras: "Extras y suscripciones", extrasHint: "Elija varios servicios. Los precios se muestran antes de enviar.", project: "Nombre del proyecto", projectExample: "p. ej., North Store", domain: "Dominio deseado", save: "Guardar solicitud", deposit: "Depósito de reserva", estimate: "Estimación", paymentOff: "El pago se activará al añadir las claves de los proveedores. Puede guardar ahora sin pagar." },
 };
 
-export function QuoteWizard({ initialType, initialService, initialTemplate, initialKind, initialEmail = "" }: { initialType?: string; initialService?: string; initialTemplate?: string; initialKind?: string; initialEmail?: string; payments: { stripe: boolean; mollie: boolean } }) {
+export function QuoteWizard({ initialType, initialService, initialTemplate, initialKind, initialEmail = "", payments }: { initialType?: string; initialService?: string; initialTemplate?: string; initialKind?: string; initialEmail?: string; payments: { paypal: boolean } }) {
   const { locale, t } = useI18n();
   const pack = websitePackage(initialKind);
   const candidate = findServiceTemplate(initialTemplate, locale);
@@ -121,6 +121,15 @@ export function QuoteWizard({ initialType, initialService, initialTemplate, init
     tr: ["İleri", "Projeyi incele", "Düzenle", "Ödeme şu anda kullanılamıyor. Ödeme yapmadan kaydedebilirsiniz."],
     fr: ["Suivant", "Vérifier le projet", "Modifier", "Le paiement est indisponible. Vous pouvez enregistrer sans payer."],
     es: ["Siguiente", "Revisar proyecto", "Editar", "El pago no está disponible. Puede guardar sin pagar."],
+  }[locale];
+  const paypalReady = {
+    ar: "احفظ المشروع أولًا، ثم ادفع بأمان عبر PayPal من لوحة العميل.",
+    en: "Save the project first, then pay securely with PayPal from your client dashboard.",
+    nl: "Sla het project eerst op en betaal daarna veilig met PayPal via uw klantdashboard.",
+    de: "Speichern Sie das Projekt zuerst und bezahlen Sie danach sicher mit PayPal im Kundenportal.",
+    tr: "Önce projeyi kaydedin, ardından müşteri panelinden PayPal ile güvenle ödeme yapın.",
+    fr: "Enregistrez d’abord le projet, puis payez avec PayPal depuis votre espace client.",
+    es: "Guarde primero el proyecto y después pague de forma segura con PayPal desde el panel de cliente.",
   }[locale];
   const steps = [t.quote.fields.type, copy.extras, t.quote.fields.features, performanceCopy[locale][0], copy.project, controls[1]];
   const priceLabel = (key: AddOn) => `${formatEUR(addOnPrice[key].amount, locale)} · ${billingPeriods[locale][addOnPrice[key].period]}`;
@@ -380,11 +389,10 @@ export function QuoteWizard({ initialType, initialService, initialTemplate, init
               <p className="mt-6 border-t border-line pt-4 text-[11px] leading-relaxed text-ink-low">
                 {t.quote.disclaimer}
               </p>
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                <Button type="button" variant="outline" disabled className="gap-2"><CreditCard className="size-4" />Stripe</Button>
-                <Button type="button" variant="outline" disabled className="gap-2"><Globe2 className="size-4" />Mollie</Button>
+              <div className="mt-5 grid gap-2">
+                <Button type="button" variant="outline" disabled className="gap-2"><CreditCard className="size-4" />PayPal Checkout</Button>
               </div>
-              <p className="mt-3 text-center text-xs text-ink-low">{controls[3]}</p>
+              <p className="mt-3 text-center text-xs text-ink-low">{payments.paypal ? paypalReady : controls[3]}</p>
             </div>
           </aside>
         </div>

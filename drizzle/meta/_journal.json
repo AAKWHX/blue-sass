@@ -8,6 +8,13 @@
       "when": 1788689256480,
       "tag": "0000_lumpy_william_stryker",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790643695910,
+      "tag": "0001_paypal_payments",
+      "breakpoints": true
     }
   ]
 }

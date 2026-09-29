@@ -19,7 +19,6 @@ export default async function QuotePage({ params, searchParams }: { params: Prom
   const plan = service?.replace(/^subscription-/, "") as SubscriptionId;
   if (service?.startsWith("subscription-") && subscriptionIds.includes(plan)) return <SubscriptionRequest id={plan}/>;
   return <QuoteWizard initialType={type} initialService={service} initialTemplate={template} initialKind={kind} initialEmail={viewer.email} payments={{
-    stripe: Boolean(process.env.STRIPE_SECRET_KEY),
-    mollie: Boolean(process.env.MOLLIE_API_KEY),
+    paypal: Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
   }} />;
 }

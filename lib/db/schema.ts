@@ -75,6 +75,8 @@ export const leadStatus = pgEnum("lead_status", [
 
 export const mediaKind = pgEnum("media_kind", ["image", "video", "demo", "document"]);
 
+export const paymentStatus = pgEnum("payment_status", ["pending", "paid", "failed"]);
+
 /* ------------------------------------------------------------------ *
  * Auth.js core tables (Drizzle adapter contract)
  * ------------------------------------------------------------------ */
@@ -253,6 +255,41 @@ export const messages = pgTable(
   (t) => [index("messages_project_idx").on(t.projectId, t.createdAt)],
 );
 
+/**
+ * One authoritative payment record per project. Provider secrets and raw
+ * PayPal payloads are deliberately never persisted here.
+ */
+export const payments = pgTable(
+  "payments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" })
+      .unique(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    provider: text("provider").notNull().default("paypal"),
+    providerOrderId: text("provider_order_id").unique(),
+    providerCaptureId: text("provider_capture_id").unique(),
+    status: paymentStatus("status").notNull().default("pending"),
+    /** Integer minor units avoid floating-point rounding in payment checks. */
+    amountCents: integer("amount_cents").notNull(),
+    currency: text("currency").notNull().default("EUR"),
+    attempt: integer("attempt").notNull().default(1),
+    failureCode: text("failure_code"),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("payments_project_idx").on(t.projectId),
+    index("payments_user_idx").on(t.userId),
+    index("payments_status_idx").on(t.status),
+  ],
+);
+
 /** Public quote form — no account required. */
 export const leads = pgTable(
   "leads",
@@ -293,6 +330,7 @@ export type Milestone = typeof projectMilestones.$inferSelect;
 export type ProjectFile = typeof projectFiles.$inferSelect;
 export type FeedbackRow = typeof feedback.$inferSelect;
 export type MessageRow = typeof messages.$inferSelect;
+export type Payment = typeof payments.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 
@@ -304,3 +342,4 @@ export type FeedbackCategory = (typeof feedbackCategory.enumValues)[number];
 export type Visibility = (typeof projectVisibility.enumValues)[number];
 export type MediaKind = (typeof mediaKind.enumValues)[number];
 export type LeadStatus = (typeof leadStatus.enumValues)[number];
+export type PaymentStatus = (typeof paymentStatus.enumValues)[number];
