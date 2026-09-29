@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface ScrollExpandMediaProps {
   mediaSrc: string;
@@ -12,6 +13,7 @@ interface ScrollExpandMediaProps {
   title: string;
   eyebrow?: string;
   scrollToExpand: string;
+  titleClassName?: string;
   children: ReactNode;
 }
 
@@ -23,6 +25,7 @@ export function ScrollExpandMedia({
   title,
   eyebrow,
   scrollToExpand,
+  titleClassName,
   children,
 }: ScrollExpandMediaProps) {
   const reduceMotion = useReducedMotion();
@@ -107,7 +110,7 @@ export function ScrollExpandMedia({
   const remainingTitle = words.join(" ");
   const visibleProgress = reduceMotion ? 1 : progress;
   const visibleExpanded = Boolean(reduceMotion) || expanded;
-  const startScale = mobile ? 0.58 : 0.34;
+  const startScale = mobile ? 0.76 : 0.64;
   const scale = startScale + visibleProgress * (1 - startScale);
   const titleShift = visibleProgress * (mobile ? 62 : 48);
 
@@ -117,21 +120,25 @@ export function ScrollExpandMedia({
         <motion.div
           aria-hidden
           className="pointer-events-none absolute inset-0 z-backdrop"
-          animate={{ opacity: 0.82 - visibleProgress * 0.64, scale: 1 + visibleProgress * 0.08 }}
+          animate={{ opacity: 0.46 - visibleProgress * 0.28, scale: 1 + visibleProgress * 0.08 }}
           transition={{ duration: 0.12, ease: "linear" }}
         >
-          <Image src={bgImageSrc} alt={backgroundAlt} fill priority sizes="100vw" className="object-cover opacity-75" />
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,.86),rgba(232,240,255,.48)_52%,rgba(255,255,255,.86))]" />
+          <Image src={bgImageSrc} alt={backgroundAlt} fill priority sizes="100vw" className="object-cover opacity-55" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,.78),rgba(232,240,255,.34)_52%,rgba(255,255,255,.78))]" />
         </motion.div>
 
         <div className="absolute inset-0 z-content">
           <motion.div
-            className="absolute start-1/2 top-1/2 h-[min(72vh,720px)] w-[min(92vw,1180px)] overflow-hidden rounded-[2rem] border border-black/15 bg-white/85 shadow-[0_30px_100px_rgba(20,68,130,.24)]"
+            className="absolute left-1/2 top-1/2 h-[min(72vh,720px)] w-[min(92vw,1180px)] overflow-hidden rounded-[2rem] border border-black/15 bg-white/45 shadow-[0_30px_100px_rgba(20,68,130,.24)] backdrop-blur-sm"
             style={{ transform: `translate(-50%, -50%) scale(${scale})` }}
           >
-            <Image src={mediaSrc} alt={mediaAlt} fill priority sizes="(max-width: 768px) 92vw, 1180px" className="object-contain p-3 sm:p-8" />
-            <motion.div className="absolute inset-0 bg-black" animate={{ opacity: 0.12 - visibleProgress * 0.1 }} transition={{ duration: 0.12 }} />
+            <Image src={mediaSrc} alt={mediaAlt} fill priority sizes="(max-width: 768px) 92vw, 1180px" className="object-contain p-2 sm:p-5" />
+            <motion.div className="absolute inset-0 bg-white" animate={{ opacity: 0.08 - visibleProgress * 0.06 }} transition={{ duration: 0.12 }} />
           </motion.div>
+
+          <motion.span aria-hidden className="absolute left-[10%] top-[22%] size-20 rounded-full border border-neon-blue/35" animate={reduceMotion ? undefined : { rotate: [0, 180, 360], scale: [1, 1.12, 1] }} transition={{ duration: 12, repeat: Infinity, ease: "linear" }} />
+          <motion.span aria-hidden className="absolute bottom-[18%] right-[12%] size-12 rounded-[1rem] bg-neon-cyan/55" animate={reduceMotion ? undefined : { rotate: [0, -18, 0], y: [0, -10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+          <motion.span aria-hidden className="absolute right-[20%] top-[19%] size-3 rounded-full bg-neon-blue shadow-[0_0_28px_rgba(36,115,255,.7)]" animate={reduceMotion ? undefined : { scale: [1, 1.8, 1], opacity: [0.55, 1, 0.55] }} transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }} />
 
           <div className="pointer-events-none absolute inset-0 grid place-items-center px-5 text-center">
             <div className="w-full">
@@ -143,10 +150,10 @@ export function ScrollExpandMedia({
                   {eyebrow}
                 </motion.p>
               ) : null}
-              <div className="space-y-2 text-[clamp(2.4rem,7vw,7.4rem)] font-black leading-[.92] tracking-[-.055em] text-black">
+              <motion.div className={cn("space-y-2 text-[clamp(2.4rem,7vw,7.4rem)] font-black leading-[.92] tracking-[-.055em] text-black [text-shadow:0_2px_0_rgba(255,255,255,.9),0_18px_50px_rgba(20,68,130,.16)]", titleClassName)} animate={reduceMotion ? undefined : { y: [0, -5, 0] }} transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}>
                 <motion.h1 style={{ transform: `translateX(${-titleShift}vw)` }}>{firstWord}</motion.h1>
                 <motion.p style={{ transform: `translateX(${titleShift}vw)` }}>{remainingTitle}</motion.p>
-              </div>
+              </motion.div>
             </div>
           </div>
 

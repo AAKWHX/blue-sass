@@ -29,6 +29,7 @@ export function Hero() {
       title={t.hero.title}
       eyebrow={`Blue Sass · ${labels.studio}`}
       scrollToExpand={labels.scroll}
+      titleClassName={locale === "ar" ? "text-[clamp(2.15rem,5.35vw,5.9rem)] leading-[1.06] tracking-[-.035em]" : undefined}
     >
       <div className="grid items-center gap-8 rounded-[2rem] border border-black/15 bg-white/90 p-6 shadow-xl shadow-blue-950/10 sm:p-10 lg:grid-cols-[1.15fr_.85fr]">
         <div>
