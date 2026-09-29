@@ -1,50 +1,11 @@
 import "server-only";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { payments, projects, type Payment, type Project } from "@/lib/db/schema";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { reservationDeposit, type ProjectType } from "@/lib/pricing";
 
 const projectTypes = new Set<ProjectType>(["web", "mobile", "ai", "ecommerce", "erp", "brand"]);
-
-let schemaSetup: Promise<void> | null = null;
-
-/** Temporary deployment bridge: production has no database CLI connection.
- * This creates only the new payment objects, idempotently, through the same
- * trusted server connection used by the app. Removed after the migration runs.
- */
-async function ensurePaymentsSchema() {
-  if (schemaSetup) return schemaSetup;
-  schemaSetup = (async () => {
-    await db.execute(sql.raw(`DO $$ BEGIN
-      CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed');
-    EXCEPTION WHEN duplicate_object THEN NULL; END $$`));
-    await db.execute(sql.raw(`CREATE TABLE IF NOT EXISTS payments (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-      project_id uuid NOT NULL UNIQUE REFERENCES projects(id) ON DELETE CASCADE,
-      user_id uuid NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-      provider text DEFAULT 'paypal' NOT NULL,
-      provider_order_id text UNIQUE,
-      provider_capture_id text UNIQUE,
-      status payment_status DEFAULT 'pending' NOT NULL,
-      amount_cents integer NOT NULL,
-      currency text DEFAULT 'EUR' NOT NULL,
-      attempt integer DEFAULT 1 NOT NULL,
-      failure_code text,
-      paid_at timestamp with time zone,
-      created_at timestamp with time zone DEFAULT now() NOT NULL,
-      updated_at timestamp with time zone DEFAULT now() NOT NULL
-    )`));
-    await db.execute(sql.raw("CREATE INDEX IF NOT EXISTS payments_project_idx ON payments (project_id)"));
-    await db.execute(sql.raw("CREATE INDEX IF NOT EXISTS payments_user_idx ON payments (user_id)"));
-    await db.execute(sql.raw("CREATE INDEX IF NOT EXISTS payments_status_idx ON payments (status)"));
-    await db.execute(sql.raw("ALTER TABLE payments ENABLE ROW LEVEL SECURITY"));
-  })().catch((error) => {
-    schemaSetup = null;
-    throw error;
-  });
-  return schemaSetup;
-}
 
 export class PaymentAccessError extends Error {
   constructor(message = "Payment is not available for this project.") {
@@ -79,7 +40,6 @@ export function projectPaymentAmount(project: Project) {
 
 export async function getProjectPayment(projectId: string, userId: string) {
   if (!isDatabaseConfigured) return null;
-  await ensurePaymentsSchema();
   try {
     const [row] = await db
       .select({ payment: payments })
