@@ -55,7 +55,7 @@ export async function requireRole(...allowed: AppRole[]): Promise<Viewer> {
 
 export const STAFF_ROLES: AppRole[] = ["super_admin", "admin", "pm", "employee"];
 export const isStaff = (role: AppRole) => STAFF_ROLES.includes(role);
-export const isReadOnlyAssistant = (viewer: Viewer) => viewer.email.toLowerCase() === "al3rab@bluesass.com";
+export const isReadOnlyAssistant = (viewer: Viewer) => viewer.email.toLowerCase() === "al3rab@bluesass.nl";
 export function assertCanWrite(viewer: Viewer) {
   if (isReadOnlyAssistant(viewer)) throw new AuthorisationError("This account has read-only access.");
 }

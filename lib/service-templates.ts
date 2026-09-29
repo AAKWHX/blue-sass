@@ -20,6 +20,7 @@ const features: FeatureKey[][] = [
 export function serviceTemplates(locale: Locale, service?: ServiceSlug) {
  return names[locale].map((name, index) => ({ id: `${serviceSlugs[Math.floor(index / 2)]}-${index % 2 + 1}`, service: serviceSlugs[Math.floor(index / 2)], name, features: features[index], variant: index % 2 })).filter(item => !service || item.service === service);
 }
+export type ServiceTemplate = ReturnType<typeof serviceTemplates>[number];
 export function findServiceTemplate(id: string | undefined, locale: Locale) {
  return serviceTemplates(locale).find(item => item.id === id);
 }

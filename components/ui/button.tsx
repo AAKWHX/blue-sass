@@ -8,16 +8,15 @@ import { cn } from "@/lib/utils";
 /**
  * shadcn Button, restyled onto the AWWA neon system.
  *
- * `neon` and `ghostNeon` reproduce the previous .btn-primary / .btn-ghost
- * exactly (animated gradient + shimmer sweep) so swapping <a>/<button> tags
- * for this component changed no visuals.
+ * `neon` is the site's high-emphasis shiny CTA. Keeping it as a variant means
+ * links, form actions and navigation CTAs share one accessible implementation.
  */
 const buttonVariants = cva(
   "relative inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold tracking-tight transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        neon: "btn-primary",
+        neon: "shiny-cta",
         ghostNeon: "btn-ghost",
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
