@@ -7,6 +7,14 @@ const PAYPAL_BASE_URLS = {
 
 type PayPalEnvironment = keyof typeof PAYPAL_BASE_URLS;
 
+export function getPayPalEnvironment(): PayPalEnvironment {
+  const environment = process.env.PAYPAL_ENV?.trim() || "sandbox";
+  if (!(environment in PAYPAL_BASE_URLS)) {
+    throw new PayPalConfigurationError("PAYPAL_ENV must be either sandbox or live.");
+  }
+  return environment as PayPalEnvironment;
+}
+
 export class PayPalConfigurationError extends Error {
   constructor(message = "PayPal is not configured.") {
     super(message);
@@ -28,7 +36,7 @@ export class PayPalApiError extends Error {
 function configuration() {
   const clientId = process.env.PAYPAL_CLIENT_ID?.trim();
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET?.trim();
-  const environment = (process.env.PAYPAL_ENV?.trim() || "sandbox") as PayPalEnvironment;
+  const environment = getPayPalEnvironment();
 
   if (!clientId || !clientSecret) throw new PayPalConfigurationError();
   if (!(environment in PAYPAL_BASE_URLS)) {
@@ -107,6 +115,7 @@ export interface PayPalCapture {
 export interface PayPalOrder {
   id: string;
   status: string;
+  intent?: string;
   purchase_units?: Array<{
     custom_id?: string;
     amount?: { currency_code?: string; value?: string };
@@ -175,9 +184,14 @@ export function verifiedCompletedCapture(
   order: PayPalOrder,
   expected: { orderId: string; paymentId: string; amountCents: number; currency: string },
 ) {
-  if (order.id !== expected.orderId || order.status !== "COMPLETED") return null;
-  const unit = order.purchase_units?.find((item) => item.custom_id === expected.paymentId);
-  const capture = unit?.payments?.captures?.find((item) => item.status === "COMPLETED");
+  if (order.id !== expected.orderId || order.status !== "COMPLETED" || order.intent !== "CAPTURE") return null;
+  if (order.purchase_units?.length !== 1) return null;
+  const unit = order.purchase_units[0];
+  if (unit.custom_id !== expected.paymentId) return null;
+  const captures = unit.payments?.captures ?? [];
+  if (captures.length !== 1) return null;
+  const capture = captures[0];
+  if (capture.status !== "COMPLETED") return null;
   if (!unit || !capture?.id) return null;
 
   const currency = capture.amount?.currency_code ?? unit.amount?.currency_code;

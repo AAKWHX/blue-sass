@@ -116,7 +116,7 @@ export function PayPalCheckout({
     <div className="space-y-4">
       <Script
         id="paypal-checkout-sdk"
-        src={`https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(currency)}&intent=capture&components=buttons`}
+        src={`https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(currency)}&intent=capture&components=buttons&enable-funding=card`}
         strategy="afterInteractive"
         onLoad={() => void renderButtons()}
         onReady={() => void renderButtons()}

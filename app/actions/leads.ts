@@ -18,6 +18,7 @@ import { pricingCopy } from "@/lib/i18n/pricing-copy";
 export interface LeadState {
   ok: boolean;
   message: string;
+  projectId?: string;
   fieldErrors?: Record<string, string>;
 }
 
@@ -145,7 +146,7 @@ export async function submitLeadAction(
   const now = new Date();
   const deadline = new Date(now.getTime() + calculated.weeks * 7 * 86_400_000);
   const titles = milestoneTitles[data.locale] ?? milestoneTitles.en;
-  await db.transaction(async (tx) => {
+  const projectId = await db.transaction(async (tx) => {
     await tx.insert(leads).values({
       name: data.name, email: data.email, company: data.company || null, phone: data.phone || null,
       locale: data.locale, projectType: data.projectType,
@@ -179,11 +180,12 @@ export async function submitLeadAction(
       estimatedHours: Math.max(4, Math.round(calculated.weeks * 32 / stages.length)),
       orderIndex: index,
     })));
+    return project.id;
   });
 
   revalidatePath("/[locale]/admin", "page");
   revalidatePath("/[locale]/portal", "page");
-  return { ok: true, message: savedMessages[data.locale] ?? savedMessages.en };
+  return { ok: true, message: savedMessages[data.locale] ?? savedMessages.en, projectId };
 }
 
 /** Admin: move a lead through the sales pipeline. */

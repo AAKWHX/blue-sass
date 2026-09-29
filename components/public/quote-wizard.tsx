@@ -340,7 +340,8 @@ export function QuoteWizard({ initialType, initialService, initialTemplate, init
                   </Alert>
                 )
               ) : null}
-              {state.ok ? <Button asChild variant="ghostNeon" className="w-full"><Link href={`/${locale}/portal`}>{portalLabel[locale]}</Link></Button> : null}
+              {state.ok && state.projectId ? <Button asChild variant="neon" className="w-full"><Link href={`/${locale}/portal/projects/${state.projectId}/payment`}>PayPal · Visa · Mastercard</Link></Button> : null}
+              {state.ok ? <Button asChild variant="ghostNeon" className="w-full"><Link href={state.projectId ? `/${locale}/portal/projects/${state.projectId}` : `/${locale}/portal`}>{portalLabel[locale]}</Link></Button> : null}
             </form>
             <div className="flex items-center justify-between gap-3"><Button type="button" variant="outline" disabled={step === 0 || pending} onClick={() => goTo(step - 1)}>{t.common.back}</Button>{step < 5 && <Button type="button" variant="neon" onClick={() => goTo(step + 1)}>{step === 4 ? controls[1] : controls[0]}</Button>}</div>
           </div>

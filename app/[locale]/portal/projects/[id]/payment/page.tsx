@@ -11,6 +11,7 @@ import { getProjectDetail } from "@/lib/db/queries";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { isLocale } from "@/lib/i18n";
 import { paymentCopy } from "@/lib/i18n/payment-copy";
+import { paymentSafetyCopy } from "@/lib/i18n/payment-safety-copy";
 import { getPayPalClientConfig } from "@/lib/paypal";
 
 function formatMoney(amountCents: number, currency: string, locale: string) {
@@ -28,6 +29,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
   const [payment, lifecycle] = await Promise.all([getProjectPayment(id, viewer.id), lifecycleState(id)]);
   const config = getPayPalClientConfig();
   const copy = paymentCopy[locale];
+  const safetyCopy = paymentSafetyCopy[locale];
 
   let payable: { amountCents: number; currency: string } | null = null;
   try {
@@ -70,7 +72,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
               </div>
 
               {config.environment === "sandbox" ? (
-                <p className="mt-5 rounded-xl border border-neon-sky/25 bg-neon-sky/10 px-4 py-3 text-xs font-bold text-ink-high">{copy.sandbox}</p>
+                <div className="mt-5 rounded-xl border border-neon-sky/25 bg-neon-sky/10 px-4 py-3 text-xs leading-6 text-ink-high"><p className="font-black">{copy.sandbox}</p><p className="mt-1 text-ink-low">{safetyCopy.sandboxDetail}</p></div>
               ) : null}
 
               <div className="mt-6">
@@ -102,7 +104,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
                 </div>
                 <div className="border-b border-line pb-5">
                   <dt className="text-ink-low">{copy.method}</dt>
-                  <dd className="mt-1 font-bold text-ink-high">{copy.paypal}</dd>
+                  <dd className="mt-1 font-bold text-ink-high">{safetyCopy.cards}</dd>
                 </div>
                 <div>
                   <dt className="text-ink-low">{copy.amount}</dt>

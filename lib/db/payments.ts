@@ -4,6 +4,7 @@ import { db, isDatabaseConfigured } from "@/lib/db";
 import { payments, projects, type Payment, type Project } from "@/lib/db/schema";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { reservationDeposit, type ProjectType } from "@/lib/pricing";
+import { getPayPalEnvironment } from "@/lib/paypal";
 
 const projectTypes = new Set<ProjectType>(["web", "mobile", "ai", "ecommerce", "erp", "brand"]);
 
@@ -45,7 +46,7 @@ export async function getProjectPayment(projectId: string, userId: string) {
       .select({ payment: payments })
       .from(payments)
       .innerJoin(projects, eq(projects.id, payments.projectId))
-      .where(and(eq(payments.projectId, projectId), eq(projects.clientId, userId)))
+      .where(and(eq(payments.projectId, projectId), eq(payments.environment, getPayPalEnvironment()), eq(projects.clientId, userId)))
       .limit(1);
     return row?.payment ?? null;
   } catch (error) {
@@ -72,10 +73,11 @@ export async function preparePayPalPayment(projectId: string, userId: string) {
     if (lifecycle.cancelled) throw new PaymentAccessError("A cancelled project cannot be paid.");
 
     const amount = projectPaymentAmount(project);
+    const environment = getPayPalEnvironment();
     const [existing] = await tx
       .select()
       .from(payments)
-      .where(eq(payments.projectId, projectId))
+      .where(and(eq(payments.projectId, projectId), eq(payments.environment, environment)))
       .for("update")
       .limit(1);
 
@@ -114,7 +116,7 @@ export async function preparePayPalPayment(projectId: string, userId: string) {
 
     const [payment] = await tx
       .insert(payments)
-      .values({ projectId, userId, ...amount })
+      .values({ projectId, userId, environment, ...amount })
       .returning();
     return { payment, needsProviderOrder: true };
   });
@@ -141,7 +143,7 @@ export async function getOwnedPayPalPayment(orderId: string, userId: string) {
     .select({ payment: payments, project: projects })
     .from(payments)
     .innerJoin(projects, eq(projects.id, payments.projectId))
-    .where(and(eq(payments.providerOrderId, orderId), eq(projects.clientId, userId)))
+    .where(and(eq(payments.providerOrderId, orderId), eq(payments.environment, getPayPalEnvironment()), eq(projects.clientId, userId)))
     .limit(1);
   if (!row) throw new PaymentAccessError();
   return row;

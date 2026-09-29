@@ -256,8 +256,9 @@ export const messages = pgTable(
 );
 
 /**
- * One authoritative payment record per project. Provider secrets and raw
- * PayPal payloads are deliberately never persisted here.
+ * One authoritative payment record per project and PayPal environment.
+ * Sandbox transactions must never satisfy a live payment. Provider secrets
+ * and raw PayPal payloads are deliberately never persisted here.
  */
 export const payments = pgTable(
   "payments",
@@ -265,12 +266,12 @@ export const payments = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     projectId: uuid("project_id")
       .notNull()
-      .references(() => projects.id, { onDelete: "cascade" })
-      .unique(),
+      .references(() => projects.id, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "restrict" }),
     provider: text("provider").notNull().default("paypal"),
+    environment: text("environment").notNull().default("sandbox"),
     providerOrderId: text("provider_order_id").unique(),
     providerCaptureId: text("provider_capture_id").unique(),
     status: paymentStatus("status").notNull().default("pending"),
@@ -284,6 +285,7 @@ export const payments = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
+    uniqueIndex("payments_project_environment_unique").on(t.projectId, t.environment),
     index("payments_project_idx").on(t.projectId),
     index("payments_user_idx").on(t.userId),
     index("payments_status_idx").on(t.status),
