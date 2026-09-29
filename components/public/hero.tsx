@@ -1,46 +1,53 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowUpLeft, Check } from "lucide-react";
+import { ArrowUpLeft, Check } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { Button } from "@/components/ui/button";
-import { Reveal, motion } from "@/components/ui/motion";
+import { ScrollExpandMedia } from "@/components/ui/scroll-expansion-hero";
+
+const heroLabels = {
+  ar: { studio: "استوديو منتجات رقمية", scroll: "مرّر لتوسيع التجربة", about: "من نحن", consultation: "استشارة أولية مجانية لمشروعك", team: "تصميم وتطوير وتسليم من فريق واحد", media: "أجهزة ومنتجات رقمية ثلاثية الأبعاد من Blue Sass" },
+  en: { studio: "Digital product studio", scroll: "Scroll to expand the experience", about: "About us", consultation: "Free initial project consultation", team: "Design, development and delivery by one team", media: "Blue Sass 3D digital products and devices" },
+  nl: { studio: "Digitale productstudio", scroll: "Scroll om de ervaring te vergroten", about: "Over ons", consultation: "Gratis eerste projectadvies", team: "Ontwerp, ontwikkeling en oplevering door één team", media: "3D digitale producten en apparaten van Blue Sass" },
+  de: { studio: "Studio für digitale Produkte", scroll: "Scrollen, um die Ansicht zu erweitern", about: "Über uns", consultation: "Kostenlose Erstberatung", team: "Design, Entwicklung und Übergabe aus einer Hand", media: "3D-Digitalprodukte und Geräte von Blue Sass" },
+  tr: { studio: "Dijital ürün stüdyosu", scroll: "Deneyimi genişletmek için kaydırın", about: "Hakkımızda", consultation: "Ücretsiz ilk proje görüşmesi", team: "Tek ekipten tasarım, geliştirme ve teslim", media: "Blue Sass 3D dijital ürünleri ve cihazları" },
+  fr: { studio: "Studio de produits numériques", scroll: "Faites défiler pour agrandir l’expérience", about: "À propos", consultation: "Première consultation gratuite", team: "Conception, développement et livraison par une seule équipe", media: "Produits et appareils numériques 3D Blue Sass" },
+  es: { studio: "Estudio de productos digitales", scroll: "Desplácese para ampliar la experiencia", about: "Nosotros", consultation: "Primera consulta gratuita", team: "Diseño, desarrollo y entrega con un solo equipo", media: "Productos y dispositivos digitales 3D de Blue Sass" },
+} as const;
 
 export function Hero() {
   const { locale, t } = useI18n();
-  const ar = locale === "ar";
-  const points = ar ? ["اختر الخدمة المناسبة", "راجع التفاصيل والتكلفة", "ابدأ التنفيذ مع فريق واحد"] : [t.process.steps[0].title, t.process.steps[1].title, t.process.steps[2].title];
+  const labels = heroLabels[locale];
+  const points = [t.process.steps[0].title, t.process.steps[1].title, t.process.steps[2].title];
 
   return (
-    <section className="relative overflow-hidden bg-base">
-      <div className="container-x grid min-h-[720px] items-center gap-10 py-14 lg:grid-cols-[.92fr_1.08fr] lg:py-20">
-        <Reveal className="relative z-10 lg:order-2">
-          <span className="inline-flex items-center gap-2 text-sm font-bold text-neon-blue"><i className="size-2 rounded-full bg-neon-magenta" />Blue Sass · {ar ? "استوديو منتجات رقمية" : "Digital product studio"}</span>
-          <h1 className="mt-5 max-w-2xl text-[clamp(2.35rem,6.5vw,6.8rem)] font-bold leading-[1.08] tracking-[-.045em] text-black sm:leading-[.98]">{t.hero.title}</h1>
-          <p className="mt-6 max-w-xl text-base leading-8 text-ink-low sm:text-lg">{t.hero.subtitle}</p>
-          <ul className="mt-6 space-y-2.5">{points.map((point) => <li key={point} className="flex items-center gap-2 text-sm font-semibold text-black"><Check className="size-4 text-neon-blue" />{point}</li>)}</ul>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild variant="neon" size="lg"><Link href={`/${locale}/create-project`}>{t.hero.ctaPrimary}<ArrowUpLeft className="size-4 flip-x"/></Link></Button>
-            <Button asChild variant="ghostNeon" size="lg"><Link href={`/${locale}/about`}>{ar ? "من نحن" : "About us"}</Link></Button>
+    <ScrollExpandMedia
+      mediaSrc="/media/blue-sass-hero-3d.webp"
+      bgImageSrc="/media/teamwork-3d.webp"
+      mediaAlt={labels.media}
+      title={t.hero.title}
+      eyebrow={`Blue Sass · ${labels.studio}`}
+      scrollToExpand={labels.scroll}
+    >
+      <div className="grid items-center gap-8 rounded-[2rem] border border-black/15 bg-white/90 p-6 shadow-xl shadow-blue-950/10 sm:p-10 lg:grid-cols-[1.15fr_.85fr]">
+        <div>
+          <span className="text-sm font-black text-neon-blue">Blue Sass · {labels.studio}</span>
+          <h2 className="mt-4 text-3xl font-black leading-tight text-black sm:text-5xl">{t.hero.title}</h2>
+          <p className="mt-5 max-w-2xl text-base leading-8 text-ink-low sm:text-lg">{t.hero.subtitle}</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Button asChild variant="neon" size="lg"><Link href={`/${locale}/create-project`}>{t.hero.ctaPrimary}<ArrowUpLeft className="size-4 flip-x" /></Link></Button>
+            <Button asChild variant="ghostNeon" size="lg"><Link href={`/${locale}/about`}>{labels.about}</Link></Button>
           </div>
-        </Reveal>
-
-        <Reveal delay={0.1} className="relative min-h-[460px] lg:order-1">
-          <motion.div animate={{ y: [0, -12, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} className="relative z-10 mx-auto max-w-[680px]">
-            <Image src="/media/blue-sass-hero-3d.webp" alt={ar ? "تصميم ثلاثي الأبعاد لأجهزة ومنتجات رقمية من بلو ساس" : "Blue Sass 3D digital product devices"} width={1400} height={1400} priority className="h-auto w-full drop-shadow-[0_32px_35px_rgba(20,68,130,.2)]" />
-          </motion.div>
-          <span aria-hidden className="absolute -start-2 top-10 size-52 rounded-full bg-neon-cyan" />
-          <span aria-hidden className="absolute -end-3 bottom-6 h-56 w-44 rounded-[4rem] bg-neon-cyan" />
-          <span aria-hidden className="absolute end-[12%] top-0 text-7xl font-black text-neon-indigo">✦</span>
-          <Link href="#services" className="absolute bottom-0 start-0 z-20 grid size-14 place-items-center rounded-full border border-black bg-white text-black transition hover:bg-black hover:text-white"><ArrowDown className="size-5"/></Link>
-        </Reveal>
+        </div>
+        <div className="space-y-3">
+          {points.map((point) => <div key={point} className="flex items-center gap-3 rounded-xl border border-black/10 bg-white px-4 py-3 text-sm font-bold text-black"><Check className="size-4 shrink-0 text-neon-blue" />{point}</div>)}
+          <div className="grid gap-3 pt-2 sm:grid-cols-2 lg:grid-cols-1">
+            <p className="rounded-xl bg-neon-cyan px-4 py-3 text-sm font-bold text-black">{labels.consultation}</p>
+            <p className="rounded-xl bg-neon-cyan px-4 py-3 text-sm font-bold text-black">{labels.team}</p>
+          </div>
+        </div>
       </div>
-
-      <div className="container-x grid gap-4 pb-10 sm:grid-cols-2">
-        <div className="rounded-xl border border-black bg-neon-cyan px-6 py-4 text-center text-sm font-bold text-black">{ar ? "استشارة أولية مجانية لمشروعك" : "Free initial project consultation"}</div>
-        <div className="rounded-xl border border-black bg-neon-cyan px-6 py-4 text-center text-sm font-bold text-black">{ar ? "تصميم وتطوير وتسليم من فريق واحد" : "Design, development and delivery by one team"}</div>
-      </div>
-    </section>
+    </ScrollExpandMedia>
   );
 }
