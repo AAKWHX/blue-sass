@@ -34,7 +34,6 @@ export function SiteHeader({ signedIn = false, userName }: SiteHeaderProps) {
     { href: base, label: c.home },
     { href: `${base}/about`, label: c.about },
     { href: `${base}/services`, label: c.services },
-    { href: `${base}/pricing`, label: t.pricing.nav },
     { href: `${base}/subscriptions`, label: c.subscriptions },
     { href: `${base}/projects`, label: c.projects },
     { href: `${base}/contact`, label: c.contact },

@@ -43,7 +43,7 @@ const rows: Record<Locale, string[]> = {
   ],
 };
 
-const prices = [49, 129, 299];
+const prices = [25, 65, 150];
 export function subscriptionPlans(locale: Locale): Plan[] {
   return rows[locale].map((row, index) => {
     const [name, description, featureList, response, hours] = row.split("|");
@@ -55,4 +55,14 @@ export const subscriptionAddOns: Record<SubscriptionId, string[]> = {
   launch: ["hosting", "maintenance"],
   growth: ["email", "hosting", "maintenance", "analytics"],
   scale: ["domain", "email", "hosting", "maintenance", "google", "analytics"],
+};
+
+export const subscriptionPurchaseNote: Record<Locale, string> = {
+  ar: "يُحفظ الاشتراك ثم تنتقل مباشرة إلى PayPal. لا يبدأ التفعيل إلا بعد تأكيد الدفع، ولا نخزن بيانات بطاقتك.",
+  en: "Your plan is saved before secure PayPal checkout. Activation starts only after payment confirmation; we never store card details.",
+  nl: "Uw plan wordt opgeslagen vóór de veilige PayPal-betaling. Activering start pas na bevestiging; wij bewaren geen kaartgegevens.",
+  de: "Ihr Plan wird vor dem sicheren PayPal-Checkout gespeichert. Die Aktivierung beginnt erst nach Bestätigung; Kartendaten speichern wir nicht.",
+  tr: "Paketiniz güvenli PayPal ödemesinden önce kaydedilir. Etkinleştirme yalnızca ödeme onayından sonra başlar; kart bilgilerini saklamayız.",
+  fr: "Votre formule est enregistrée avant le paiement PayPal sécurisé. L’activation commence après confirmation; aucune donnée bancaire n’est stockée.",
+  es: "El plan se guarda antes del pago seguro con PayPal. La activación empieza tras la confirmación; no almacenamos datos de tarjeta.",
 };

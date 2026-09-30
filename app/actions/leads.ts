@@ -8,7 +8,7 @@ import { leads, projectMilestones, projects, type ProjectStage } from "@/lib/db/
 import { getViewer, requireRole, assertCanWrite } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
 import { takeRateLimit } from "@/lib/rate-limit";
-import { estimate, featureCost, type FeatureKey } from "@/lib/pricing";
+import { estimate, featureCost, getImplementationPromotion, type FeatureKey } from "@/lib/pricing";
 import { findServiceTemplate } from "@/lib/service-templates";
 import { isLocale } from "@/lib/i18n/config";
 import { serviceQuotePresets } from "@/lib/service-details";
@@ -124,6 +124,7 @@ export async function submitLeadAction(
   const pack = websitePackage(data.kind);
   if (data.kind && (!pack || pack.type !== data.projectType || pack.features.some(key => !features.includes(key)))) return { ok: false, message: "Invalid website package." };
   const calculated = estimate(data.projectType, features as FeatureKey[], data.speed, pack);
+  const promotion = getImplementationPromotion();
   const locale = isLocale(data.locale) ? data.locale : "en";
   const pricing = pricingCopy(locale);
   const template = findServiceTemplate(data.templateId, isLocale(data.locale) ? data.locale : "en");
@@ -133,7 +134,7 @@ export async function submitLeadAction(
   const details = [
     pack ? `${websitePackageName(pack.id,locale)} (${pack.id})` : "",
     `${pricing.base}: EUR ${calculated.baseLow}–${calculated.baseHigh}`,
-    `BUILD10: 10% · ${pricing.discount}: EUR ${calculated.discount} · EUR ${calculated.low}–${calculated.high}`,
+    `${promotion.id}: ${promotion.percent}% · ${pricing.discount}: EUR ${calculated.discount} · EUR ${calculated.low}–${calculated.high}`,
     pricing.tax,
     template ? `Template: ${template.name} (${template.id})` : "",
     data.projectName ? `Project: ${data.projectName}` : "",
@@ -165,7 +166,7 @@ export async function submitLeadAction(
       industry: data.projectType,
       budget: calculated.low,
       currency: "EUR",
-      startDate: now,
+      startDate: null,
       deadline,
       estimatedHours: Math.max(24, calculated.weeks * 32),
       hoursLogged: 0,
@@ -175,7 +176,7 @@ export async function submitLeadAction(
       projectId: project.id,
       title: titles[index],
       stage,
-      status: index === 0 ? "in_progress" as const : "todo" as const,
+      status: "todo" as const,
       dueDate: new Date(now.getTime() + Math.max(1, Math.round(calculated.weeks * (index + 1) / stages.length)) * 7 * 86_400_000),
       estimatedHours: Math.max(4, Math.round(calculated.weeks * 32 / stages.length)),
       orderIndex: index,

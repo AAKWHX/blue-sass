@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { CheckCircle2, Clock, CreditCard, Loader2, Save, Wallet } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { SectionHeading } from "@/components/ui/primitives";
-import { estimate, formatEUR, type FeatureKey, type ProjectType, type Speed } from "@/lib/pricing";
+import { estimate, formatEUR, getImplementationPromotion, type FeatureKey, type ProjectType, type Speed } from "@/lib/pricing";
 import { submitLeadAction, type LeadState } from "@/app/actions/leads";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -34,8 +34,8 @@ const addOns = ["domain", "email", "hosting", "maintenance", "google", "analytic
 type AddOn = (typeof addOns)[number];
 
 const addOnPrice: Record<AddOn, { amount: number; period: number }> = {
-  domain: { amount: 15, period: 0 }, email: { amount: 6, period: 1 }, hosting: { amount: 19, period: 1 },
-  maintenance: { amount: 79, period: 1 }, google: { amount: 49, period: 2 }, analytics: { amount: 39, period: 2 },
+  domain: { amount: 8, period: 0 }, email: { amount: 3, period: 1 }, hosting: { amount: 10, period: 1 },
+  maintenance: { amount: 40, period: 1 }, google: { amount: 25, period: 2 }, analytics: { amount: 20, period: 2 },
 };
 const billingPeriods = { ar: ["سنويًا", "شهريًا", "مرة واحدة"], en: ["yearly", "monthly", "one time"], nl: ["per jaar", "per maand", "eenmalig"], de: ["jährlich", "monatlich", "einmalig"], tr: ["yıllık", "aylık", "tek sefer"], fr: ["par an", "par mois", "une fois"], es: ["anual", "mensual", "pago único"] };
 const performanceCopy = {
@@ -97,6 +97,7 @@ export function QuoteWizard({ initialType, initialService, initialTemplate, init
   });
 
   const result = useMemo(() => estimate(type, features, speed, pack), [type, features, speed, pack]);
+  const promotion = getImplementationPromotion();
   const availableFeatures = pack ? [...new Set([...featuresByType[type], ...pack.features])] : servicePreset ? [...servicePreset.options] as FeatureKey[] : featuresByType[type];
 
   function toggleFeature(key: FeatureKey) {
@@ -353,7 +354,7 @@ export function QuoteWizard({ initialType, initialService, initialTemplate, init
                 {formatEUR(result.low, locale)}
               </p>
               <p className="text-sm font-semibold text-ink-low">— {formatEUR(result.high, locale)}</p>
-              <dl className="mt-4 space-y-2 text-xs"><div className="flex justify-between gap-2"><dt>{t.pricing.base}</dt><dd>{formatEUR(result.baseLow,locale)}</dd></div><div className="flex justify-between gap-2"><dt>{t.pricing.discount} · 10%</dt><dd>−{formatEUR(result.discount,locale)}</dd></div></dl><p className="mt-3 text-xs leading-6 text-ink-low">{t.pricing.tax}</p>
+              <dl className="mt-4 space-y-2 text-xs"><div className="flex justify-between gap-2"><dt>{t.pricing.base}</dt><dd>{formatEUR(result.baseLow,locale)}</dd></div><div className="flex justify-between gap-2"><dt>{t.pricing.discount} · {promotion.percent}%</dt><dd>−{formatEUR(result.discount,locale)}</dd></div></dl><p className="mt-3 text-xs leading-6 text-ink-low">{t.pricing.tax}</p>
 
               <dl className="mt-6 space-y-3 text-sm">
                 <div className="flex items-center justify-between">

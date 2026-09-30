@@ -3,29 +3,29 @@ export type Speed = "relaxed" | "standard" | "rush";
 export type FeatureKey = "auth" | "payments" | "dashboard" | "i18n" | "cms" | "api" | "ai" | "realtime" | "prototype" | "identity" | "appstore" | "offline" | "catalog" | "automation";
 
 export const baseCost: Record<ProjectType, { price: number; weeks: number }> = {
-  web: { price: 1490, weeks: 4 },
-  mobile: { price: 7900, weeks: 10 },
-  ai: { price: 4900, weeks: 8 },
-  ecommerce: { price: 2490, weeks: 5 },
-  erp: { price: 6900, weeks: 10 },
-  brand: { price: 790, weeks: 3 },
+  web: { price: 745, weeks: 4 },
+  mobile: { price: 3950, weeks: 10 },
+  ai: { price: 2450, weeks: 8 },
+  ecommerce: { price: 1245, weeks: 5 },
+  erp: { price: 3450, weeks: 10 },
+  brand: { price: 395, weeks: 3 },
 };
 
 export const featureCost: Record<FeatureKey, { price: number; weeks: number }> = {
-  auth: { price: 450, weeks: 1 },
-  payments: { price: 650, weeks: 2 },
-  dashboard: { price: 900, weeks: 2 },
-  i18n: { price: 250, weeks: 1.5 },
-  cms: { price: 350, weeks: 1.5 },
-  api: { price: 650, weeks: 1 },
-  ai: { price: 1500, weeks: 3 },
-  realtime: { price: 1100, weeks: 2 },
-  prototype: { price: 450, weeks: 1 },
-  identity: { price: 650, weeks: 2 },
-  appstore: { price: 350, weeks: 1 },
-  offline: { price: 900, weeks: 2 },
-  catalog: { price: 500, weeks: 1.5 },
-  automation: { price: 900, weeks: 2 },
+  auth: { price: 225, weeks: 1 },
+  payments: { price: 325, weeks: 2 },
+  dashboard: { price: 450, weeks: 2 },
+  i18n: { price: 125, weeks: 1.5 },
+  cms: { price: 175, weeks: 1.5 },
+  api: { price: 325, weeks: 1 },
+  ai: { price: 750, weeks: 3 },
+  realtime: { price: 550, weeks: 2 },
+  prototype: { price: 225, weeks: 1 },
+  identity: { price: 325, weeks: 2 },
+  appstore: { price: 175, weeks: 1 },
+  offline: { price: 450, weeks: 2 },
+  catalog: { price: 250, weeks: 1.5 },
+  automation: { price: 450, weeks: 2 },
 };
 
 export const speedModifier: Record<Speed, { price: number; weeks: number }> = {
@@ -45,17 +45,25 @@ export interface Estimate {
 }
 
 export const reservationDeposit: Record<ProjectType, number> = {
-  web: 99,
-  mobile: 199,
-  ai: 249,
-  ecommerce: 149,
-  erp: 299,
-  brand: 79,
+  web: 50,
+  mobile: 100,
+  ai: 125,
+  ecommerce: 75,
+  erp: 150,
+  brand: 40,
 };
 
-export const implementationPromotion = { id: "BUILD10", percent: 10 } as const;
-export function applyImplementationDiscount(amount: number) {
-  return Math.round(amount * (100 - implementationPromotion.percent) / 100);
+const promotions = [
+  { id: "START5", percent: 5 },
+  { id: "BUILD10", percent: 10 },
+  { id: "LAUNCH15", percent: 15 },
+] as const;
+export function getImplementationPromotion(date = new Date()) {
+  const day = Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / 86_400_000);
+  return promotions[day % promotions.length];
+}
+export function applyImplementationDiscount(amount: number, date?: Date) {
+  return Math.round(amount * (100 - getImplementationPromotion(date).percent) / 100);
 }
 type PackageEstimate = { low: number; high: number; weeks: number; type: ProjectType; features: FeatureKey[] };
 export function estimate(type: ProjectType, features: FeatureKey[], speed: Speed, selected?: PackageEstimate): Estimate {

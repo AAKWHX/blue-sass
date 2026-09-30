@@ -46,6 +46,7 @@ import type {
   ProjectFile,
   ProjectStage,
   Lead,
+  PaymentStatus,
 } from "@/lib/db/schema";
 
 const STAGES: ProjectStage[] = ["planning", "design", "development", "testing", "review", "completed"];
@@ -73,6 +74,7 @@ export interface DashboardProject {
     remainingHours: number;
     daysLeft: number | null;
   };
+  paymentStatus?: PaymentStatus | null;
 }
 
 export interface ClientDashboardProps {
@@ -187,6 +189,8 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
 
   const active = projects[Math.min(index, projects.length - 1)];
   const { project, milestones, files, summary } = active;
+  const awaitingPayment = active.paymentStatus !== undefined && active.paymentStatus !== "paid";
+  const awaitingLabel = locale === "ar" ? "بانتظار الدفع — لن يبدأ التخطيط قبل تأكيده" : "Awaiting payment — planning starts after confirmation";
   const stageIndex = STAGES.indexOf(project.stage);
   const dateFmt = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" });
   const detailsText = detailCopy[locale];
@@ -226,13 +230,13 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
                 <h2 className="text-lg font-bold text-ink-hi" dir="auto">
                   {project.name}
                 </h2>
-                <StatusBadge status={project.stage} label={t.status[project.stage]} />
+                {awaitingPayment ? <Badge className="bg-amber-100 text-amber-900">{awaitingLabel}</Badge> : <StatusBadge status={project.stage} label={t.status[project.stage]} />}
               </div>
               <p className="mt-2 text-sm text-ink-low" dir="auto">
                 {project.summary}
               </p>
 
-              <div className="mt-6">
+              <div className={`mt-6 ${awaitingPayment ? "opacity-45" : ""}`}>
                 <div className="mb-2 flex items-center justify-between text-xs font-semibold">
                   <span className="text-ink-low">{t.portal.completion}</span>
                   <span className="tabular-nums text-neon-cyan">{summary.percent}%</span>
@@ -246,7 +250,7 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
               <ol className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {STAGES.map((stage, i) => {
                   const done = i < stageIndex || project.stage === "completed";
-                  const current = i === stageIndex && project.stage !== "completed";
+                  const current = !awaitingPayment && i === stageIndex && project.stage !== "completed";
                   return (
                     <li key={stage}>
                       <div className="flex items-center gap-2">

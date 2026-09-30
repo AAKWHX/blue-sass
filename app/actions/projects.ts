@@ -10,6 +10,7 @@ import {
   projectFiles,
   projectMilestones,
   projects,
+  payments,
 } from "@/lib/db/schema";
 import {
   assertCanEditProject,
@@ -20,6 +21,12 @@ import {
 } from "@/lib/db/access";
 
 import { lifecycleState, lockProject, recordLifecycle, type ProjectTransaction } from "@/lib/db/project-lifecycle";
+import { getPayPalEnvironment } from "@/lib/paypal";
+
+async function hasCompletedPayment(projectId: string, tx: ProjectTransaction) {
+  const [row] = await tx.select({ id: payments.id }).from(payments).where(and(eq(payments.projectId, projectId), eq(payments.environment, getPayPalEnvironment()), eq(payments.status, "paid"))).limit(1);
+  return Boolean(row);
+}
 
 export interface MutationState {
   ok: boolean;
@@ -71,6 +78,7 @@ export async function setProjectStageAction(formData: FormData) {
   await db.transaction(async tx => {
     const project = await lockProject(tx, parsed.data.projectId);
     if (!project || (await lifecycleState(project.id, tx)).cancelled) return;
+    if (project.clientId && !(await hasCompletedPayment(project.id, tx))) return;
     const targetIndex = stageOrder.indexOf(parsed.data.stage);
     if (project.stage !== "planning" || parsed.data.stage !== "planning") await recordLifecycle(tx, project.id, "locked", viewer.id);
     const rows = await tx.select({ id: projectMilestones.id, stage: projectMilestones.stage }).from(projectMilestones).where(eq(projectMilestones.projectId, project.id));
@@ -100,6 +108,7 @@ export async function setMilestoneStatusAction(
   const changed = await db.transaction(async tx => {
     const project = await lockProject(tx, parsed.data.projectId);
     if (!project || (await lifecycleState(project.id, tx)).cancelled) return false;
+    if (project.clientId && !(await hasCompletedPayment(project.id, tx))) return false;
     if (project.stage !== "planning") await recordLifecycle(tx, project.id, "locked", viewer.id);
     const rows = await tx.update(projectMilestones).set({ status: parsed.data.status }).where(and(eq(projectMilestones.id, parsed.data.milestoneId), eq(projectMilestones.projectId, project.id))).returning({ id: projectMilestones.id });
     if (!rows.length) return false;

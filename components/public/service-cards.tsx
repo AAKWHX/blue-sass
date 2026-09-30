@@ -25,6 +25,16 @@ const actions = {
   es: { start: "Empezar", previous: "Servicio anterior", next: "Servicio siguiente" },
 } as const;
 
+const headings = {
+  ar: "اختر ما تريد بناءه",
+  en: "Choose what you want to build",
+  nl: "Kies wat u wilt bouwen",
+  de: "Wählen Sie, was Sie bauen möchten",
+  tr: "Ne inşa etmek istediğinizi seçin",
+  fr: "Choisissez ce que vous voulez créer",
+  es: "Elija lo que quiere crear",
+} as const;
+
 export function Services() {
   const { locale, t } = useI18n();
   const ar = locale === "ar";
@@ -45,7 +55,7 @@ export function Services() {
   return (
     <section id="services" className="section-y bg-white">
       <div className="container-x">
-        <Reveal className="text-center"><span className="text-sm font-bold text-neon-magenta">✦ {ar ? "الخدمات" : t.services.title}</span><h2 className="mx-auto mt-3 max-w-3xl text-4xl font-bold text-black sm:text-6xl">{ar ? "كل ما يحتاجه مشروعك الرقمي" : t.services.subtitle}</h2><p className="mx-auto mt-5 max-w-2xl leading-8 text-ink-low">{t.hero.subtitle}</p></Reveal>
+        <Reveal className="text-center"><h2 className="mx-auto max-w-3xl text-4xl font-bold text-black sm:text-6xl">{headings[locale]}</h2></Reveal>
 
         <Reveal className="mt-12"><SqueezeCarousel slides={slides} label={t.services.title} previousLabel={action.previous} nextLabel={action.next} /></Reveal>
       </div>

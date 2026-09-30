@@ -1,7 +1,7 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { payments, projects, type Payment, type Project } from "@/lib/db/schema";
+import { payments, projectMilestones, projects, type Payment, type Project } from "@/lib/db/schema";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { reservationDeposit, type ProjectType } from "@/lib/pricing";
 import { getPayPalEnvironment } from "@/lib/paypal";
@@ -150,17 +150,15 @@ export async function getOwnedPayPalPayment(orderId: string, userId: string) {
 }
 
 export async function markPaymentPaid(payment: Payment, captureId: string) {
-  const [updated] = await db
-    .update(payments)
-    .set({
-      status: "paid",
-      providerCaptureId: captureId,
-      failureCode: null,
-      paidAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(and(eq(payments.id, payment.id), eq(payments.status, "pending")))
-    .returning();
+  const updated = await db.transaction(async (tx) => {
+    const now = new Date();
+    const [paid] = await tx.update(payments).set({ status: "paid", providerCaptureId: captureId, failureCode: null, paidAt: now, updatedAt: now }).where(and(eq(payments.id, payment.id), eq(payments.status, "pending"))).returning();
+    if (!paid) return null;
+    await tx.update(projects).set({ startDate: now, updatedAt: now }).where(eq(projects.id, paid.projectId));
+    const [first] = await tx.select({ id: projectMilestones.id }).from(projectMilestones).where(eq(projectMilestones.projectId, paid.projectId)).orderBy(asc(projectMilestones.orderIndex)).limit(1);
+    if (first) await tx.update(projectMilestones).set({ status: "in_progress" }).where(eq(projectMilestones.id, first.id));
+    return paid;
+  });
   if (updated) return updated;
   const [current] = await db.select().from(payments).where(eq(payments.id, payment.id)).limit(1);
   if (current?.status === "paid") return current;

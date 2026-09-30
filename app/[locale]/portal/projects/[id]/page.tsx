@@ -30,7 +30,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ locale
     <>
       <PortalNav locale={locale} />
       <ProjectControls project={detail.project} cancelled={state.cancelled} editable={detail.project.clientId === viewer.id && detail.project.stage === "planning" && !state.locked && !state.cancelled} />
-      <ClientDashboard viewerName={viewer.name ?? viewer.email} viewerCompany={null} projects={[{ ...detail, summary: summariseProgress(detail) }]} orders={[]} />
+      <ClientDashboard viewerName={viewer.name ?? viewer.email} viewerCompany={null} projects={[{ ...detail, summary: summariseProgress(detail), paymentStatus: payment?.status ?? null }]} orders={[]} />
       <section className="container-x pb-12">
         <div className="rounded-2xl border border-black/15 bg-neon-cyan/15 p-6">
           <div className="flex flex-wrap items-start justify-between gap-5">

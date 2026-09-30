@@ -3,7 +3,7 @@ import type { ServiceTemplate } from "@/lib/service-templates";
 import { cn } from "@/lib/utils";
 
 function Lines({ light = false }: { light?: boolean }) {
-  return <div aria-hidden className="space-y-2"><i className={cn("block h-1.5 w-4/5 rounded-full", light ? "bg-white/30" : "bg-black/15")} /><i className={cn("block h-1.5 w-3/5 rounded-full", light ? "bg-white/15" : "bg-black/8")} /></div>;
+  return <div className={cn("space-y-1 text-[7px] leading-relaxed", light ? "text-white/55" : "text-black/55")}><p>Strategy, design and development</p><p className="opacity-65">Built for clarity and measurable growth</p></div>;
 }
 function BrowserBar({ dark = false }: { dark?: boolean }) {
   return <div className={cn("flex items-center gap-1.5 border-b px-3 py-2", dark ? "border-white/10" : "border-black/10")}><i className="size-1.5 rounded-full bg-current opacity-25"/><i className="size-1.5 rounded-full bg-current opacity-25"/><i className="size-1.5 rounded-full bg-current opacity-25"/><span className={cn("ms-2 h-3 flex-1 rounded-full", dark ? "bg-white/8" : "bg-black/5")}/></div>;
@@ -38,5 +38,5 @@ export function TemplateLivePreview({ item, expanded = false }: { item: ServiceT
   else if (item.service === "erp") content = <DashboardPreview alt={alt} erp/>;
   else if (item.service === "ai") content = <AiPreview alt={alt}/>;
   else content = <BrandPreview alt={alt}/>;
-  return <div className={cn("group relative w-full overflow-hidden rounded-2xl bg-[#151922] p-2", expanded ? "h-[min(58vh,520px)]" : "h-64")}><div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"/><div className="h-full transition-transform duration-500 ease-out group-hover:scale-[1.015]">{content}</div><div className="pointer-events-none absolute bottom-3 end-3 flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2 py-1 text-[8px] font-semibold text-white backdrop-blur"><Layers3 className="size-2.5"/>LIVE UI</div></div>;
+  return <div className={cn("group relative w-full overflow-hidden rounded-2xl bg-[#151922] p-2", expanded ? "h-[min(58vh,520px)]" : "h-64")}><div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"/><div className="h-full transition-transform duration-500 ease-out group-hover:scale-[1.015]">{content}</div><div className="pointer-events-none absolute bottom-3 start-3 max-w-[65%] truncate rounded-full border border-white/10 bg-black/70 px-2.5 py-1 text-[8px] font-semibold text-white backdrop-blur">{item.name}</div><div className="pointer-events-none absolute bottom-3 end-3 flex items-center gap-1 rounded-full border border-white/10 bg-black/70 px-2 py-1 text-[8px] font-semibold text-white backdrop-blur"><Layers3 className="size-2.5"/>LIVE UI</div></div>;
 }
