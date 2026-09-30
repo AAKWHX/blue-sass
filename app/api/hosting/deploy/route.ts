@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { hostedSites } from "@/lib/db/schema";
-import { requireViewer } from "@/lib/db/access";
+import { AuthorisationError, requireViewer } from "@/lib/db/access";
 import { createVercelDeployment } from "@/lib/hosting/vercel";
 import { takeRateLimit } from "@/lib/rate-limit";
+import { assertSameOrigin } from "@/lib/api-security";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -29,6 +30,7 @@ function slugify(value: string) {
 
 export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
     if (!isDatabaseConfigured) return NextResponse.json({ error: "Hosting database is not configured." }, { status: 503 });
     const viewer = await requireViewer();
     if (!takeRateLimit(`hosting:${viewer.id}`, 2, 60 * 60_000)) return NextResponse.json({ error: "Please wait before starting another deployment." }, { status: 429 });
@@ -62,7 +64,13 @@ export async function POST(request: Request) {
       await db.update(hostedSites).set({ status: "failed", errorMessage: message, updatedAt: new Date() }).where(eq(hostedSites.id, site.id));
       return NextResponse.json({ error: message, id: site.id }, { status: 502 });
     }
-  } catch {
+  } catch (error) {
+    if (error instanceof AuthorisationError) {
+      return NextResponse.json({ error: "AUTH_REQUIRED" }, { status: 401 });
+    }
+    if (error instanceof Error && error.message === "UNTRUSTED_ORIGIN") {
+      return NextResponse.json({ error: "INVALID_ORIGIN" }, { status: 403 });
+    }
     return NextResponse.json({ error: "Unable to process this deployment." }, { status: 400 });
   }
 }
