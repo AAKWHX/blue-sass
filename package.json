@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
+    "prebuild": "node scripts/apply-hosting-migration.mjs",
     "build": "BUILD_DIST=1 next build",
     "start": "BUILD_DIST=1 next start",
     "lint": "eslint .",
