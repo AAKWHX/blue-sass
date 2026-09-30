@@ -5,6 +5,10 @@ export function quoteReturnPath(value: unknown, locale: string) {
   try {
     const url = new URL(value, "https://local.invalid");
     if (url.origin !== "https://local.invalid") return fallback;
+    const safePages = new Set([`/${locale}/portal`, `/${locale}/portal/profile`, `/${locale}/hosting`]);
+    if (safePages.has(url.pathname)) return url.pathname;
+    const hostingPrefix = `/${locale}/hosting/`;
+    if (url.pathname.startsWith(hostingPrefix) && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(url.pathname.slice(hostingPrefix.length))) return url.pathname;
     const projectPrefix = `/${locale}/portal/projects/`;
     if (url.pathname.startsWith(projectPrefix) && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(url.pathname.slice(projectPrefix.length))) return url.pathname;
     if (url.pathname !== `/${locale}/quote`) return fallback;

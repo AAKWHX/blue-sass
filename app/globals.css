@@ -324,6 +324,13 @@
   [data-slot="button"] { cursor: pointer; }
   [data-slot="button"]:disabled { cursor: not-allowed; }
 
+  /* Headings normally use the dark ink token. Dark dialogs opt into white
+     text, so nested headings must inherit that surface colour explicitly. */
+  [data-slot="dialog-content"].text-white h1,
+  [data-slot="dialog-content"].text-white h2,
+  [data-slot="dialog-content"].text-white h3,
+  [data-slot="dialog-content"].text-white h4 { color: inherit; }
+
   .chip {
     @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white
            px-3 py-1 text-xs font-medium tracking-tight text-ink-low;

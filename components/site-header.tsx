@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ArrowUpLeft, ChevronDown, LogIn, Menu, UserRound } from "lucide-react";
+import { ArrowUpLeft, ChevronDown, FolderKanban, LogIn, LogOut, Menu, Settings, UserRound } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
 import { useI18n } from "@/components/providers";
 import { BrandLogo } from "@/components/brand-logo";
@@ -11,20 +11,21 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { LanguageSwitcher } from "@/components/ui/switchers";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export interface SiteHeaderProps { signedIn?: boolean; userName?: string }
+export interface SiteHeaderProps { signedIn?: boolean; userName?: string; userImage?: string }
 
 const navCopy = {
-  ar: { home: "الرئيسية", about: "من نحن", services: "الخدمات", subscriptions: "الاشتراكات", projects: "أعمالنا", contact: "اتصل بنا", start: "ابدأ مشروعك", account: "حسابي" },
-  en: { home: "Home", about: "About", services: "Services", subscriptions: "Plans", projects: "Work", contact: "Contact", start: "Start a project", account: "My account" },
-  nl: { home: "Home", about: "Over ons", services: "Diensten", subscriptions: "Abonnementen", projects: "Werk", contact: "Contact", start: "Start een project", account: "Mijn account" },
-  de: { home: "Start", about: "Über uns", services: "Leistungen", subscriptions: "Abos", projects: "Projekte", contact: "Kontakt", start: "Projekt starten", account: "Mein Konto" },
-  tr: { home: "Ana sayfa", about: "Hakkımızda", services: "Hizmetler", subscriptions: "Paketler", projects: "Projeler", contact: "İletişim", start: "Proje başlat", account: "Hesabım" },
-  fr: { home: "Accueil", about: "À propos", services: "Services", subscriptions: "Abonnements", projects: "Projets", contact: "Contact", start: "Démarrer", account: "Mon compte" },
-  es: { home: "Inicio", about: "Nosotros", services: "Servicios", subscriptions: "Planes", projects: "Proyectos", contact: "Contacto", start: "Empezar proyecto", account: "Mi cuenta" },
+  ar: { home: "الرئيسية", about: "من نحن", services: "الخدمات", subscriptions: "الاشتراكات", hosting: "الاستضافة", projects: "أعمالنا", contact: "اتصل بنا", start: "ابدأ مشروعك", account: "الملف الشخصي", allProjects: "جميع المشاريع", settings: "الإعدادات" },
+  en: { home: "Home", about: "About", services: "Services", subscriptions: "Plans", hosting: "Hosting", projects: "Work", contact: "Contact", start: "Start a project", account: "Profile", allProjects: "All projects", settings: "Settings" },
+  nl: { home: "Home", about: "Over ons", services: "Diensten", subscriptions: "Abonnementen", hosting: "Hosting", projects: "Werk", contact: "Contact", start: "Start een project", account: "Profiel", allProjects: "Alle projecten", settings: "Instellingen" },
+  de: { home: "Start", about: "Über uns", services: "Leistungen", subscriptions: "Abos", hosting: "Hosting", projects: "Projekte", contact: "Kontakt", start: "Projekt starten", account: "Profil", allProjects: "Alle Projekte", settings: "Einstellungen" },
+  tr: { home: "Ana sayfa", about: "Hakkımızda", services: "Hizmetler", subscriptions: "Paketler", hosting: "Hosting", projects: "Projeler", contact: "İletişim", start: "Proje başlat", account: "Profil", allProjects: "Tüm projeler", settings: "Ayarlar" },
+  fr: { home: "Accueil", about: "À propos", services: "Services", subscriptions: "Abonnements", hosting: "Hébergement", projects: "Projets", contact: "Contact", start: "Démarrer", account: "Profil", allProjects: "Tous les projets", settings: "Paramètres" },
+  es: { home: "Inicio", about: "Nosotros", services: "Servicios", subscriptions: "Planes", hosting: "Hosting", projects: "Proyectos", contact: "Contacto", start: "Empezar proyecto", account: "Perfil", allProjects: "Todos los proyectos", settings: "Ajustes" },
 } as const;
 
-export function SiteHeader({ signedIn = false, userName }: SiteHeaderProps) {
+export function SiteHeader({ signedIn = false, userName, userImage }: SiteHeaderProps) {
   const { locale, t } = useI18n();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -35,6 +36,7 @@ export function SiteHeader({ signedIn = false, userName }: SiteHeaderProps) {
     { href: `${base}/about`, label: c.about },
     { href: `${base}/services`, label: c.services },
     { href: `${base}/subscriptions`, label: c.subscriptions },
+    { href: `${base}/hosting`, label: c.hosting },
     { href: `${base}/projects`, label: c.projects },
     { href: `${base}/contact`, label: c.contact },
   ];
@@ -50,8 +52,8 @@ export function SiteHeader({ signedIn = false, userName }: SiteHeaderProps) {
           <LanguageSwitcher />
           {signedIn ? (
             <DropdownMenu modal={false} dir={locale === "ar" ? "rtl" : "ltr"}>
-              <DropdownMenuTrigger asChild><Button variant="unstyled" size="auto" className="rounded-xl border border-white/20 px-3 py-2 text-white"><UserRound className="size-4"/><span className="hidden sm:inline">{userName?.split(" ")[0] || c.account}</span><ChevronDown className="size-3"/></Button></DropdownMenuTrigger>
-              <DropdownMenuContent align="end"><DropdownMenuItem asChild><Link href={`${base}/portal`}>{c.account}</Link></DropdownMenuItem><form action={signOutAction}><input type="hidden" name="locale" value={locale}/><Button type="submit" variant="ghost" className="w-full justify-start">{t.auth.signOut}</Button></form></DropdownMenuContent>
+              <DropdownMenuTrigger asChild><Button variant="unstyled" size="auto" aria-label={c.account} className="rounded-full border border-white/20 p-1 text-white"><Avatar className="size-9 border border-white/15"><AvatarImage src={userImage} alt={userName || c.account}/><AvatarFallback className="bg-white text-black">{userName?.trim().charAt(0).toUpperCase() || <UserRound className="size-4"/>}</AvatarFallback></Avatar><ChevronDown className="me-1 size-3"/></Button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-56"><div className="px-3 py-2"><p className="font-bold text-white">{userName || c.account}</p><p className="text-xs text-ink-faint">{c.account}</p></div><DropdownMenuItem asChild><Link href={`${base}/portal/profile`}><UserRound className="size-4"/>{c.account}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal`}><FolderKanban className="size-4"/>{c.allProjects}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal/profile#settings`}><Settings className="size-4"/>{c.settings}</Link></DropdownMenuItem><form action={signOutAction}><input type="hidden" name="locale" value={locale}/><Button type="submit" variant="ghost" className="w-full justify-start"><LogOut className="size-4"/>{t.auth.signOut}</Button></form></DropdownMenuContent>
             </DropdownMenu>
           ) : <><Button asChild variant="unstyled" size="auto" className="hidden rounded-xl border border-white/20 px-3 py-2.5 font-semibold text-white transition hover:bg-white/10 2xl:inline-flex"><Link href={`${base}/login`}><LogIn className="size-4"/>{t.auth.signIn}</Link></Button><Button asChild variant="unstyled" size="auto" className="hidden rounded-xl bg-neon-cyan px-5 py-3 font-bold text-black transition hover:bg-white sm:inline-flex"><Link href={`${base}/create-project`}>{c.start}<ArrowUpLeft className="size-4 flip-x"/></Link></Button></>}
           <Sheet open={open} onOpenChange={setOpen}>

@@ -51,6 +51,7 @@ export function Services() {
     primaryHref: `/${locale}/quote?type=${item.quoteType}&service=${item.slug}`,
     secondaryAction: t.experience.templates,
     secondaryHref: `/${locale}/services/${item.slug}#templates`,
+    detailHref: `/${locale}/services/${item.slug}`,
   }));
   return (
     <section id="services" className="section-y bg-white">

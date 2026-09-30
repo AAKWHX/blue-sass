@@ -8,7 +8,7 @@
 import { and, eq, or, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { projectMembers, projects } from "@/lib/db/schema";
+import { projectMembers, projects, users } from "@/lib/db/schema";
 import type { AppRole } from "@/lib/db/schema";
 
 export class AuthorisationError extends Error {
@@ -23,17 +23,33 @@ export interface Viewer {
   email: string;
   name: string | null;
   role: AppRole;
+  image: string | null;
+  company: string | null;
+  title: string | null;
+  phone: string | null;
+  locale: string;
 }
 
 /** Returns the signed-in user, or null for anonymous visitors. */
 export async function getViewer(): Promise<Viewer | null> {
   const session = await auth();
   if (!session?.user?.id) return null;
+  const [record] = await db.select({
+    id: users.id, email: users.email, name: users.name, role: users.role,
+    image: users.image, company: users.company, title: users.title,
+    phone: users.phone, locale: users.locale,
+  }).from(users).where(eq(users.id, session.user.id)).limit(1);
+  if (record) return record;
   return {
     id: session.user.id,
     email: session.user.email ?? "",
     name: session.user.name ?? null,
     role: session.user.role,
+    image: session.user.image ?? null,
+    company: session.user.company ?? null,
+    title: null,
+    phone: null,
+    locale: session.user.locale ?? "ar",
   };
 }
 

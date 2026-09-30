@@ -9,6 +9,7 @@ import { portfolioEntries } from "@/lib/db/portfolio";
 import { PromotionBanner } from "@/components/public/website-pricing";
 import { AgencyProofStrip } from "@/components/ui/agency-proof-strip";
 import { StaggerShowcase } from "@/components/ui/stagger-showcase";
+import { HostingSection } from "@/components/public/hosting-section";
 
 export default async function HomePage() {
   const portfolio = (await portfolioEntries()).slice(0, 3);
@@ -21,6 +22,7 @@ export default async function HomePage() {
       <PromotionBanner/>
       {portfolio.length > 0 && <LivePortfolio entries={portfolio} embedded/>}
       <CompanySection />
+      <HostingSection />
       <StaggerShowcase />
       <HomeFaq />
       <CallToAction />

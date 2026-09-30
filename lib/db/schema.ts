@@ -76,6 +76,7 @@ export const leadStatus = pgEnum("lead_status", [
 export const mediaKind = pgEnum("media_kind", ["image", "video", "demo", "document"]);
 
 export const paymentStatus = pgEnum("payment_status", ["pending", "paid", "failed"]);
+export const hostingStatus = pgEnum("hosting_status", ["uploading", "building", "ready", "failed"]);
 
 /* ------------------------------------------------------------------ *
  * Auth.js core tables (Drizzle adapter contract)
@@ -292,6 +293,26 @@ export const payments = pgTable(
   ],
 );
 
+export const hostedSites = pgTable(
+  "hosted_sites",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    projectName: text("project_name").notNull().unique(),
+    framework: text("framework").notNull(),
+    deploymentId: text("deployment_id").unique(),
+    url: text("url"),
+    status: hostingStatus("status").notNull().default("uploading"),
+    errorMessage: text("error_message"),
+    fileCount: integer("file_count").notNull().default(0),
+    totalBytes: integer("total_bytes").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("hosted_sites_user_idx").on(t.userId, t.createdAt), index("hosted_sites_status_idx").on(t.status)],
+);
+
 /** Public quote form — no account required. */
 export const leads = pgTable(
   "leads",
@@ -333,6 +354,7 @@ export type ProjectFile = typeof projectFiles.$inferSelect;
 export type FeedbackRow = typeof feedback.$inferSelect;
 export type MessageRow = typeof messages.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
+export type HostedSite = typeof hostedSites.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 
@@ -345,3 +367,4 @@ export type Visibility = (typeof projectVisibility.enumValues)[number];
 export type MediaKind = (typeof mediaKind.enumValues)[number];
 export type LeadStatus = (typeof leadStatus.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatus.enumValues)[number];
+export type HostingStatus = (typeof hostingStatus.enumValues)[number];

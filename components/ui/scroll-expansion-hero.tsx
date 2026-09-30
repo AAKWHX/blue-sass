@@ -117,8 +117,9 @@ export function ScrollExpandMedia({
           animate={{ opacity: reveal, scale: 1.18 - reveal * 0.18 }}
           transition={{ duration: 0.12, ease: "linear" }}
         >
-          <Image src={mediaSrc} alt="" fill priority sizes="100vw" className="object-cover" />
+          <Image src={mediaSrc} alt="" fill priority quality={92} sizes="100vw" className="object-cover object-center" />
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,6,8,.12),rgba(5,6,8,.34))]" />
+          <motion.div className="absolute -inset-[20%] bg-[radial-gradient(circle_at_30%_35%,rgba(255,255,255,.12),transparent_28%),linear-gradient(120deg,transparent_35%,rgba(255,255,255,.08),transparent_65%)]" animate={reduceMotion ? undefined : { x: ["-4%", "4%", "-4%"], y: ["2%", "-2%", "2%"], rotate: [-1, 1, -1] }} transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }} />
         </motion.div>
 
         <div className="absolute inset-0 z-content">
@@ -126,7 +127,7 @@ export function ScrollExpandMedia({
             className="absolute left-1/2 top-1/2 h-[100dvh] w-screen overflow-hidden bg-[#050608] shadow-[0_30px_100px_rgba(20,68,130,.24)]"
             style={{ transform: `translate(-50%, -50%) scale(${scale})`, opacity: reveal }}
           >
-            <Image src={mediaSrc} alt={mediaAlt} fill priority sizes="100vw" className="object-cover" />
+            <Image src={mediaSrc} alt={mediaAlt} fill priority quality={92} sizes="100vw" className="object-contain object-center md:object-cover" />
             <motion.div className="absolute inset-0 bg-black" animate={{ opacity: 0.72 - reveal * 0.54 }} transition={{ duration: 0.12 }} />
           </motion.div>
 
@@ -149,11 +150,14 @@ export function ScrollExpandMedia({
               <h1 className={cn("text-[clamp(2.4rem,7vw,7.4rem)] font-black leading-[1.02] tracking-[-.055em] text-white [text-shadow:0_18px_60px_rgba(0,0,0,.65)]", titleClassName)} aria-label={title}>
                 {characters.map((character, index) => {
                   const angle = ((index * 137.5) % 360) * Math.PI / 180;
-                  const distance = visibleProgress * (mobile ? 58 : 82);
+                  const distance = visibleProgress * (mobile ? 78 : 92);
                   const x = Math.cos(angle) * distance;
-                  const y = Math.sin(angle) * distance * 0.72;
+                  const y = Math.sin(angle) * distance * (mobile ? 0.9 : 0.76);
                   const rotation = ((index % 7) - 3) * visibleProgress * 18;
-                  return <motion.span aria-hidden key={`${character}-${index}`} className="inline-block will-change-transform" style={{ transform: `translate3d(${x}vw, ${y}vh, 0) rotate(${rotation}deg)`, opacity: Math.min(1, visibleProgress * 12) * Math.max(0, 1 - visibleProgress * 1.18) }}>{character === " " ? "\u00a0" : character}</motion.span>;
+                  const depth = ((index * 83) % 440 - 220) * visibleProgress;
+                  const tiltX = ((index % 5) - 2) * visibleProgress * 22;
+                  const tiltY = ((index % 9) - 4) * visibleProgress * 14;
+                  return <motion.span aria-hidden key={`${character}-${index}`} className="inline-block will-change-transform" style={{ transform: `perspective(900px) translate3d(${x}vw, ${y}vh, ${depth}px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) rotateZ(${rotation}deg)`, opacity: Math.min(1, visibleProgress * 16) * Math.max(0, 1 - visibleProgress * 1.16), transformOrigin: "center" }}>{character === " " ? "\u00a0" : character}</motion.span>;
                 })}
               </h1>
               </div>
