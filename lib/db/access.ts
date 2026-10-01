@@ -28,6 +28,7 @@ export interface Viewer {
   title: string | null;
   phone: string | null;
   locale: string;
+  marketingOptIn: boolean;
 }
 
 /** Returns the signed-in user, or null for anonymous visitors. */
@@ -37,7 +38,7 @@ export async function getViewer(): Promise<Viewer | null> {
   const [record] = await db.select({
     id: users.id, email: users.email, name: users.name, role: users.role,
     image: users.image, company: users.company, title: users.title,
-    phone: users.phone, locale: users.locale,
+    phone: users.phone, locale: users.locale, marketingOptIn: users.marketingOptIn,
   }).from(users).where(eq(users.id, session.user.id)).limit(1);
   if (record) return record;
   return {
@@ -50,6 +51,7 @@ export async function getViewer(): Promise<Viewer | null> {
     title: null,
     phone: null,
     locale: session.user.locale ?? "ar",
+    marketingOptIn: false,
   };
 }
 

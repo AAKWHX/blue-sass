@@ -1173,6 +1173,25 @@
   }
 }
 
+/* Shader-inspired hero without WebGL. These are static gradient layers; only
+   their transforms and opacity animate, so no frame-by-frame paint is needed. */
+.shader-hero { background: radial-gradient(circle at 50% 110%, #1c2027 0%, #090b0e 32%, #050608 66%); }
+.shader-cloud { position:absolute; border-radius:9999px; background:radial-gradient(circle, rgb(255 255 255 / .16), rgb(255 255 255 / .045) 42%, transparent 72%); filter:blur(34px); will-change:transform,opacity; }
+.shader-cloud-a { width:min(70vw,62rem); aspect-ratio:1; inset-inline-start:-15%; top:-38%; animation:shader-float-a 13s ease-in-out infinite alternate; }
+.shader-cloud-b { width:min(58vw,48rem); aspect-ratio:1; inset-inline-end:-12%; top:7%; opacity:.72; animation:shader-float-b 16s ease-in-out infinite alternate; }
+.shader-cloud-c { width:min(54vw,42rem); aspect-ratio:1; left:23%; bottom:-40%; opacity:.7; animation:shader-float-c 11s ease-in-out infinite alternate; }
+.shader-wave { position:absolute; left:50%; top:54%; width:min(118vw,90rem); height:min(36vw,23rem); border:1px solid rgb(255 255 255 / .1); border-radius:50%; transform-origin:center; will-change:transform,opacity; }
+.shader-wave-a { animation:shader-wave-a 18s linear infinite; }
+.shader-wave-b { opacity:.55; animation:shader-wave-b 26s linear infinite; }
+.shader-grid { opacity:.22; background-image:linear-gradient(rgb(255 255 255 / .05) 1px,transparent 1px),linear-gradient(90deg,rgb(255 255 255 / .05) 1px,transparent 1px); background-size:72px 72px; mask-image:radial-gradient(circle at center,black,transparent 78%); }
+@keyframes shader-float-a { from{transform:translate3d(-2%,0,0) scale(.94);opacity:.55} to{transform:translate3d(7%,8%,0) scale(1.07);opacity:.9} }
+@keyframes shader-float-b { from{transform:translate3d(3%,-4%,0) scale(1.05);opacity:.48} to{transform:translate3d(-8%,5%,0) scale(.94);opacity:.82} }
+@keyframes shader-float-c { from{transform:translate3d(-5%,2%,0) scale(.95);opacity:.45} to{transform:translate3d(8%,-5%,0) scale(1.08);opacity:.76} }
+@keyframes shader-wave-a { from{transform:translate(-50%,-50%) rotateX(68deg) rotateZ(0)} to{transform:translate(-50%,-50%) rotateX(68deg) rotateZ(360deg)} }
+@keyframes shader-wave-b { from{transform:translate(-50%,-50%) scale(.72) rotateX(72deg) rotateZ(360deg)} to{transform:translate(-50%,-50%) scale(.72) rotateX(72deg) rotateZ(0)} }
+[dir="rtl"] .shader-hero h1,[dir="rtl"] .shader-hero .text-gradient-hero { letter-spacing:-.02em; }
+@media (max-width:639px){.shader-cloud-a{width:110vw;top:-20%;}.shader-cloud-b{width:100vw;top:28%;}.shader-wave{width:150vw;height:64vw;top:62%;}.shader-grid{background-size:42px 42px;}.shader-hero{min-height:calc(100svh - 74px);}}
+
 /* Directional glyphs (arrows, quotes) mirror under RTL */
 [dir="rtl"] .flip-x {
   transform: scaleX(-1);

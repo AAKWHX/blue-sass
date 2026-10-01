@@ -7,6 +7,8 @@ import { listViewerProjects } from "@/lib/db/queries";
 import { ProjectStatusPanel } from "@/components/admin/project-status-panel";
 import { PortfolioEditor } from "@/components/admin/portfolio-editor";
 import { portfolioEntries } from "@/lib/db/portfolio";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "Administration — Blue Sass" };
 
@@ -32,6 +34,10 @@ export default async function AdminPage({
 
   return (
     <>
+      <div className="container-x flex flex-wrap gap-3 pt-8">
+        {canPublish && <Button asChild variant="outline"><Link href={`/${locale}/admin/reviews`}>مراجعة آراء العملاء</Link></Button>}
+        {["super_admin", "admin"].includes(viewer.role) && <Button asChild variant="outline"><Link href={`/${locale}/admin/announcements`}>إرسال العروض والتحديثات</Link></Button>}
+      </div>
       <LeadsPanel leads={leads} locale={locale} readOnly={isReadOnlyAssistant(viewer) || !["super_admin", "admin", "pm"].includes(viewer.role)} />
       {!isReadOnlyAssistant(viewer) && ["super_admin", "admin", "pm"].includes(viewer.role) && <ProjectStatusPanel projects={projects} locale={locale} />}
       {canPublish && <PortfolioEditor entries={portfolio}/>}

@@ -16,13 +16,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export interface SiteHeaderProps { signedIn?: boolean; userName?: string; userImage?: string }
 
 const navCopy = {
-  ar: { home: "الرئيسية", about: "من نحن", services: "الخدمات", subscriptions: "الاشتراكات", hosting: "الاستضافة", projects: "أعمالنا", contact: "اتصل بنا", start: "ابدأ مشروعك", account: "الملف الشخصي", allProjects: "جميع المشاريع", settings: "الإعدادات" },
-  en: { home: "Home", about: "About", services: "Services", subscriptions: "Plans", hosting: "Hosting", projects: "Work", contact: "Contact", start: "Start a project", account: "Profile", allProjects: "All projects", settings: "Settings" },
-  nl: { home: "Home", about: "Over ons", services: "Diensten", subscriptions: "Abonnementen", hosting: "Hosting", projects: "Werk", contact: "Contact", start: "Start een project", account: "Profiel", allProjects: "Alle projecten", settings: "Instellingen" },
-  de: { home: "Start", about: "Über uns", services: "Leistungen", subscriptions: "Abos", hosting: "Hosting", projects: "Projekte", contact: "Kontakt", start: "Projekt starten", account: "Profil", allProjects: "Alle Projekte", settings: "Einstellungen" },
-  tr: { home: "Ana sayfa", about: "Hakkımızda", services: "Hizmetler", subscriptions: "Paketler", hosting: "Hosting", projects: "Projeler", contact: "İletişim", start: "Proje başlat", account: "Profil", allProjects: "Tüm projeler", settings: "Ayarlar" },
-  fr: { home: "Accueil", about: "À propos", services: "Services", subscriptions: "Abonnements", hosting: "Hébergement", projects: "Projets", contact: "Contact", start: "Démarrer", account: "Profil", allProjects: "Tous les projets", settings: "Paramètres" },
-  es: { home: "Inicio", about: "Nosotros", services: "Servicios", subscriptions: "Planes", hosting: "Hosting", projects: "Proyectos", contact: "Contacto", start: "Empezar proyecto", account: "Perfil", allProjects: "Todos los proyectos", settings: "Ajustes" },
+  ar: { home: "الرئيسية", about: "من نحن", services: "الخدمات", subscriptions: "الاشتراكات", hosting: "الاستضافة", projects: "أعمالنا", reviews: "آراء العملاء", contact: "اتصل بنا", start: "ابدأ مشروعك", account: "الملف الشخصي", allProjects: "جميع المشاريع", settings: "الإعدادات" },
+  en: { home: "Home", about: "About", services: "Services", subscriptions: "Plans", hosting: "Hosting", projects: "Work", reviews: "Reviews", contact: "Contact", start: "Start a project", account: "Profile", allProjects: "All projects", settings: "Settings" },
+  nl: { home: "Home", about: "Over ons", services: "Diensten", subscriptions: "Abonnementen", hosting: "Hosting", projects: "Werk", reviews: "Reviews", contact: "Contact", start: "Start een project", account: "Profiel", allProjects: "Alle projecten", settings: "Instellingen" },
+  de: { home: "Start", about: "Über uns", services: "Leistungen", subscriptions: "Abos", hosting: "Hosting", projects: "Projekte", reviews: "Bewertungen", contact: "Kontakt", start: "Projekt starten", account: "Profil", allProjects: "Alle Projekte", settings: "Einstellungen" },
+  tr: { home: "Ana sayfa", about: "Hakkımızda", services: "Hizmetler", subscriptions: "Paketler", hosting: "Hosting", projects: "Projeler", reviews: "Yorumlar", contact: "İletişim", start: "Proje başlat", account: "Profil", allProjects: "Tüm projeler", settings: "Ayarlar" },
+  fr: { home: "Accueil", about: "À propos", services: "Services", subscriptions: "Abonnements", hosting: "Hébergement", projects: "Projets", reviews: "Avis", contact: "Contact", start: "Démarrer", account: "Profil", allProjects: "Tous les projets", settings: "Paramètres" },
+  es: { home: "Inicio", about: "Nosotros", services: "Servicios", subscriptions: "Planes", hosting: "Hosting", projects: "Proyectos", reviews: "Opiniones", contact: "Contacto", start: "Empezar proyecto", account: "Perfil", allProjects: "Todos los proyectos", settings: "Ajustes" },
 } as const;
 
 export function SiteHeader({ signedIn = false, userName, userImage }: SiteHeaderProps) {
@@ -38,6 +38,7 @@ export function SiteHeader({ signedIn = false, userName, userImage }: SiteHeader
     { href: `${base}/subscriptions`, label: c.subscriptions },
     { href: `${base}/hosting`, label: c.hosting },
     { href: `${base}/projects`, label: c.projects },
+    { href: `${base}/reviews`, label: c.reviews },
     { href: `${base}/contact`, label: c.contact },
   ];
 

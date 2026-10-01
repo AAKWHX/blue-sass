@@ -77,6 +77,7 @@ export const mediaKind = pgEnum("media_kind", ["image", "video", "demo", "docume
 
 export const paymentStatus = pgEnum("payment_status", ["pending", "paid", "failed"]);
 export const hostingStatus = pgEnum("hosting_status", ["uploading", "building", "ready", "failed"]);
+export const reviewStatus = pgEnum("review_status", ["pending", "approved", "rejected"]);
 
 /* ------------------------------------------------------------------ *
  * Auth.js core tables (Drizzle adapter contract)
@@ -94,6 +95,7 @@ export const users = pgTable("users", {
   title: text("title"),
   phone: text("phone"),
   locale: text("locale").notNull().default("ar"),
+  marketingOptIn: boolean("marketing_opt_in").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -313,6 +315,23 @@ export const hostedSites = pgTable(
   (t) => [index("hosted_sites_user_idx").on(t.userId, t.createdAt), index("hosted_sites_status_idx").on(t.status)],
 );
 
+/** Public customer opinions. New submissions stay private until staff approval. */
+export const reviews = pgTable(
+  "reviews",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    displayName: text("display_name").notNull(),
+    company: text("company"),
+    rating: integer("rating").notNull(),
+    body: text("body").notNull(),
+    status: reviewStatus("status").notNull().default("pending"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    moderatedAt: timestamp("moderated_at", { withTimezone: true }),
+  },
+  (t) => [index("reviews_status_created_idx").on(t.status, t.createdAt), index("reviews_user_idx").on(t.userId, t.createdAt)],
+);
+
 /** Public quote form — no account required. */
 export const leads = pgTable(
   "leads",
@@ -355,6 +374,7 @@ export type FeedbackRow = typeof feedback.$inferSelect;
 export type MessageRow = typeof messages.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
 export type HostedSite = typeof hostedSites.$inferSelect;
+export type Review = typeof reviews.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 
@@ -368,3 +388,4 @@ export type MediaKind = (typeof mediaKind.enumValues)[number];
 export type LeadStatus = (typeof leadStatus.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatus.enumValues)[number];
 export type HostingStatus = (typeof hostingStatus.enumValues)[number];
+export type ReviewStatus = (typeof reviewStatus.enumValues)[number];

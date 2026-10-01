@@ -16,6 +16,9 @@ import {
   PayPalConfigurationError,
   verifiedCompletedCapture,
 } from "@/lib/paypal";
+import { purchaseConfirmationEmail } from "@/lib/email/templates";
+import { sendEmail } from "@/lib/email/resend";
+import { getSiteUrl } from "@/lib/site-url";
 
 const orderIdSchema = z.string().min(6).max(64).regex(/^[A-Za-z0-9_-]+$/);
 
@@ -26,7 +29,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
     const viewer = await requireViewer();
     assertCanWrite(viewer);
     const orderId = orderIdSchema.parse((await params).orderId);
-    const { payment } = await getOwnedPayPalPayment(orderId, viewer.id);
+    const { payment, project } = await getOwnedPayPalPayment(orderId, viewer.id);
     paymentId = payment.id;
 
     if (payment.status === "paid") {
@@ -44,7 +47,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
       currency: payment.currency,
     });
     if (capture) {
-      await markPaymentPaid(payment, capture.id);
+      const paid = await markPaymentPaid(payment, capture.id);
+      const siteUrl = await getSiteUrl();
+      const message = purchaseConfirmationEmail(viewer.locale, {
+        projectName: project.name,
+        amount: new Intl.NumberFormat(viewer.locale, { style: "currency", currency: payment.currency }).format(payment.amountCents / 100),
+        reference: capture.id,
+        paidAt: paid.paidAt ?? new Date(),
+        portalUrl: `${siteUrl}/${viewer.locale}/portal/projects/${project.id}`,
+        siteUrl,
+      });
+      await sendEmail({ to: viewer.email, ...message }).catch(() => undefined);
       return NextResponse.json({ status: "paid" });
     }
 

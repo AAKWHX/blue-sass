@@ -9,6 +9,8 @@ import { isLocale } from "@/lib/i18n";
 import { recovery } from "@/lib/i18n/recovery";
 import { validateEmail } from "@/lib/validation/contact";
 import { newResetCode, resetDigest, matchesResetCode, RESET_TTL, RESET_MAX_ATTEMPTS } from "@/lib/auth/reset-code";
+import { recoveryEmail } from "@/lib/email/templates";
+import { getSiteUrl } from "@/lib/site-url";
 
 export interface RecoveryState { ok: boolean; message: string; email?: string; complete?: boolean }
 function input(data: FormData) {
@@ -20,7 +22,7 @@ function input(data: FormData) {
 function secret() { return process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? ""; }
 
 export async function requestRecovery(_previous: RecoveryState, data: FormData): Promise<RecoveryState> {
-  const { t, email } = input(data);
+  const { t, email, locale } = input(data);
   if (!validateEmail(email).ok || !isDatabaseConfigured || !isEmailConfigured || !secret()) return { ok: false, message: t.unavailable };
   const identifier = `password-reset:${email}`;
   const code = newResetCode();
@@ -35,7 +37,8 @@ export async function requestRecovery(_previous: RecoveryState, data: FormData):
     return Boolean(user);
   });
   if (issued) {
-    const sent = await sendEmail({ to: email, subject: `Blue Sass — ${t.title}`, html: `<h1>Blue Sass</h1><p>${t.intro}</p><p style="font-size:32px;letter-spacing:6px" dir="ltr">${code}</p>`, text: `${t.intro}\n\n${code}` });
+    const message = recoveryEmail(locale, code, await getSiteUrl());
+    const sent = await sendEmail({ to: email, ...message });
     if (!sent.ok || sent.skipped) return { ok: false, message: t.unavailable };
   }
   return { ok: true, message: t.sent, email };

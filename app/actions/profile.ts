@@ -16,6 +16,7 @@ const profileSchema = z.object({
   title: z.string().trim().max(100).optional(),
   phone: z.string().trim().max(32).optional(),
   locale: z.string(),
+  marketingOptIn: z.string().optional(),
 });
 
 function validImageSignature(bytes: Uint8Array, type: string) {
@@ -53,6 +54,7 @@ export async function updateProfileAction(_previous: ProfileState, formData: For
     title: title || null,
     phone: phone || null,
     locale,
+    marketingOptIn: parsed.data.marketingOptIn === "on",
     ...(image ? { image } : {}),
   }).where(eq(users.id, viewer.id));
 
