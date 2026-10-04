@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { builderCopy, translated } from "@/lib/i18n/project-builder";
 import {
   postFeedbackAction,
   postMessageAction,
@@ -51,6 +52,8 @@ import type {
 
 const STAGES: ProjectStage[] = ["planning", "design", "development", "testing", "review", "completed"];
 const initialState: MutationState = { ok: false, message: "" };
+const awaitingCopy = translated("بانتظار الدفع، لن يبدأ التنفيذ قبل تأكيده", "Awaiting payment; work starts after confirmation", "Wacht op betaling; uitvoering start na bevestiging", "Wartet auf Zahlung; Umsetzung nach Bestätigung", "Ödeme bekleniyor; onaydan sonra çalışma başlar", "En attente de paiement ; démarrage après confirmation", "Pendiente de pago; trabajo tras confirmación");
+const completedCopy = translated("إطلاق النسخة المعتمدة وتسليم الملفات النهائية", "Launch the approved version and hand over final files", "Goedgekeurde versie lanceren en definitieve bestanden overdragen", "Freigegebene Version starten und finale Dateien übergeben", "Onaylı sürümü yayınlama ve son dosyaları teslim etme", "Lancer la version approuvée et livrer les fichiers finaux", "Publicar la versión aprobada y entregar los archivos finales");
 const detailCopy = {
   ar: { details: "تفاصيل المشروع", budget: "الميزانية", start: "تاريخ البدء", deadline: "موعد التسليم" },
   en: { details: "Project details", budget: "Budget", start: "Start date", deadline: "Deadline" },
@@ -75,6 +78,7 @@ export interface DashboardProject {
     daysLeft: number | null;
   };
   paymentStatus?: PaymentStatus | null;
+  cancelled?: boolean;
 }
 
 export interface ClientDashboardProps {
@@ -189,8 +193,9 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
 
   const active = projects[Math.min(index, projects.length - 1)];
   const { project, milestones, files, summary } = active;
-  const awaitingPayment = active.paymentStatus !== undefined && active.paymentStatus !== "paid";
-  const awaitingLabel = locale === "ar" ? "بانتظار الدفع — لن يبدأ التخطيط قبل تأكيده" : "Awaiting payment — planning starts after confirmation";
+  const cancelled = active.cancelled === true;
+  const awaitingPayment = !cancelled && active.paymentStatus !== undefined && active.paymentStatus !== "paid";
+  const awaitingLabel = awaitingCopy[locale];
   const stageIndex = STAGES.indexOf(project.stage);
   const dateFmt = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" });
   const detailsText = detailCopy[locale];
@@ -230,13 +235,13 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
                 <h2 className="text-lg font-bold text-ink-hi" dir="auto">
                   {project.name}
                 </h2>
-                {awaitingPayment ? <Badge className="bg-amber-100 text-amber-900">{awaitingLabel}</Badge> : <StatusBadge status={project.stage} label={t.status[project.stage]} />}
+                {cancelled ? <Badge variant="outline">{t.experience.cancelled}</Badge> : awaitingPayment ? <Badge className="bg-amber-100 text-amber-900">{awaitingLabel}</Badge> : <StatusBadge status={project.stage} label={t.status[project.stage]} />}
               </div>
               <p className="mt-2 whitespace-pre-line text-sm text-ink-low" dir="auto">
                 {project.summary}
               </p>
 
-              <div className={`mt-6 ${awaitingPayment ? "opacity-45" : ""}`}>
+              <div className={`mt-6 ${awaitingPayment || cancelled ? "opacity-45" : ""}`}>
                 <div className="mb-2 flex items-center justify-between text-xs font-semibold">
                   <span className="text-ink-low">{t.portal.completion}</span>
                   <span className="tabular-nums text-neon-cyan">{summary.percent}%</span>
@@ -250,7 +255,7 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
               <ol className="mt-8 space-y-3">
                 {STAGES.map((stage, i) => {
                   const done = i < stageIndex || project.stage === "completed";
-                  const current = !awaitingPayment && i === stageIndex && project.stage !== "completed";
+                  const current = !cancelled && !awaitingPayment && i === stageIndex && project.stage !== "completed";
                   return (
                     <li key={stage} className="rounded-2xl border border-line-strong p-4">
                       <div className="flex items-center gap-2">
@@ -270,7 +275,7 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
                           {t.status[stage]}
                         </span>
                       </div>
-                      <ul className="mt-3 space-y-1 text-sm leading-7 text-ink-low">{(t.deliveryDetails[Math.min(i, 4)] ?? []).map(line => <li key={line}>{line}</li>)}</ul>
+                      <ul className="mt-3 space-y-1 text-sm leading-7 text-ink-low">{(stage === "completed" ? [completedCopy[locale]] : t.deliveryDetails[i] ?? []).map(line => <li key={line}>{line}</li>)}</ul>
                       <div className="mt-2 h-1 rounded-full bg-line">
                         <div
                           className={clsx(
@@ -446,7 +451,7 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
                 <Clock3 className="size-3.5" />
                 {t.auth.estimatedTime}
               </p>
-              <p className="mt-3 text-4xl font-black tabular-nums text-neon-cyan">
+              {cancelled || awaitingPayment ? <p className="mt-3 text-sm leading-7 text-ink-low">{cancelled ? t.experience.cancelled : builderCopy.timing[locale]}</p> : <><p className="mt-3 text-4xl font-black tabular-nums text-neon-cyan">
                 {summary.remainingHours}
               </p>
               <p className="text-sm text-ink-low">{t.auth.hours}</p>
@@ -455,7 +460,7 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
                   <span className="font-bold tabular-nums text-ink-hi">{summary.daysLeft}</span>{" "}
                   {t.auth.daysLeft}
                 </p>
-              ) : null}
+              ) : null}</>}
             </div>
 
             <div className="glass-card p-5">
@@ -472,7 +477,7 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
                 {t.portal.nextDelivery}
               </p>
               <p className="mt-2 text-sm font-semibold text-ink-hi" dir="auto">
-                {milestones.find((m) => m.status !== "done")?.title ?? "—"}
+                {cancelled ? "—" : awaitingPayment ? awaitingLabel : milestones.find((m) => m.status !== "done")?.title ?? "—"}
               </p>
             </div>
 
