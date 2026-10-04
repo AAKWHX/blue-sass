@@ -9,6 +9,20 @@
    v4 reads it through this bridge. */
 @config "../tailwind.config.ts";
 
+/* Keep Tailwind's v4 automatic source scan out of adjacent backup copies.
+   Those folders are preserved in the workspace, but contain copied build
+   artifacts and dependencies that emit invalid arbitrary-value utilities. */
+@source not "../app - kopie";
+@source not "../components - kopie";
+@source not "../drizzle - kopie";
+@source not "../hooks - kopie";
+@source not "../lib - kopie";
+@source not "../public - kopie";
+@source not "../scripts - kopie";
+@source not "../node_modules - kopie";
+@source not "../.next - kopie";
+@source not "../.next-build - kopie";
+
 /* shadcn/ui theme tokens.
    Mapped onto the existing AWWA palette rather than shadcn's default slate,
    so Radix primitives inherit the neon look instead of fighting it.
@@ -1173,24 +1187,40 @@
   }
 }
 
-/* Shader-inspired hero without WebGL. These are static gradient layers; only
-   their transforms and opacity animate, so no frame-by-frame paint is needed. */
-.shader-hero { background: radial-gradient(circle at 50% 110%, #1c2027 0%, #090b0e 32%, #050608 66%); }
-.shader-cloud { position:absolute; border-radius:9999px; background:radial-gradient(circle, rgb(255 255 255 / .16), rgb(255 255 255 / .045) 42%, transparent 72%); filter:blur(34px); will-change:transform,opacity; }
-.shader-cloud-a { width:min(70vw,62rem); aspect-ratio:1; inset-inline-start:-15%; top:-38%; animation:shader-float-a 13s ease-in-out infinite alternate; }
-.shader-cloud-b { width:min(58vw,48rem); aspect-ratio:1; inset-inline-end:-12%; top:7%; opacity:.72; animation:shader-float-b 16s ease-in-out infinite alternate; }
-.shader-cloud-c { width:min(54vw,42rem); aspect-ratio:1; left:23%; bottom:-40%; opacity:.7; animation:shader-float-c 11s ease-in-out infinite alternate; }
-.shader-wave { position:absolute; left:50%; top:54%; width:min(118vw,90rem); height:min(36vw,23rem); border:1px solid rgb(255 255 255 / .1); border-radius:50%; transform-origin:center; will-change:transform,opacity; }
-.shader-wave-a { animation:shader-wave-a 18s linear infinite; }
-.shader-wave-b { opacity:.55; animation:shader-wave-b 26s linear infinite; }
-.shader-grid { opacity:.22; background-image:linear-gradient(rgb(255 255 255 / .05) 1px,transparent 1px),linear-gradient(90deg,rgb(255 255 255 / .05) 1px,transparent 1px); background-size:72px 72px; mask-image:radial-gradient(circle at center,black,transparent 78%); }
-@keyframes shader-float-a { from{transform:translate3d(-2%,0,0) scale(.94);opacity:.55} to{transform:translate3d(7%,8%,0) scale(1.07);opacity:.9} }
-@keyframes shader-float-b { from{transform:translate3d(3%,-4%,0) scale(1.05);opacity:.48} to{transform:translate3d(-8%,5%,0) scale(.94);opacity:.82} }
-@keyframes shader-float-c { from{transform:translate3d(-5%,2%,0) scale(.95);opacity:.45} to{transform:translate3d(8%,-5%,0) scale(1.08);opacity:.76} }
+/* Sentinel-style cinematic hero, adapted to Blue Sass. The Spline scene is
+   represented by composited CSS light fields to keep the experience smooth
+   on phones and avoid a WebGL runtime. */
+.shader-hero { background: radial-gradient(ellipse at 72% 35%, #172010 0%, #0b0d09 38%, #080908 76%); }
+.shader-cloud { position:absolute; border-radius:9999px; background:radial-gradient(circle, rgb(2 232 7 / .18), rgb(2 232 7 / .055) 42%, transparent 72%); filter:blur(38px); will-change:transform,opacity; }
+.shader-cloud-a { width:min(70vw,62rem); aspect-ratio:1; inset-inline-start:34%; top:-58%; animation:shader-float-a 15s ease-in-out infinite alternate; }
+.shader-cloud-b { width:min(52vw,46rem); aspect-ratio:1; inset-inline-start:52%; top:12%; opacity:.68; background:radial-gradient(circle, rgb(146 201 255 / .16), rgb(146 201 255 / .035) 44%, transparent 72%); animation:shader-float-b 18s ease-in-out infinite alternate; }
+.shader-cloud-c { width:min(48vw,40rem); aspect-ratio:1; inset-inline-start:12%; bottom:-42%; opacity:.5; animation:shader-float-c 12s ease-in-out infinite alternate; }
+.shader-wave { position:absolute; left:68%; top:47%; width:min(102vw,88rem); height:min(48vw,34rem); border:1px solid rgb(2 232 7 / .13); border-radius:50%; transform-origin:center; will-change:transform,opacity; }
+.shader-wave-a { animation:shader-wave-a 28s linear infinite; }
+.shader-wave-b { border-color:rgb(255 255 255 / .07); opacity:.6; animation:shader-wave-b 36s linear infinite; }
+.shader-grid { opacity:.14; background-image:linear-gradient(rgb(255 255 255 / .05) 1px,transparent 1px),linear-gradient(90deg,rgb(255 255 255 / .05) 1px,transparent 1px); background-size:84px 84px; mask-image:linear-gradient(to bottom,transparent 0%,black 30%,black 78%,transparent 100%); }
+.shader-horizon { background:linear-gradient(to right,transparent,rgb(2 232 7 / .35),rgb(255 255 255 / .16),transparent); box-shadow:0 0 34px rgb(2 232 7 / .14); }
+.shader-scene-mark { inset-inline-end:8%; top:14%; width:min(42vw,35rem); aspect-ratio:1; border:1px solid rgb(255 255 255 / .08); border-radius:50%; box-shadow:inset 0 0 80px rgb(2 232 7 / .025),0 0 80px rgb(2 232 7 / .04); transform:rotateX(65deg) rotateZ(-18deg); }
+.home-floating-nav { position:fixed; inset-block-start:0; inset-inline:0; z-index:50; border:0; background:linear-gradient(to bottom,rgb(0 0 0 / .55),rgb(0 0 0 / .12) 72%,transparent); }
+.home-floating-nav-inner { min-height:5.5rem; }
+.home-floating-nav-links { gap:clamp(1rem,2.2vw,2rem); }
+.home-floating-nav-link { color:rgb(255 255 255 / .68); font-size:.68rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; transition:color .2s ease,text-shadow .2s ease; }
+.home-floating-nav-link:hover,.home-floating-nav-link:focus-visible { color:#fff; text-shadow:0 0 16px rgb(2 232 7 / .42); }
+.hero-nav-cta { align-items:center; gap:.55rem; border-radius:.65rem; background:#252725; color:#fff; padding:.78rem 1.3rem; font-size:.7rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; transition:transform .2s ease,background-color .2s ease,box-shadow .2s ease; }
+.hero-nav-cta:hover { transform:translateY(-2px); background:#30342e; box-shadow:0 0 26px rgb(2 232 7 / .17); }
+.hero-primary-cta { align-items:center; gap:.8rem; background:#02e807; color:#090b07; transition:transform .22s ease,box-shadow .22s ease,filter .22s ease; }
+.hero-primary-cta:hover { transform:translateY(-2px); filter:brightness(1.08); box-shadow:0 14px 40px -12px rgb(2 232 7 / .52); }
+.hero-secondary-cta { align-items:center; gap:.8rem; background:#f4f5f2; color:#10120e; transition:transform .22s ease,box-shadow .22s ease,background-color .22s ease; }
+.hero-secondary-cta:hover { transform:translateY(-2px); background:#fff; box-shadow:0 14px 36px -14px rgb(255 255 255 / .38); }
+.hero-primary-cta:focus-visible,.hero-secondary-cta:focus-visible,.hero-nav-cta:focus-visible { outline:2px solid #fff; outline-offset:3px; }
+@keyframes shader-float-a { from{transform:translate3d(-2%,0,0) scale(.94);opacity:.48} to{transform:translate3d(7%,8%,0) scale(1.07);opacity:.82} }
+@keyframes shader-float-b { from{transform:translate3d(3%,-4%,0) scale(1.05);opacity:.42} to{transform:translate3d(-8%,5%,0) scale(.94);opacity:.76} }
+@keyframes shader-float-c { from{transform:translate3d(-5%,2%,0) scale(.95);opacity:.35} to{transform:translate3d(8%,-5%,0) scale(1.08);opacity:.66} }
 @keyframes shader-wave-a { from{transform:translate(-50%,-50%) rotateX(68deg) rotateZ(0)} to{transform:translate(-50%,-50%) rotateX(68deg) rotateZ(360deg)} }
 @keyframes shader-wave-b { from{transform:translate(-50%,-50%) scale(.72) rotateX(72deg) rotateZ(360deg)} to{transform:translate(-50%,-50%) scale(.72) rotateX(72deg) rotateZ(0)} }
-[dir="rtl"] .shader-hero h1,[dir="rtl"] .shader-hero .text-gradient-hero { letter-spacing:-.02em; }
-@media (max-width:639px){.shader-cloud-a{width:110vw;top:-20%;}.shader-cloud-b{width:100vw;top:28%;}.shader-wave{width:150vw;height:64vw;top:62%;}.shader-grid{background-size:42px 42px;}.shader-hero{min-height:calc(100svh - 74px);}}
+[dir="rtl"] .shader-hero h1,[dir="rtl"] .shader-hero p { letter-spacing:0; }
+@media (max-width:1279px){.home-floating-nav-links{gap:1.1rem}.home-floating-nav-link{font-size:.62rem;letter-spacing:.12em}}
+@media (max-width:639px){.shader-cloud-a{width:112vw;inset-inline-start:10%;top:-18%;}.shader-cloud-b{width:94vw;inset-inline-start:23%;top:23%;}.shader-cloud-c{width:90vw;inset-inline-start:-12%;bottom:-32%;}.shader-wave{width:145vw;height:66vw;left:78%;top:52%;}.shader-grid{background-size:46px 46px;}.shader-scene-mark{width:74vw;inset-inline-end:-22%;top:15%;}.home-floating-nav-inner{min-height:4.75rem}.home-floating-nav{background:linear-gradient(to bottom,rgb(0 0 0 / .7),transparent)}}
 
 /* Directional glyphs (arrows, quotes) mirror under RTL */
 [dir="rtl"] .flip-x {

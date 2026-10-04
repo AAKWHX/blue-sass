@@ -8,7 +8,7 @@ const orderIdSchema = z.string().min(6).max(64).regex(/^[A-Za-z0-9_-]+$/);
 
 export async function POST(request: Request, { params }: { params: Promise<{ orderId: string }> }) {
   try {
-    assertSameOrigin(request);
+    assertSameOrigin(request, true);
     const viewer = await requireViewer();
     assertCanWrite(viewer);
     const orderId = orderIdSchema.parse((await params).orderId);

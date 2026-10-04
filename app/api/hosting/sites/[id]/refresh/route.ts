@@ -8,7 +8,7 @@ import { assertSameOrigin } from "@/lib/api-security";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    assertSameOrigin(request);
+    assertSameOrigin(request, true);
     const viewer = await requireViewer();
     const { id } = await params;
     const [site] = await db.select().from(hostedSites).where(and(eq(hostedSites.id, id), eq(hostedSites.userId, viewer.id))).limit(1);

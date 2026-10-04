@@ -40,6 +40,18 @@
     ".next-build/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "node_modules - kopie",
+    ".next - kopie",
+    ".next-build - kopie",
+    "app - kopie",
+    "components - kopie",
+    "drizzle - kopie",
+    "hooks - kopie",
+    "lib - kopie",
+    "public - kopie",
+    "scripts - kopie",
+    "next-env.d - kopie.ts",
+    "drizzle.config - kopie.ts"
   ]
 }

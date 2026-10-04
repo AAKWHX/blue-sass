@@ -54,7 +54,7 @@ export function Services() {
     detailHref: `/${locale}/services/${item.slug}`,
   }));
   return (
-    <section id="services" className="section-y bg-white">
+    <section id="services" className="section-y scroll-mt-24 bg-white">
       <div className="container-x">
         <Reveal className="text-center"><h2 className="mx-auto max-w-3xl text-4xl font-bold text-black sm:text-6xl">{headings[locale]}</h2></Reveal>
 

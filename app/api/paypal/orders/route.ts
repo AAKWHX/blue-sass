@@ -16,7 +16,7 @@ const bodySchema = z.object({ projectId: z.string().uuid() }).strict();
 export async function POST(request: Request) {
   let paymentId: string | undefined;
   try {
-    assertSameOrigin(request);
+    assertSameOrigin(request, true);
     const viewer = await requireViewer();
     assertCanWrite(viewer);
     const body = bodySchema.parse(await request.json());

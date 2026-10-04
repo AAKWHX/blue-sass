@@ -12,6 +12,7 @@ export interface AnimatedShaderHeroProps {
   subtitle: string;
   primary: string;
   secondary: string;
+  trustLine: string;
 }
 
 /**
@@ -19,27 +20,29 @@ export interface AnimatedShaderHeroProps {
  * field is rasterised CSS and only transform/opacity animate, keeping phones
  * smooth and honouring reduced-motion preferences.
  */
-export function AnimatedShaderHero({ locale, badge, headline, subtitle, primary, secondary }: AnimatedShaderHeroProps) {
+export function AnimatedShaderHero({ locale, badge, headline, subtitle, primary, secondary, trustLine }: AnimatedShaderHeroProps) {
   const base = `/${locale}`;
-  return <section className="shader-hero noise relative isolate flex min-h-[calc(100svh-82px)] overflow-hidden bg-black text-white">
+  return <section className="shader-hero noise relative isolate flex min-h-svh overflow-hidden bg-black text-white">
     <div aria-hidden="true" className="absolute inset-0 z-backdrop overflow-hidden pointer-events-none">
       <div className="shader-cloud shader-cloud-a"/><div className="shader-cloud shader-cloud-b"/><div className="shader-cloud shader-cloud-c"/>
       <div className="shader-wave shader-wave-a"/><div className="shader-wave shader-wave-b"/>
       <div className="shader-grid absolute inset-0"/>
-      <div className="absolute inset-x-0 bottom-[17%] h-px bg-gradient-to-r from-transparent via-white/35 to-transparent"/>
+      <div className="shader-horizon absolute inset-x-0 bottom-[14%] h-px"/>
+      <div className="shader-scene-mark absolute"/>
     </div>
-    <div className="container-x relative z-content flex flex-1 items-center justify-center py-20 text-center sm:py-24">
-      <div className="mx-auto max-w-6xl">
-        <motion.div initial={{ opacity: 0, y: -18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7 }} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[.06] px-4 py-2 text-xs font-semibold text-white/75 backdrop-blur-md sm:text-sm"><Sparkles className="size-4 text-white"/>{badge}</motion.div>
-        <div className="mt-8 space-y-1 sm:mt-10">
-          <motion.h1 initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .8, delay: .12 }} className="text-[clamp(3rem,9vw,8.4rem)] font-black leading-[.96] tracking-[-.055em] text-white">{headline.line1}</motion.h1>
-          <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .8, delay: .24 }} className="text-gradient-hero text-[clamp(3rem,9vw,8.4rem)] font-black leading-[.96] tracking-[-.055em]">{headline.line2}</motion.p>
+    <div className="container-x relative z-content flex w-full flex-1 items-end px-6 pb-10 pt-32 md:px-10 md:pb-12">
+      <div className="w-full max-w-4xl text-start">
+        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .65, delay: .05 }} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/35 px-4 py-2 text-xs font-semibold text-white/80 backdrop-blur-md sm:text-sm"><Sparkles className="size-4 text-[#02e807]"/>{badge}</motion.div>
+        <div className="mt-6 space-y-0.5 sm:mt-8">
+          <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7, delay: .2 }} className="max-w-5xl text-[clamp(3.25rem,8vw,7.2rem)] font-bold uppercase leading-[1.02] tracking-[-.055em] text-white">{headline.line1}</motion.h1>
+          <motion.p initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7, delay: .34 }} className="max-w-5xl text-[clamp(2.5rem,6vw,5.6rem)] font-semibold leading-[1.05] tracking-[-.045em] text-[#02e807]">{headline.line2}</motion.p>
         </div>
-        <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .75, delay: .38 }} className="mx-auto mt-8 max-w-3xl text-base leading-8 text-white/65 sm:text-xl sm:leading-9">{subtitle}</motion.p>
-        <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7, delay: .5 }} className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button asChild variant="neon" size="lg" className="min-h-14 rounded-full px-8 text-base"><Link href={`${base}/create-project`}>{primary}<ArrowUpLeft className="size-4 flip-x"/></Link></Button>
-          <Button asChild variant="unstyled" size="auto" className="inline-flex min-h-14 items-center justify-center rounded-full border border-white/20 bg-white/[.06] px-8 text-base font-bold text-white backdrop-blur-md transition hover:border-white/40 hover:bg-white/[.11]"><Link href={`${base}/services`}>{secondary}</Link></Button>
+        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .65, delay: .5 }} className="mt-4 max-w-2xl text-[clamp(1rem,1.5vw,1.35rem)] font-light leading-8 text-white/75 sm:mt-5 sm:leading-9">{subtitle}</motion.p>
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .65, delay: .66 }} className="mt-6 flex flex-wrap gap-3 sm:mt-8">
+          <Button asChild variant="unstyled" size="auto" className="hero-primary-cta min-h-12 rounded-md px-6 py-3 text-sm font-bold md:min-h-14 md:px-8 md:py-4"><Link href={`${base}/create-project`}>{primary}<motion.span className="inline-flex" animate={{ x: [0, 4, 0] }} transition={{ duration: 1.35, repeat: Infinity, ease: "easeInOut" }}><ArrowUpLeft className="size-4 flip-x"/></motion.span></Link></Button>
+          <Button asChild variant="unstyled" size="auto" className="hero-secondary-cta min-h-12 rounded-md px-6 py-3 text-sm font-bold md:min-h-14 md:px-8 md:py-4"><Link href={`${base}/projects`}>{secondary}<motion.span className="inline-flex" whileHover={{ x: 4 }}><ArrowUpLeft className="size-4 flip-x"/></motion.span></Link></Button>
         </motion.div>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: .55, delay: .86 }} className="mt-5 text-xs font-light tracking-wide text-white/50 sm:mt-6">{trustLine}</motion.p>
       </div>
     </div>
   </section>;
