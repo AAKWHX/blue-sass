@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { ArrowUpLeft, ChevronDown, FolderKanban, LogIn, LogOut, Menu, Settings, UserRound } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
 import { useI18n } from "@/components/providers";
@@ -14,6 +14,14 @@ import { LanguageSwitcher } from "@/components/ui/switchers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export interface SiteHeaderProps { signedIn?: boolean; userName?: string; userImage?: string }
+
+function subscribeToScroll(onChange: () => void) {
+  window.addEventListener("scroll", onChange, { passive: true });
+  return () => window.removeEventListener("scroll", onChange);
+}
+
+function getScrolledSnapshot() { return window.scrollY > 32; }
+function getServerScrolledSnapshot() { return false; }
 
 const navCopy = {
   ar: { home: "الرئيسية", about: "من نحن", services: "الخدمات", subscriptions: "الاشتراكات", hosting: "الاستضافة", projects: "أعمالنا", reviews: "آراء العملاء", contact: "اتصل بنا", team: "الفريق", start: "ابدأ مشروعك", account: "الملف الشخصي", allProjects: "جميع المشاريع", settings: "الإعدادات" },
@@ -28,6 +36,7 @@ const navCopy = {
 export function SiteHeader({ signedIn = false, userName, userImage }: SiteHeaderProps) {
   const { locale, t } = useI18n();
   const pathname = usePathname();
+  const scrolled = useSyncExternalStore(subscribeToScroll, getScrolledSnapshot, getServerScrolledSnapshot);
   const [open, setOpen] = useState(false);
   const base = `/${locale}`;
   const c = navCopy[locale];
@@ -51,7 +60,7 @@ export function SiteHeader({ signedIn = false, userName, userImage }: SiteHeader
   ];
 
   return (
-    <header className={isHome ? "home-floating-nav text-white" : "sticky top-0 z-50 border-b border-black/10 bg-black text-white"}>
+    <header className={isHome ? `home-floating-nav text-white ${scrolled ? "home-floating-nav-scrolled" : ""}` : "sticky top-0 z-50 border-b border-black/10 bg-black text-white"}>
       <div className={`container-x flex min-h-[82px] items-center gap-4 py-2 ${isHome ? "home-floating-nav-inner" : ""}`}>
         <Link href={base} className="shrink-0 [&_svg]:h-12 [&_svg]:w-12 [&>span>span]:!text-white"><BrandLogo /></Link>
         <nav className={`mx-auto hidden items-center gap-8 ${isHome ? "home-floating-nav-links xl:flex" : "2xl:flex"}`}>
