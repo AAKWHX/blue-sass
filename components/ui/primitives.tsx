@@ -14,7 +14,6 @@ import { Card as ShadcnCard } from "@/components/ui/card";
  */
 
 export function SectionHeading({
-  eyebrow,
   title,
   subtitle,
   align = "center",
@@ -26,12 +25,7 @@ export function SectionHeading({
 }) {
   return (
     <div className={clsx("max-w-3xl", align === "center" ? "mx-auto text-center" : "text-start")}>
-      {eyebrow && (
-        <Badge variant="neon" className="mono-label px-3 py-1.5">
-          {eyebrow}
-        </Badge>
-      )}
-      <h2 className="mt-5 text-3xl sm:text-5xl">{title}</h2>
+      <h2 className="text-3xl sm:text-5xl">{title}</h2>
       {subtitle && <p className="mt-4 text-base leading-relaxed text-ink-low">{subtitle}</p>}
     </div>
   );

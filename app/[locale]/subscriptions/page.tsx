@@ -27,7 +27,6 @@ export default async function SubscriptionsPage({ params }: { params: Promise<{ 
   const plans = subscriptionPlans(locale);
   return <main className="bg-base">
     <section className="container-x py-16 text-center sm:py-24">
-      <span className="text-sm font-bold text-neon-blue">✦ {c.eyebrow}</span>
       <h1 className="mx-auto mt-5 max-w-4xl text-4xl font-bold leading-tight text-black sm:text-7xl">{c.title}</h1>
       <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-ink-low">{c.subtitle}</p>
       <div className="mt-14 grid gap-5 lg:grid-cols-3">

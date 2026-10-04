@@ -1,13 +1,12 @@
 type LegalSection = { title: string; paragraphs: string[] };
 
-export function LegalPage({ eyebrow, title, updated, introduction, sections, updatedLabel = "Last updated" }: {
+export function LegalPage({ title, updated, introduction, sections, updatedLabel = "Last updated" }: {
   eyebrow: string; title: string; updated: string; introduction: string; sections: LegalSection[]; updatedLabel?: string;
 }) {
   return (
     <section className="container-x py-20 sm:py-28">
       <div className="mx-auto max-w-3xl">
-        <p className="mono-label text-neon-cyan">{eyebrow}</p>
-        <h1 className="mt-4 text-4xl font-black tracking-tight text-ink-high sm:text-5xl">{title}</h1>
+        <h1 className="text-4xl font-black tracking-tight text-ink-high sm:text-5xl">{title}</h1>
         <p className="mt-4 text-sm text-ink-low">{updatedLabel}: {updated}</p>
         <p className="mt-10 text-base leading-8 text-ink-mid">{introduction}</p>
         <div className="mt-12 space-y-10">

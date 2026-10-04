@@ -19,7 +19,6 @@ export function ScrollExpandMedia({
   mediaSrc,
   mediaAlt,
   title,
-  eyebrow,
   scrollToExpand,
   titleClassName,
   children,
@@ -137,14 +136,6 @@ export function ScrollExpandMedia({
 
           <div className="pointer-events-none absolute inset-0 grid place-items-center px-5 text-center">
             <div className="w-full">
-              {eyebrow ? (
-                <motion.p
-                  className="mb-5 text-xs font-black uppercase tracking-[.22em] text-white/70 sm:text-sm"
-                  animate={{ opacity: 1 - visibleProgress * 1.4 }}
-                >
-                  {eyebrow}
-                </motion.p>
-              ) : null}
               <div className="relative mx-auto max-w-6xl">
               <motion.h1 className={cn("absolute inset-0 text-[clamp(2.4rem,7vw,7.4rem)] font-black leading-[1.02] tracking-[-.055em] text-white [text-shadow:0_18px_60px_rgba(0,0,0,.65)]", titleClassName)} animate={{ opacity: Math.max(0, 1 - visibleProgress * 10), scale: 1 - visibleProgress * .035 }}>{title}</motion.h1>
               <h1 className={cn("text-[clamp(2.4rem,7vw,7.4rem)] font-black leading-[1.02] tracking-[-.055em] text-white [text-shadow:0_18px_60px_rgba(0,0,0,.65)]", titleClassName)} aria-label={title}>

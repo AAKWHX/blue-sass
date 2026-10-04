@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowUpRight, Check, LayoutGrid, Search, Sparkles } from "lucide-react";
+import { ArrowUpRight, Check, LayoutGrid, Search } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { TemplateLivePreview } from "@/components/public/template-live-preview";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ export function TemplateGallery({ service, group, embedded = false }: { service?
       {!service && <Button variant="unstyled" size="auto" className={`justify-start rounded-xl border px-3 py-2.5 text-xs ${filter === "all" ? "border-white bg-white text-black" : "border-white/10 bg-white/[.03] text-white/65 hover:border-white/25 hover:text-white"}`} onClick={() => setFilter("all")}>{c.allServices}<span className="ms-auto opacity-50">{source.length}</span></Button>}
       {catalog.filter((entry) => source.some((item) => item.service === entry.slug)).map((entry) => <Button key={entry.slug} variant="unstyled" size="auto" className={`justify-start rounded-xl border px-3 py-2.5 text-start text-xs ${filter === entry.slug ? "border-white bg-white text-black" : "border-white/10 bg-white/[.03] text-white/65 hover:border-white/25 hover:text-white"}`} onClick={() => setFilter(entry.slug)}>{entry.title}<span className="ms-auto opacity-50">{source.filter((item) => item.service === entry.slug).length}</span></Button>)}
     </div></aside>
-    <div className="min-w-0"><span className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[.04] px-3 py-1.5 text-xs text-white/70"><Sparkles className="size-3"/>{labels.live}</span>{embedded ? <h2 className="mt-5 max-w-3xl text-4xl font-bold leading-tight text-white sm:text-6xl">{c.templates}</h2> : <h1 className="mt-5 max-w-3xl text-4xl font-bold leading-tight text-white sm:text-6xl">{c.templates}</h1>}<p className="mt-5 max-w-3xl text-sm leading-7 text-white/70">{c.templateNote} {labels.hint}</p>
+    <div className="min-w-0">{embedded ? <h2 className="max-w-3xl text-4xl font-bold leading-tight text-white sm:text-6xl">{c.templates}</h2> : <h1 className="max-w-3xl text-4xl font-bold leading-tight text-white sm:text-6xl">{c.templates}</h1>}<p className="mt-5 max-w-3xl text-sm leading-7 text-white/70">{c.templateNote} {labels.hint}</p>
       <label className="relative mt-8 block max-w-2xl"><Search className="pointer-events-none absolute start-4 top-1/2 z-content size-4 -translate-y-1/2 text-white/45"/><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={labels.search} className="h-13 rounded-2xl border-white/12 bg-white/[.045] ps-11 text-white placeholder:text-white/35 focus:border-white/35"/></label><p className="mt-4 text-xs text-white/45">{items.length} {labels.results}</p>
       {items.length ? <div className="mt-7 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">{items.map((item, index) => { const serviceInfo = catalog.find((entry) => entry.slug === item.service); return <article key={item.id} className="group/card flex min-w-0 flex-col rounded-[1.4rem] border border-white/10 bg-white/[.035] p-2.5 transition duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-white/[.055]">
         <Button variant="unstyled" size="auto" className="block w-full rounded-2xl text-start focus-visible:ring-offset-[#050608]" onClick={() => setSelected(item.id)} aria-label={`${c.preview}: ${item.name}`}><TemplateLivePreview item={item}/></Button>
