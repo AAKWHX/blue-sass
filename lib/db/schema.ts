@@ -19,6 +19,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
+import type { ProjectConfiguration, configuredEstimate } from "../project-options";
 
 /* ------------------------------------------------------------------ *
  * Enums
@@ -364,6 +365,14 @@ export const leads = pgTable(
 /* ------------------------------------------------------------------ *
  * Inferred types — the app imports these instead of hand-written ones.
  * ------------------------------------------------------------------ */
+export const projectRequests = pgTable("project_requests", {
+  projectId: uuid("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
+  leadId: uuid("lead_id").references(() => leads.id, { onDelete: "set null" }),
+  configuration: jsonb("configuration").$type<ProjectConfiguration>().notNull(),
+  estimate: jsonb("estimate").$type<ReturnType<typeof configuredEstimate>>().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Project = typeof projects.$inferSelect;

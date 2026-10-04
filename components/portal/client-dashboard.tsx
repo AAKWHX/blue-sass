@@ -232,7 +232,7 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
                 </h2>
                 {awaitingPayment ? <Badge className="bg-amber-100 text-amber-900">{awaitingLabel}</Badge> : <StatusBadge status={project.stage} label={t.status[project.stage]} />}
               </div>
-              <p className="mt-2 text-sm text-ink-low" dir="auto">
+              <p className="mt-2 whitespace-pre-line text-sm text-ink-low" dir="auto">
                 {project.summary}
               </p>
 
@@ -247,12 +247,12 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
                 </p>
               </div>
 
-              <ol className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <ol className="mt-8 space-y-3">
                 {STAGES.map((stage, i) => {
                   const done = i < stageIndex || project.stage === "completed";
                   const current = !awaitingPayment && i === stageIndex && project.stage !== "completed";
                   return (
-                    <li key={stage}>
+                    <li key={stage} className="rounded-2xl border border-line-strong p-4">
                       <div className="flex items-center gap-2">
                         {done ? (
                           <CheckCircle2 className="size-5 text-neon-emerald" />
@@ -270,6 +270,7 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
                           {t.status[stage]}
                         </span>
                       </div>
+                      <ul className="mt-3 space-y-1 text-sm leading-7 text-ink-low">{(t.deliveryDetails[Math.min(i, 4)] ?? []).map(line => <li key={line}>{line}</li>)}</ul>
                       <div className="mt-2 h-1 rounded-full bg-line">
                         <div
                           className={clsx(

@@ -4,6 +4,19 @@
 /* Tailwind v4: a single @import replaces the three @tailwind directives. */
 @import "tailwindcss";
 
+.request-builder { color: #f5f5f5; background: #050608; border-radius: 1.5rem; margin-block: 1.5rem; }
+.request-builder h1, .request-builder h2, .request-builder h3, .request-panel h1, .request-panel h2, .request-panel h3 { color: inherit; }
+.request-builder [data-slot="button"][data-variant="outline"], .request-panel [data-slot="button"][data-variant="outline"], .request-builder [data-slot="button"][data-variant="ghostNeon"], .request-panel [data-slot="button"][data-variant="ghostNeon"] { color: #f5f5f5; border-color: #6a707c; background: transparent; }
+.request-builder [data-slot="button"][data-variant="neon"], .request-panel [data-slot="button"][data-variant="neon"] { background: #20232a; color: #f5f5f5; border-color: #e8ecf0; }
+.request-panel { min-width: 0; padding: clamp(1rem, 3vw, 1.75rem); border: 1px solid #30333b; border-radius: 1.5rem; background: linear-gradient(145deg, #16181d, #090a0d); color: #f5f5f5; }
+.request-choice { display: block; width: 100%; height: 100%; min-width: 0; padding: 1.25rem; border: 1px solid #30333b; border-radius: 1.25rem; text-align: start; white-space: normal; background: linear-gradient(150deg, #191c22, #0b0c10); color: #f5f5f5; transition: transform .2s, border-color .2s; }
+.request-choice:hover { transform: translateY(-2px); border-color: #9098a3; }
+.request-choice-selected { border-color: #f2f4f7; background: linear-gradient(150deg, #30343d, #111318); }
+.request-choice:disabled { opacity: .8; }
+.request-choice-icon { display: flex; align-items: center; justify-content: center; width: 3rem; height: 3rem; border: 1px solid #454a54; border-radius: 1rem; background: #20232a; }
+.request-builder input:not([type="hidden"]), .request-builder textarea { border-color: #444954; background: #0a0b0e; color: #f5f5f5; }
+@media (prefers-reduced-motion: reduce) { .request-choice { transition: none; } .request-choice:hover { transform: none; } }
+
 /* Keep the JS config as the single source of truth for the design tokens
    (colours, the z-scale, keyframes) instead of duplicating them into @theme.
    v4 reads it through this bridge. */

@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { projects } from "@/lib/db/schema";
+import { projects, projectRequests } from "@/lib/db/schema";
 import { assertCanWrite, requireViewer } from "@/lib/db/access";
 import { lifecycleState, lockProject, recordLifecycle } from "@/lib/db/project-lifecycle";
 import { experience } from "@/lib/i18n/experience";
@@ -31,6 +31,8 @@ export async function updateClientProject(_previous: { ok: boolean; message: str
    await recordLifecycle(tx, projectId, "cancelled", viewer.id);
    await tx.update(projects).set({ visibility: "private", updatedAt: new Date() }).where(eq(projects.id, projectId));
   } else {
+   const [configured] = await tx.select({ id: projectRequests.projectId }).from(projectRequests).where(eq(projectRequests.projectId, projectId)).limit(1);
+   if (configured) return false;
    await tx.update(projects).set({ name, summary, updatedAt: new Date() }).where(eq(projects.id, projectId));
   }
   return true;

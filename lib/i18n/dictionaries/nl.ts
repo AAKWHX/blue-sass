@@ -65,7 +65,7 @@ const nl: Dictionary = {
     ],
   },
   quote: {
-    title: "Projectcalculator", subtitle: "Stel uw scope samen en ontvang binnen een minuut een indicatief budget en tijdlijn.",
+    title: "Projectdetails kiezen", subtitle: "Kies de omvang, bekijk de raming en sla uw aanvraag op. Betaal wanneer u klaar bent.",
     fields: { name: "Volledige naam", email: "Zakelijk e-mailadres", company: "Bedrijf", type: "Projecttype", features: "Modules & functies", timeline: "Levertempo", budget: "Budgetrange", notes: "Nog iets dat we moeten weten?" },
     types: { web: "Webplatform", mobile: "Mobiele app", ai: "AI-systeem", ecommerce: "E-commerce", erp: "ERP / interne tools", brand: "Merk & design" },
     speeds: { relaxed: "Flexibele planning", standard: "Standaard", rush: "Spoed (+40%)" },

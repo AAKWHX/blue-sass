@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, eq } from "drizzle-orm";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { payments, projectMilestones, projects, type Payment, type Project } from "@/lib/db/schema";
+import { payments, projectMilestones, projectRequests, projects, type Payment, type Project } from "@/lib/db/schema";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { reservationDeposit, type ProjectType } from "@/lib/pricing";
 import { getPayPalEnvironment } from "@/lib/paypal";
@@ -154,7 +154,13 @@ export async function markPaymentPaid(payment: Payment, captureId: string) {
     const now = new Date();
     const [paid] = await tx.update(payments).set({ status: "paid", providerCaptureId: captureId, failureCode: null, paidAt: now, updatedAt: now }).where(and(eq(payments.id, payment.id), eq(payments.status, "pending"))).returning();
     if (!paid) return null;
-    await tx.update(projects).set({ startDate: now, updatedAt: now }).where(eq(projects.id, paid.projectId));
+    const [request] = await tx.select({ configuration: projectRequests.configuration }).from(projectRequests).where(eq(projectRequests.projectId, paid.projectId)).limit(1);
+    const days = request?.configuration.deliveryDays;
+    await tx.update(projects).set({ startDate: now, ...(days ? { deadline: new Date(now.getTime() + days * 86_400_000) } : {}), updatedAt: now }).where(eq(projects.id, paid.projectId));
+    if (days) {
+      const milestones = await tx.select({ id: projectMilestones.id }).from(projectMilestones).where(eq(projectMilestones.projectId, paid.projectId)).orderBy(asc(projectMilestones.orderIndex));
+      for (const [index, milestone] of milestones.entries()) await tx.update(projectMilestones).set({ dueDate: new Date(now.getTime() + Math.ceil(days * (index + 1) / Math.max(1, milestones.length)) * 86_400_000) }).where(eq(projectMilestones.id, milestone.id));
+    }
     const [first] = await tx.select({ id: projectMilestones.id }).from(projectMilestones).where(eq(projectMilestones.projectId, paid.projectId)).orderBy(asc(projectMilestones.orderIndex)).limit(1);
     if (first) await tx.update(projectMilestones).set({ status: "in_progress" }).where(eq(projectMilestones.id, first.id));
     return paid;

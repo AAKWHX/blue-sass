@@ -65,7 +65,7 @@ const de: Dictionary = {
     ],
   },
   quote: {
-    title: "Projektrechner", subtitle: "Scope zusammenstellen und in unter einer Minute Budget- und Zeitindikation erhalten.",
+    title: "Projektdetails auswählen", subtitle: "Umfang wählen, Kostenschätzung prüfen und Anfrage speichern. Bezahlen Sie später.",
     fields: { name: "Vollständiger Name", email: "Geschäftliche E-Mail", company: "Unternehmen", type: "Projekttyp", features: "Module & Funktionen", timeline: "Liefertempo", budget: "Budgetrahmen", notes: "Weitere Hinweise?" },
     types: { web: "Webplattform", mobile: "Mobile App", ai: "KI-System", ecommerce: "E-Commerce", erp: "ERP / interne Tools", brand: "Marke & Design" },
     speeds: { relaxed: "Flexibler Zeitplan", standard: "Standard", rush: "Eilig (+40 %)" },

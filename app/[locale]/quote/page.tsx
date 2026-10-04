@@ -4,7 +4,7 @@ import { getViewer } from "@/lib/db/access";
 import { SubscriptionRequest } from "@/components/public/subscription-request";
 import { subscriptionIds, type SubscriptionId } from "@/lib/subscriptions";
 
-export const metadata = { title: "Project estimator — Blue Sass" };
+export const metadata = { title: "Project details | Blue Sass" };
 
 export default async function QuotePage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ type?: string; service?: string; template?: string; kind?: string }> }) {
   const { locale } = await params;

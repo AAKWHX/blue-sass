@@ -65,7 +65,7 @@ const fr: Dictionary = {
     ],
   },
   quote: {
-    title: "Estimateur de projet", subtitle: "Composez votre périmètre et obtenez budget et délai indicatifs en moins d'une minute.",
+    title: "Choisir les détails du projet", subtitle: "Configurez le périmètre, vérifiez l'estimation et enregistrez. Payez lorsque vous êtes prêt.",
     fields: { name: "Nom complet", email: "E-mail professionnel", company: "Société", type: "Type de projet", features: "Modules et fonctionnalités", timeline: "Rythme de livraison", budget: "Fourchette budgétaire", notes: "Autre information utile ?" },
     types: { web: "Plateforme web", mobile: "Application mobile", ai: "Système d'IA", ecommerce: "E-commerce", erp: "ERP / outils internes", brand: "Marque et design" },
     speeds: { relaxed: "Calendrier souple", standard: "Standard", rush: "Urgent (+40 %)" },

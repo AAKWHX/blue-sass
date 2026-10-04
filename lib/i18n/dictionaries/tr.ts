@@ -65,7 +65,7 @@ const tr: Dictionary = {
     ],
   },
   quote: {
-    title: "Proje hesaplayıcı", subtitle: "Kapsamınızı oluşturun, bir dakikadan kısa sürede yaklaşık bütçe ve süre alın.",
+    title: "Proje ayrıntılarını seçin", subtitle: "Kapsamı seçin, tahmini inceleyin ve talebi kaydedin. Hazır olduğunuzda ödeyin.",
     fields: { name: "Ad soyad", email: "Kurumsal e-posta", company: "Şirket", type: "Proje türü", features: "Modüller ve özellikler", timeline: "Teslim hızı", budget: "Bütçe aralığı", notes: "Eklemek istediğiniz bir şey var mı?" },
     types: { web: "Web platformu", mobile: "Mobil uygulama", ai: "Yapay zekâ sistemi", ecommerce: "E-ticaret", erp: "ERP / iç araçlar", brand: "Marka ve tasarım" },
     speeds: { relaxed: "Esnek takvim", standard: "Standart", rush: "Acil (+%40)" },

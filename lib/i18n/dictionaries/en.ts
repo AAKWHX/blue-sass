@@ -103,7 +103,7 @@ const en = {
     ],
   },
   quote: {
-    title: "Project estimator",
+    title: "Choose project details",
     subtitle: "Build your scope and get an indicative budget and timeline in under a minute.",
     fields: {
       name: "Full name",

@@ -65,7 +65,7 @@ const es: Dictionary = {
     ],
   },
   quote: {
-    title: "Calculadora de proyecto", subtitle: "Define tu alcance y obtén presupuesto y plazo orientativos en menos de un minuto.",
+    title: "Elegir detalles del proyecto", subtitle: "Configure el alcance, revise la estimación y guarde. Pague cuando esté listo.",
     fields: { name: "Nombre completo", email: "Correo corporativo", company: "Empresa", type: "Tipo de proyecto", features: "Módulos y funciones", timeline: "Ritmo de entrega", budget: "Rango de presupuesto", notes: "¿Algo más que debamos saber?" },
     types: { web: "Plataforma web", mobile: "App móvil", ai: "Sistema de IA", ecommerce: "E-commerce", erp: "ERP / herramientas internas", brand: "Marca y diseño" },
     speeds: { relaxed: "Calendario flexible", standard: "Estándar", rush: "Urgente (+40 %)" },
