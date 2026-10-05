@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Bot, Gauge, Layers3, ShieldCheck, Workflow } from "lucide-react";
@@ -6,7 +7,7 @@ import { useI18n } from "@/components/providers";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const copy = {
+const copy = withExtraLocales({
   ar: { title: "ما الذي يجعل المنتج أقوى؟", subtitle: "تفاصيل عملية ندمجها في المشروع بدل إضافة زخارف لا تخدم الهدف.", previous: "السابق", next: "التالي", cards: [["قرار واضح قبل الكود", "نحوّل الهدف والجمهور والمحتوى إلى نطاق يمكن قياسه."], ["واجهة تقود المستخدم", "تسلسل بصري وحركة هادئة يساعدان الزائر على اتخاذ الخطوة التالية."], ["أداء وأمان من البداية", "بنية سريعة، تحقق من البيانات، وصلاحيات واضحة قبل الإطلاق."], ["لوحة متابعة حقيقية", "تشاهد حالة المشروع والدفعات والملفات والقرارات في مكان واحد."], ["قابلية للتوسع", "مكوّنات منظمة وتكاملات يمكن تطويرها مع نمو نشاطك."]] },
   en: { title: "What makes a stronger product?", subtitle: "Practical details built into the project instead of decoration without purpose.", previous: "Previous", next: "Next", cards: [["Clarity before code", "Goals, audience and content become a measurable scope."], ["An interface that guides", "Visual hierarchy and calm motion help visitors take the next step."], ["Performance and security", "Fast foundations, validation and clear permissions from day one."], ["A real client workspace", "Track project status, payments, files and decisions in one place."], ["Ready to scale", "Organised components and integrations that grow with the business."]] },
   nl: { title: "Wat maakt een product sterker?", subtitle: "Praktische details in het project, geen decoratie zonder doel.", previous: "Vorige", next: "Volgende", cards: [["Duidelijkheid vóór code", "Doelen, doelgroep en content worden een meetbare scope."], ["Een interface die leidt", "Hiërarchie en rustige beweging sturen de bezoeker."], ["Prestaties en veiligheid", "Een snelle basis, validatie en heldere rechten."], ["Een echte klantomgeving", "Status, betalingen, bestanden en besluiten op één plek."], ["Klaar om te groeien", "Geordende componenten en uitbreidbare koppelingen."]] },
@@ -14,7 +15,7 @@ const copy = {
   tr: { title: "Ürünü daha güçlü yapan nedir?", subtitle: "Amaçsız süsler yerine projeye dahil edilen gerçek ayrıntılar.", previous: "Önceki", next: "Sonraki", cards: [["Koddan önce netlik", "Hedefler, kitle ve içerik ölçülebilir kapsama dönüşür."], ["Yönlendiren arayüz", "Hiyerarşi ve sakin hareket kullanıcıya yol gösterir."], ["Performans ve güvenlik", "Hızlı temel, doğrulama ve net yetkiler."], ["Gerçek müşteri alanı", "Durum, ödeme, dosya ve kararlar tek yerde."], ["Büyümeye hazır", "Düzenli bileşenler ve genişleyebilir entegrasyonlar."]] },
   fr: { title: "Qu’est-ce qui renforce un produit ?", subtitle: "Des détails utiles intégrés au projet, sans décoration gratuite.", previous: "Précédent", next: "Suivant", cards: [["Clarté avant le code", "Objectifs, public et contenus deviennent mesurables."], ["Une interface qui guide", "Hiérarchie et mouvement calme orientent le visiteur."], ["Performance et sécurité", "Base rapide, validation et droits clairs."], ["Un vrai espace client", "Suivi, paiements, fichiers et décisions au même endroit."], ["Prêt à évoluer", "Composants organisés et intégrations extensibles."]] },
   es: { title: "¿Qué hace más fuerte un producto?", subtitle: "Detalles útiles integrados, sin decoración que no cumpla un objetivo.", previous: "Anterior", next: "Siguiente", cards: [["Claridad antes del código", "Objetivos, público y contenido se convierten en alcance medible."], ["Una interfaz que guía", "Jerarquía y movimiento sereno orientan al visitante."], ["Rendimiento y seguridad", "Base rápida, validación y permisos claros."], ["Un área real de cliente", "Estado, pagos, archivos y decisiones en un solo lugar."], ["Preparado para crecer", "Componentes organizados e integraciones ampliables."]] },
-} as const;
+} as const);
 
 const icons = [Workflow, Layers3, ShieldCheck, Gauge, Bot];
 

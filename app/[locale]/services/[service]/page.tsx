@@ -1,3 +1,4 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowRight, CheckCircle2, Clock3, PackageCheck, Target } from "lucide-react";
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 const slugs = serviceSlugs;
-const copy = {
+const copy = withExtraLocales({
   ar: { what: "مخرجات هذه الخدمة", steps: "مسار تنفيذ مخصص لهذه الخدمة", estimate: "ابدأ مشروعًا بهذه التفاصيل", ideal: "مناسبة لـ", result: "النتيجة المتوقعة", timeline: "المدة التقديرية", points: ["تخطيط واضح ونطاق عمل موثّق", "تصميم متجاوب وسهل الاستخدام", "تنفيذ آمن وقابل للتوسع", "اختبار وإطلاق ودعم مستمر"] },
   en: { what: "Service deliverables", steps: "A delivery path tailored to this service", estimate: "Start with these details", ideal: "Best for", result: "Expected outcome", timeline: "Estimated timeline", points: ["A clear plan and documented scope", "Responsive, accessible design", "Secure and scalable implementation", "Testing, launch and ongoing support"] },
   nl: { what: "Resultaten van de dienst", steps: "Een traject op maat voor deze dienst", estimate: "Start met deze details", ideal: "Geschikt voor", result: "Verwacht resultaat", timeline: "Geschatte doorlooptijd", points: ["Een duidelijk plan en vastgelegde scope", "Responsief en toegankelijk ontwerp", "Veilige en schaalbare realisatie", "Testen, lancering en doorlopende support"] },
@@ -25,7 +26,7 @@ const copy = {
   tr: { what: "Hizmet çıktıları", steps: "Bu hizmete özel teslim süreci", estimate: "Bu ayrıntılarla başlayın", ideal: "Kimler için", result: "Beklenen sonuç", timeline: "Tahmini süre", points: ["Net plan ve belgelenmiş kapsam", "Duyarlı ve erişilebilir tasarım", "Güvenli ve ölçeklenebilir geliştirme", "Test, yayın ve sürekli destek"] },
   fr: { what: "Livrables du service", steps: "Un parcours adapté à ce service", estimate: "Démarrer avec ces détails", ideal: "Idéal pour", result: "Résultat attendu", timeline: "Délai estimé", points: ["Un plan clair et un périmètre documenté", "Un design adaptatif et accessible", "Une réalisation sûre et évolutive", "Tests, lancement et support continu"] },
   es: { what: "Entregables del servicio", steps: "Un proceso adaptado a este servicio", estimate: "Empezar con estos detalles", ideal: "Ideal para", result: "Resultado esperado", timeline: "Plazo estimado", points: ["Plan claro y alcance documentado", "Diseño adaptable y accesible", "Implementación segura y escalable", "Pruebas, lanzamiento y soporte continuo"] },
-} as const;
+} as const);
 
 export function generateStaticParams() {
   return slugs.map((service) => ({ service }));

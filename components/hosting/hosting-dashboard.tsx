@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ import type { HostedSite } from "@/lib/db/schema";
 import type { Locale } from "@/lib/i18n";
 import { hostingCopy } from "@/lib/i18n/hosting-copy";
 
-const copy = {
+const copy = withExtraLocales({
   ar: { name: "اسم الموقع", type: "نوع المشروع", static: "موقع Static", next: "تطبيق Next.js", folder: "اختر فولدر المشروع", chosen: "ملف محدد", confirm: "أؤكد أن الملفات تخصني ولا تحتوي على كلمات مرور أو مفاتيح سرية.", deploy: "استضافة الموقع", deploying: "جارٍ رفع الملفات وبدء النشر…", preparing: "جارٍ فحص الملفات وتجهيزها…", waiting: "اكتمل الرفع، جارٍ إنشاء الموقع. قد يستغرق ذلك دقيقة…", network: "تعذر الاتصال بخدمة الاستضافة. تحقق من الإنترنت ثم أعد المحاولة.", invalid: "وصل رد غير صالح من الخادم. أعد المحاولة، وإن استمرت المشكلة تواصل معنا.", tooLarge: "تجاوزت الملفات الحد المسموح: 200 ملف وبحجم إجمالي 4 MB.", limits: "حتى 200 ملف و4 MB. لا ترفع .env أو node_modules أو مجلدات البناء.", sites: "مواقعك المستضافة", empty: "لا توجد مواقع مستضافة بعد.", details: "الإعدادات والتفاصيل", visit: "زيارة الموقع", ready: "جاهز", building: "قيد البناء", uploading: "قيد الرفع", failed: "فشل" },
   en: { name: "Site name", type: "Project type", static: "Static website", next: "Next.js application", folder: "Choose project folder", chosen: "files selected", confirm: "I confirm I own these files and they contain no passwords or secret keys.", deploy: "Host website", deploying: "Uploading files and starting deployment…", limits: "Up to 200 files and 4 MB. Do not upload .env, node_modules or build folders.", sites: "Your hosted sites", empty: "No hosted sites yet.", details: "Settings and details", visit: "Visit site", ready: "Ready", building: "Building", uploading: "Uploading", failed: "Failed" },
   nl: { name: "Sitenaam", type: "Projecttype", static: "Statische website", next: "Next.js-app", folder: "Projectmap kiezen", chosen: "bestanden gekozen", confirm: "Ik bevestig dat deze bestanden van mij zijn en geen geheime sleutels bevatten.", deploy: "Website hosten", deploying: "Bestanden uploaden…", limits: "Maximaal 200 bestanden en 4 MB. Upload geen .env, node_modules of buildmappen.", sites: "Uw gehoste sites", empty: "Nog geen sites.", details: "Instellingen en details", visit: "Site bezoeken", ready: "Gereed", building: "Wordt gebouwd", uploading: "Uploaden", failed: "Mislukt" },
@@ -22,7 +23,7 @@ const copy = {
   tr: { name: "Site adı", type: "Proje türü", static: "Statik web sitesi", next: "Next.js uygulaması", folder: "Proje klasörünü seç", chosen: "dosya seçildi", confirm: "Dosyaların bana ait olduğunu ve gizli anahtar içermediğini onaylıyorum.", deploy: "Siteyi barındır", deploying: "Dosyalar yükleniyor…", limits: "En fazla 200 dosya ve 4 MB. .env, node_modules veya build klasörlerini yüklemeyin.", sites: "Barındırılan siteleriniz", empty: "Henüz site yok.", details: "Ayarlar ve ayrıntılar", visit: "Siteyi ziyaret et", ready: "Hazır", building: "Oluşturuluyor", uploading: "Yükleniyor", failed: "Başarısız" },
   fr: { name: "Nom du site", type: "Type de projet", static: "Site statique", next: "Application Next.js", folder: "Choisir le dossier", chosen: "fichiers sélectionnés", confirm: "Je confirme posséder ces fichiers et qu’ils ne contiennent aucun secret.", deploy: "Héberger le site", deploying: "Téléversement en cours…", limits: "200 fichiers et 4 Mo maximum. Aucun .env, node_modules ou dossier de build.", sites: "Vos sites hébergés", empty: "Aucun site pour le moment.", details: "Paramètres et détails", visit: "Visiter le site", ready: "Prêt", building: "Construction", uploading: "Téléversement", failed: "Échec" },
   es: { name: "Nombre del sitio", type: "Tipo de proyecto", static: "Sitio estático", next: "Aplicación Next.js", folder: "Elegir carpeta", chosen: "archivos seleccionados", confirm: "Confirmo que estos archivos son míos y no contienen secretos.", deploy: "Alojar sitio", deploying: "Subiendo archivos…", limits: "Hasta 200 archivos y 4 MB. No suba .env, node_modules ni carpetas de compilación.", sites: "Tus sitios alojados", empty: "Todavía no hay sitios.", details: "Ajustes y detalles", visit: "Visitar sitio", ready: "Listo", building: "Construyendo", uploading: "Subiendo", failed: "Falló" },
-} as const;
+} as const);
 
 function uploadDeployment(formData: FormData, onProgress: (value: number) => void) {
   return new Promise<{ status: number; body: { id?: string; error?: string } }>((resolve, reject) => {

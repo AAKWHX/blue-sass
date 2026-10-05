@@ -1,10 +1,11 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import Link from "next/link";
 import { ArrowUpLeft, BriefcaseBusiness, Mail, MessageCircle, Phone, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { isLocale } from "@/lib/i18n";
 
-const copy = {
+const copy = withExtraLocales({
   ar: ["تواصل معنا", "أخبرنا عن فكرتك، وسنساعدك في تحويلها إلى خطة واضحة ومنتج جاهز للنمو.", "ابدأ طلب مشروع", "الهاتف وواتساب", "البريد الإلكتروني", "نرد عادة خلال يوم عمل واحد.", "فريق Blue Sass", "فريق متعدد التخصصات يتغير توزيع مهامه حسب احتياج كل مشروع. يمكننا إضافة موظفين جدد مع نمو الفريق.", "المهام الموضحة هي المسؤوليات الأساسية وقد تختلف حسب المشروع."],
   en: ["Contact us", "Tell us about your idea and we will turn it into a clear plan and a product ready to grow.", "Start a project request", "Phone & WhatsApp", "Email", "We usually reply within one business day.", "The Blue Sass team", "A multidisciplinary team whose responsibilities adapt to each project. New members can be added as the team grows.", "Listed responsibilities are primary roles and may vary by project."],
   nl: ["Neem contact op", "Vertel ons uw idee en wij maken er een helder plan van.", "Start een projectaanvraag", "Telefoon & WhatsApp", "E-mail", "We reageren meestal binnen één werkdag.", "Het Blue Sass-team", "Een multidisciplinair team waarvan de taken per project worden verdeeld.", "De genoemde taken zijn hoofdrollen en kunnen per project verschillen."],
@@ -12,14 +13,14 @@ const copy = {
   tr: ["İletişim", "Fikrinizi anlatın, onu net bir plana ve büyümeye hazır ürüne dönüştürelim.", "Proje talebi başlat", "Telefon & WhatsApp", "E-posta", "Genellikle bir iş günü içinde yanıt veririz.", "Blue Sass ekibi", "Görevleri projeye göre uyarlanan çok disiplinli bir ekip.", "Belirtilen sorumluluklar ana rollerdir ve projeye göre değişebilir."],
   fr: ["Contactez-nous", "Parlez-nous de votre idée et nous la transformerons en plan clair.", "Démarrer une demande", "Téléphone & WhatsApp", "E-mail", "Nous répondons généralement sous un jour ouvré.", "L’équipe Blue Sass", "Une équipe multidisciplinaire dont les responsabilités s’adaptent au projet.", "Les responsabilités indiquées sont principales et peuvent varier."],
   es: ["Contacto", "Cuéntenos su idea y la convertiremos en un plan claro.", "Iniciar solicitud", "Teléfono y WhatsApp", "Correo electrónico", "Respondemos normalmente en un día laborable.", "El equipo Blue Sass", "Un equipo multidisciplinar cuyas funciones se adaptan a cada proyecto.", "Las responsabilidades indicadas son principales y pueden variar."],
-} as const;
+} as const);
 
 const team = [
-  { name: "ETSKAR", email: "etskar@bluesass.nl", role: { ar: "مدير الشركة · استلام المشاريع وتقسيم المهام", en: "Company director · Project intake and task allocation" }, icon: BriefcaseBusiness },
-  { name: "Moayad", email: "mvx@bluesass.nl", role: { ar: "مدير المشروع", en: "Project manager" }, icon: Users },
-  { name: "Mustafa", email: "mustafa@bluesass.nl", role: { ar: "استلام تفاصيل المشروع", en: "Project requirements and details" }, icon: MessageCircle },
-  { name: "George", email: "george@bluesass.nl", role: { ar: "فحص أمن المشاريع", en: "Project security review" }, icon: ShieldCheck },
-  { name: "Omar", email: "omar@bluesass.nl", role: { ar: "تصميم الواجهات والهوية البصرية", en: "Interface and visual identity design" }, icon: Sparkles },
+  { name: "ETSKAR", email: "etskar@bluesass.nl", role: withExtraLocales({ ar: "مدير الشركة · استلام المشاريع وتقسيم المهام", en: "Company director · Project intake and task allocation" }), icon: BriefcaseBusiness },
+  { name: "Moayad", email: "mvx@bluesass.nl", role: withExtraLocales({ ar: "مدير المشروع", en: "Project manager" }), icon: Users },
+  { name: "Mustafa", email: "mustafa@bluesass.nl", role: withExtraLocales({ ar: "استلام تفاصيل المشروع", en: "Project requirements and details" }), icon: MessageCircle },
+  { name: "George", email: "george@bluesass.nl", role: withExtraLocales({ ar: "فحص أمن المشاريع", en: "Project security review" }), icon: ShieldCheck },
+  { name: "Omar", email: "omar@bluesass.nl", role: withExtraLocales({ ar: "تصميم الواجهات والهوية البصرية", en: "Interface and visual identity design" }), icon: Sparkles },
 ] as const;
 
 export const metadata = { title: "تواصل مع بلو ساس — تصميم وتطوير المواقع والتطبيقات" };

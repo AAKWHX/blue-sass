@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { websiteNames, websitePackages } from "@/lib/website-packages";
 import { applyImplementationDiscount, formatEUR, getImplementationPromotion } from "@/lib/pricing";
 import { websiteWorkflows } from "@/lib/i18n/website-workflows";
-const promotionMessage = {
+const promotionMessage = withExtraLocales({
  ar: (percent:number) => `عرض اليوم: خصم ${percent}% على تنفيذ المشروع`,
  en: (percent:number) => `${percent}% off project implementation today`,
  nl: (percent:number) => `Vandaag ${percent}% korting op projectrealisatie`,
@@ -16,7 +17,7 @@ const promotionMessage = {
  tr: (percent:number) => `Bugün proje geliştirmede %${percent} indirim`,
  fr: (percent:number) => `Aujourd’hui, ${percent}% de remise sur la réalisation`,
  es: (percent:number) => `Hoy, ${percent}% de descuento en el desarrollo`,
-} as const;
+} as const);
 export function PromotionBanner() {
  const { locale, t } = useI18n(); const c = t.pricing; const pathname = usePathname(); const promotion = getImplementationPromotion();
  const message = promotionMessage[locale](promotion.percent);

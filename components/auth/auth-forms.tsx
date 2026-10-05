@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
@@ -20,7 +21,7 @@ import { validateEmail } from "@/lib/validation/contact";
 import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import { recovery } from "@/lib/i18n/recovery";
 
-const orLabels = { ar: "أو", en: "or", nl: "of", de: "oder", tr: "veya", fr: "ou", es: "o" } as const;
+const orLabels = withExtraLocales({ ar: "أو", en: "or", nl: "of", de: "oder", tr: "veya", fr: "ou", es: "o" } as const);
 
 const initial: ActionState = { ok: false, message: "" };
 const initialLogin: LoginState = { ok: false, message: "" };

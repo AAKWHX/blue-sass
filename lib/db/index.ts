@@ -5,6 +5,7 @@
  * `isDatabaseConfigured` lets every caller fall back to bundled mock data so
  * the preview keeps working before the database is provisioned.
  */
+import "server-only";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";

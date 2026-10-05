@@ -1,4 +1,5 @@
 "use client";
+import { localizeForLocale } from "@/lib/i18n/extra-locales";
 
 import { useActionState } from "react";
 import Link from "next/link";
@@ -15,7 +16,7 @@ export function SubscriptionRequest({ id }: { id: SubscriptionId }) {
   const c = t.experience;
   const plan = subscriptionPlans(locale).find((entry) => entry.id === id)!;
   const [state, action, pending] = useActionState(requestSubscription, { ok: false, message: "" });
-  const checkout = locale === "ar" ? "حفظ والمتابعة إلى الدفع الآمن" : "Save and continue to secure payment";
+  const checkout = locale === "ar" ? "حفظ والمتابعة إلى الدفع الآمن" : localizeForLocale("Save and continue to secure payment", locale);
   return <section className="container-x py-16"><div className="mx-auto max-w-2xl rounded-3xl border border-black/20 bg-white p-7">
     <h1 className="text-3xl font-bold">{plan.name} · €{plan.price}</h1>
     <p className="mt-4 leading-7">{plan.description}</p>

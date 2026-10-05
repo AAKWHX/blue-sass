@@ -1,10 +1,11 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import { motion, useReducedMotion } from "framer-motion";
 import { Code2, DraftingCompass, SearchCheck, ShieldCheck } from "lucide-react";
 import { useI18n } from "@/components/providers";
 
-const labels = {
+const labels = withExtraLocales({
   ar: { title: "خبرات تعمل كفريق واحد", note: "استراتيجية · تجربة مستخدم · تطوير · جودة", items: ["STRATEGY", "UX / UI", "WEB & APPS", "AI AUTOMATION", "QUALITY"] },
   en: { title: "Specialists working as one team", note: "Strategy · user experience · engineering · quality", items: ["STRATEGY", "UX / UI", "WEB & APPS", "AI AUTOMATION", "QUALITY"] },
   nl: { title: "Specialisten als één team", note: "Strategie · gebruikerservaring · ontwikkeling · kwaliteit", items: ["STRATEGIE", "UX / UI", "WEB & APPS", "AI AUTOMATISERING", "KWALITEIT"] },
@@ -12,7 +13,7 @@ const labels = {
   tr: { title: "Tek ekip olarak çalışan uzmanlar", note: "Strateji · kullanıcı deneyimi · geliştirme · kalite", items: ["STRATEJİ", "UX / UI", "WEB & APPS", "AI OTOMASYON", "KALİTE"] },
   fr: { title: "Des spécialistes réunis en une équipe", note: "Stratégie · expérience utilisateur · développement · qualité", items: ["STRATÉGIE", "UX / UI", "WEB & APPS", "AUTOMATISATION IA", "QUALITÉ"] },
   es: { title: "Especialistas en un solo equipo", note: "Estrategia · experiencia · desarrollo · calidad", items: ["ESTRATEGIA", "UX / UI", "WEB & APPS", "AUTOMATIZACIÓN IA", "CALIDAD"] },
-} as const;
+} as const);
 
 const icons = [DraftingCompass, SearchCheck, Code2, ShieldCheck];
 

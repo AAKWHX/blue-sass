@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,7 +24,7 @@ function subscribeToScroll(onChange: () => void) {
 function getScrolledSnapshot() { return window.scrollY > 32; }
 function getServerScrolledSnapshot() { return false; }
 
-const navCopy = {
+const navCopy = withExtraLocales({
   ar: { home: "الرئيسية", about: "من نحن", services: "الخدمات", subscriptions: "الاشتراكات", hosting: "الاستضافة", projects: "أعمالنا", reviews: "آراء العملاء", contact: "اتصل بنا", team: "الفريق", start: "ابدأ مشروعك", account: "الملف الشخصي", allProjects: "جميع المشاريع", settings: "الإعدادات" },
   en: { home: "Home", about: "About", services: "Services", subscriptions: "Plans", hosting: "Hosting", projects: "Work", reviews: "Reviews", contact: "Contact", team: "Team", start: "Start a project", account: "Profile", allProjects: "All projects", settings: "Settings" },
   nl: { home: "Home", about: "Over ons", services: "Diensten", subscriptions: "Abonnementen", hosting: "Hosting", projects: "Werk", reviews: "Reviews", contact: "Contact", team: "Team", start: "Start een project", account: "Profiel", allProjects: "Alle projecten", settings: "Instellingen" },
@@ -31,7 +32,7 @@ const navCopy = {
   tr: { home: "Ana sayfa", about: "Hakkımızda", services: "Hizmetler", subscriptions: "Paketler", hosting: "Hosting", projects: "Projeler", reviews: "Yorumlar", contact: "İletişim", team: "Ekip", start: "Proje başlat", account: "Profil", allProjects: "Tüm projeler", settings: "Ayarlar" },
   fr: { home: "Accueil", about: "À propos", services: "Services", subscriptions: "Abonnements", hosting: "Hébergement", projects: "Projets", reviews: "Avis", contact: "Contact", team: "Équipe", start: "Démarrer", account: "Profil", allProjects: "Tous les projets", settings: "Paramètres" },
   es: { home: "Inicio", about: "Nosotros", services: "Servicios", subscriptions: "Planes", hosting: "Hosting", projects: "Proyectos", reviews: "Opiniones", contact: "Contacto", team: "Equipo", start: "Empezar proyecto", account: "Perfil", allProjects: "Todos los proyectos", settings: "Ajustes" },
-} as const;
+} as const);
 
 export function SiteHeader({ signedIn = false, userName, userImage }: SiteHeaderProps) {
   const { locale, t } = useI18n();

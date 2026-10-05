@@ -1,6 +1,7 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import type { Locale } from "./config";
 
-export const paymentSafetyCopy: Record<Locale, { sandboxDetail: string; cards: string }> = {
+export const paymentSafetyCopy: Record<Locale, { sandboxDetail: string; cards: string }> = withExtraLocales({
   ar: {
     sandboxDetail: "اختبار فقط: يقبل PayPal بيانات الاختبار عمدًا، ولا تُخصم أو تُحوّل أموال حقيقية. التحقق من البطاقة و3D Secure يعملان في الوضع الحقيقي حسب أهلية PayPal.",
     cards: "PayPal أو بطاقة Visa / Mastercard المؤهلة",
@@ -29,4 +30,4 @@ export const paymentSafetyCopy: Record<Locale, { sandboxDetail: string; cards: s
     sandboxDetail: "Solo pruebas: PayPal acepta datos de prueba deliberadamente y no se cobra ni transfiere dinero real. La verificación de tarjeta y 3D Secure en producción dependen de PayPal.",
     cards: "PayPal o Visa / Mastercard elegible",
   },
-};
+});

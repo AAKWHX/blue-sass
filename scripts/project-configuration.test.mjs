@@ -1,23 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { createRequire } from "node:module";
-import ts from "typescript";
-
-const nativeRequire = createRequire(import.meta.url);
-const cache = new Map();
-function load(path) {
-  const file = resolve(path);
-  if (cache.has(file)) return cache.get(file);
-  const compiled = { exports: {} };
-  cache.set(file, compiled.exports);
-  const source = ts.transpileModule(readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  const require = spec => spec.startsWith("@/") ? load(`${spec.slice(2)}.ts`) : spec.startsWith(".") ? load(resolve(dirname(file), `${spec.replace(/\.ts$/, "")}.ts`)) : nativeRequire(spec);
-  new Function("require", "module", "exports", source)(require, compiled, compiled.exports);
-  cache.set(file, compiled.exports);
-  return compiled.exports;
-}
+import { load } from "./test-typescript-loader.mjs";
 const { projectOptions, initialConfiguration, configuredEstimate, extraOptions, providerOptions, moduleOptions, performanceOptions } = load("lib/project-options.ts");
 const { configurationSchema } = load("lib/validation/project-configuration.ts");
 const { builderCopy } = load("lib/i18n/project-builder.ts");
@@ -55,11 +38,11 @@ test("34 unique project types have valid scope, price and translations", () => {
     const result = configuredEstimate(c);
     assert.ok(result.totalLow > 0 && result.totalHigh >= result.totalLow);
     assert.ok(result.minimumDays >= 3);
-    assert.equal(Object.values(p.names).filter(Boolean).length, 7);
+    assert.equal(Object.values(p.names).filter(Boolean).length, 15);
   }
 });
-test("all seven locales contain all UI and option labels", () => {
-  for (const names of [...Object.values(builderCopy), ...[...extraOptions, ...providerOptions, ...moduleOptions, ...performanceOptions].map(p => p.names)]) assert.equal(Object.values(names).filter(Boolean).length, 7);
+test("all fifteen locales contain all UI and option labels", () => {
+  for (const names of [...Object.values(builderCopy), ...[...extraOptions, ...providerOptions, ...moduleOptions, ...performanceOptions].map(p => p.names)]) assert.equal(Object.values(names).filter(Boolean).length, 15);
 });
 test("monthly and yearly services never inflate implementation cost", () => {
   const c = valid(); const base = configuredEstimate(c);

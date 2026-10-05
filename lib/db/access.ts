@@ -5,6 +5,7 @@
  * goes through these guards instead. They mirror what the old Supabase RLS
  * policies enforced in the database.
  */
+import "server-only";
 import { and, eq, or, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";

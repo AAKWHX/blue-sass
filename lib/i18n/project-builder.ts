@@ -1,7 +1,8 @@
-import { locales, type Locale } from "./config";
+import { baseLocales, type Locale } from "./config";
+import { withExtraLocales } from "./extra-locales";
 
 export function translated(...values: [string, string, string, string, string, string, string]): Record<Locale, string> {
-  return Object.fromEntries(locales.map((locale, i) => [locale, values[i]])) as Record<Locale, string>;
+  return withExtraLocales(Object.fromEntries(baseLocales.map((locale, i) => [locale, values[i]])) as Record<typeof baseLocales[number], string>) as Record<Locale, string>;
 }
 
 export const builderCopy = {

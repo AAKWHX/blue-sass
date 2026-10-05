@@ -1,5 +1,6 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import { translated } from "./i18n/project-builder";
-import type { Locale } from "./i18n/config";
+import { locales, type Locale } from "./i18n/config";
 import { estimate, featureCost, implementationPrice, speedModifier, type FeatureKey, type ProjectType, type Speed } from "./pricing";
 import { websitePackages, websitePackage, websitePackageName } from "./website-packages";
 
@@ -7,7 +8,7 @@ type Names = Record<Locale, string>;
 export type ProjectOption = { id: string; type: ProjectType; names: Names; price: number; weeks: number; features: FeatureKey[] };
 const option = (id: string, type: ProjectType, price: number, weeks: number, features: FeatureKey[], names: Names): ProjectOption => ({ id, type, price: websitePackage(id) ? price : implementationPrice(price), weeks, features, names });
 export const projectOptions: ProjectOption[] = [
-  ...websitePackages.map(p => option(p.id, p.type, p.low, p.weeks, p.features, Object.fromEntries((["ar", "en", "nl", "de", "tr", "fr", "es"] as Locale[]).map(l => [l, websitePackageName(p.id, l)])) as Names)),
+  ...websitePackages.map(p => option(p.id, p.type, p.low, p.weeks, p.features, Object.fromEntries(locales.map(l => [l, websitePackageName(p.id, l)])) as Names)),
   option("android", "mobile", 2450, 8, ["appstore"], translated("تطبيق أندرويد", "Android app", "Android-app", "Android-App", "Android uygulaması", "Application Android", "Aplicación Android")),
   option("ios", "mobile", 2950, 9, ["appstore"], translated("تطبيق آيفون وآيباد", "iPhone and iPad app", "iPhone- en iPad-app", "iPhone- und iPad-App", "iPhone ve iPad uygulaması", "Application iPhone et iPad", "Aplicación iPhone y iPad")),
   option("cross-platform", "mobile", 3950, 10, ["appstore"], translated("تطبيق أندرويد وآيفون", "Cross-platform mobile app", "Multiplatform mobiele app", "Plattformübergreifende mobile App", "Çapraz platform mobil uygulaması", "Application mobile multiplateforme", "Aplicación móvil multiplataforma")),
@@ -73,7 +74,7 @@ export const performanceOptions = [
   priced("performance-audit", 125, "once", software, translated("تدقيق الأداء وتحسين مسار التحميل", "Performance audit and loading optimization", "Prestatie-audit en laadoptimalisatie", "Leistungsprüfung und Ladeoptimierung", "Performans denetimi ve yükleme iyileştirme", "Audit performance et optimisation", "Auditoría de rendimiento y optimización")),
 ];
 export const projectLanguages = ["ar", "en", "nl", "de", "tr", "fr", "es", "it", "pt", "zh", "ja", "ru"];
-export const languageNames: Record<string, string> = { ar: "العربية", en: "English", nl: "Nederlands", de: "Deutsch", tr: "Türkçe", fr: "Français", es: "Español", it: "Italiano", pt: "Português", zh: "中文", ja: "日本語", ru: "Русский" };
+export const languageNames: Record<string, string> = withExtraLocales({ ar: "العربية", en: "English", nl: "Nederlands", de: "Deutsch", tr: "Türkçe", fr: "Français", es: "Español", it: "Italiano", pt: "Português", zh: "中文", ja: "日本語", ru: "Русский" });
 export type ProjectConfiguration = {
   priceVersion?: 1 | 2;
   promotionPercent?: number;

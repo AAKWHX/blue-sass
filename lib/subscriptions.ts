@@ -1,3 +1,4 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import type { Locale } from "@/lib/i18n";
 
 export const subscriptionIds = ["launch", "growth", "scale"] as const;
@@ -5,7 +6,7 @@ export type SubscriptionId = (typeof subscriptionIds)[number];
 
 type Plan = { id: SubscriptionId; name: string; description: string; price: number; features: string[]; response: string; hours: string };
 
-const rows: Record<Locale, string[]> = {
+const rows: Record<Locale, string[]> = withExtraLocales({
   ar: [
     "انطلاقة|للمواقع الصغيرة التي تحتاج استضافة آمنة وصيانة مستمرة.|استضافة مُدارة،نسخ احتياطي أسبوعي،تحديثات أمنية،مراقبة التوفر،تقرير شهري|خلال يومي عمل|ساعة دعم شهريًا",
     "نمو|للمواقع والمتاجر النشطة التي تتطور باستمرار.|كل مزايا انطلاقة،نسخ احتياطي يومي،تحسين السرعة،تحليلات وتقارير،تحديثات محتوى،بيئة تجريبية|خلال يوم عمل|4 ساعات تطوير شهريًا",
@@ -41,13 +42,13 @@ const rows: Record<Locale, string[]> = {
     "Crecimiento|Para sitios y tiendas activos que mejoran continuamente.|Todo Lanzamiento,Copias diarias,Optimización de rendimiento,Informes analíticos,Actualizaciones de contenido,Entorno de pruebas|En 1 día hábil|4 horas de desarrollo mensuales",
     "Escala|Para plataformas que necesitan soporte prioritario.|Todo Crecimiento,Monitoreo avanzado,Soporte prioritario,Mejoras mensuales,Revisión técnica,Automatizaciones|En 4 horas hábiles|10 horas de desarrollo mensuales",
   ],
-};
+});
 
 const prices = [25, 65, 150];
 export function subscriptionPlans(locale: Locale): Plan[] {
   return rows[locale].map((row, index) => {
     const [name, description, featureList, response, hours] = row.split("|");
-    return { id: subscriptionIds[index], name, description, price: prices[index], features: featureList.split(/[,،]/), response, hours };
+    return { id: subscriptionIds[index], name, description, price: prices[index], features: featureList.split(/[,،、，]/), response, hours };
   });
 }
 
@@ -57,7 +58,7 @@ export const subscriptionAddOns: Record<SubscriptionId, string[]> = {
   scale: ["domain", "email", "hosting", "maintenance", "google", "analytics"],
 };
 
-export const subscriptionPurchaseNote: Record<Locale, string> = {
+export const subscriptionPurchaseNote: Record<Locale, string> = withExtraLocales({
   ar: "يُحفظ الاشتراك ثم تنتقل مباشرة إلى PayPal. لا يبدأ التفعيل إلا بعد تأكيد الدفع، ولا نخزن بيانات بطاقتك.",
   en: "Your plan is saved before secure PayPal checkout. Activation starts only after payment confirmation; we never store card details.",
   nl: "Uw plan wordt opgeslagen vóór de veilige PayPal-betaling. Activering start pas na bevestiging; wij bewaren geen kaartgegevens.",
@@ -65,4 +66,4 @@ export const subscriptionPurchaseNote: Record<Locale, string> = {
   tr: "Paketiniz güvenli PayPal ödemesinden önce kaydedilir. Etkinleştirme yalnızca ödeme onayından sonra başlar; kart bilgilerini saklamayız.",
   fr: "Votre formule est enregistrée avant le paiement PayPal sécurisé. L’activation commence après confirmation; aucune donnée bancaire n’est stockée.",
   es: "El plan se guarda antes del pago seguro con PayPal. La activación empieza tras la confirmación; no almacenamos datos de tarjeta.",
-};
+});

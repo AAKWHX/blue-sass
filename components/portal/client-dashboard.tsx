@@ -1,4 +1,6 @@
 "use client";
+import { localizeForLocale } from "@/lib/i18n/extra-locales";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 /**
  * The signed-in client's dashboard.
@@ -54,7 +56,7 @@ const STAGES: ProjectStage[] = ["planning", "design", "development", "testing", 
 const initialState: MutationState = { ok: false, message: "" };
 const awaitingCopy = translated("بانتظار الدفع، لن يبدأ التنفيذ قبل تأكيده", "Awaiting payment; work starts after confirmation", "Wacht op betaling; uitvoering start na bevestiging", "Wartet auf Zahlung; Umsetzung nach Bestätigung", "Ödeme bekleniyor; onaydan sonra çalışma başlar", "En attente de paiement ; démarrage après confirmation", "Pendiente de pago; trabajo tras confirmación");
 const completedCopy = translated("إطلاق النسخة المعتمدة وتسليم الملفات النهائية", "Launch the approved version and hand over final files", "Goedgekeurde versie lanceren en definitieve bestanden overdragen", "Freigegebene Version starten und finale Dateien übergeben", "Onaylı sürümü yayınlama ve son dosyaları teslim etme", "Lancer la version approuvée et livrer les fichiers finaux", "Publicar la versión aprobada y entregar los archivos finales");
-const detailCopy = {
+const detailCopy = withExtraLocales({
   ar: { details: "تفاصيل المشروع", budget: "الميزانية", start: "تاريخ البدء", deadline: "موعد التسليم" },
   en: { details: "Project details", budget: "Budget", start: "Start date", deadline: "Deadline" },
   nl: { details: "Projectdetails", budget: "Budget", start: "Startdatum", deadline: "Deadline" },
@@ -62,7 +64,7 @@ const detailCopy = {
   tr: { details: "Proje ayrıntıları", budget: "Bütçe", start: "Başlangıç", deadline: "Teslim tarihi" },
   fr: { details: "Détails du projet", budget: "Budget", start: "Début", deadline: "Échéance" },
   es: { details: "Detalles del proyecto", budget: "Presupuesto", start: "Inicio", deadline: "Entrega" },
-} as const;
+} as const);
 
 export interface DashboardProject {
   project: Project;
@@ -90,7 +92,7 @@ export interface ClientDashboardProps {
 
 function MediaCard({ file }: { file: ProjectFile }) {
   const { locale } = useI18n();
-  const liveDemo = locale === "ar" ? "عرض مباشر" : locale === "nl" ? "Live demonstratie" : locale === "de" ? "Live-Demo" : locale === "tr" ? "Canlı demo" : locale === "fr" ? "Démo en direct" : locale === "es" ? "Demostración en vivo" : "Live demo";
+  const liveDemo = locale === "ar" ? "عرض مباشر" : locale === "nl" ? "Live demonstratie" : locale === "de" ? "Live-Demo" : locale === "tr" ? "Canlı demo" : locale === "fr" ? "Démo en direct" : locale === "es" ? "Demostración en vivo" : localizeForLocale("Live demo", locale);
   if (file.kind === "image") {
     return (
       <figure className="overflow-hidden rounded-xl border border-line-strong bg-black/30">
@@ -152,8 +154,8 @@ function MediaCard({ file }: { file: ProjectFile }) {
 function SavedOrders({ orders }: { orders: Lead[] }) {
   const { locale } = useI18n();
   if (!orders.length) return null;
-  const title = { ar: "الطلبات المحفوظة", en: "Saved requests", nl: "Opgeslagen aanvragen", de: "Gespeicherte Anfragen", tr: "Kayıtlı talepler", fr: "Demandes enregistrées", es: "Solicitudes guardadas" }[locale];
-  const estimateLabel = { ar: "التقدير", en: "Estimate", nl: "Schatting", de: "Schätzung", tr: "Tahmin", fr: "Estimation", es: "Estimación" }[locale];
+  const title = withExtraLocales({ ar: "الطلبات المحفوظة", en: "Saved requests", nl: "Opgeslagen aanvragen", de: "Gespeicherte Anfragen", tr: "Kayıtlı talepler", fr: "Demandes enregistrées", es: "Solicitudes guardadas" })[locale];
+  const estimateLabel = withExtraLocales({ ar: "التقدير", en: "Estimate", nl: "Schatting", de: "Schätzung", tr: "Tahmin", fr: "Estimation", es: "Estimación" })[locale];
   return <section className="mt-5 rounded-3xl border border-black bg-white p-5 sm:p-6">
     <div className="flex items-center gap-2"><ReceiptText className="size-5 text-neon-blue"/><h2 className="text-lg font-bold text-black">{title}</h2></div>
     <div className="mt-4 grid gap-4 sm:grid-cols-2">{orders.map((order) => <Link key={order.id} href={`/${locale}/portal/orders/${order.id}`} className="block rounded-2xl border border-black/15 bg-base p-5 transition hover:-translate-y-1 hover:border-black"><div className="flex items-center justify-between gap-3"><span className="font-bold text-black">{order.projectType}</span><Badge variant="outline">{order.status}</Badge></div><p className="mt-3 text-sm text-ink-low">{order.services.join(" · ")}</p><div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-xs"><span className="flex items-center gap-2 text-ink-low"><ReceiptText className="size-4" />{estimateLabel}</span><span className="font-bold text-black">{new Intl.NumberFormat(locale, { style: "currency", currency: order.currency, maximumFractionDigits: 0 }).format(order.budgetEstimate)}</span></div></Link>)}</div>
@@ -182,7 +184,7 @@ export function ClientDashboard({ viewerName, projects, orders }: ClientDashboar
             {t.portal.welcome}, {viewerName}
           </h1>
           <p className="mt-3 text-sm text-ink-low" dir="auto">
-            {orders.length ? (locale === "ar" ? "طلباتك محفوظة هنا. سنحوّل الطلب إلى مشروع بعد اعتماد النطاق والدفعة الأولى." : "Your requests are saved here. They become projects after scope and deposit approval.") : t.auth.noProjects}
+            {orders.length ? (locale === "ar" ? "طلباتك محفوظة هنا. سنحوّل الطلب إلى مشروع بعد اعتماد النطاق والدفعة الأولى." : localizeForLocale("Your requests are saved here. They become projects after scope and deposit approval.", locale)) : t.auth.noProjects}
           </p>
         </div>
         <SavedOrders orders={orders} />

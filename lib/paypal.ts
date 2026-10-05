@@ -194,8 +194,8 @@ export function verifiedCompletedCapture(
   if (capture.status !== "COMPLETED") return null;
   if (!unit || !capture?.id) return null;
 
-  const currency = capture.amount?.currency_code ?? unit.amount?.currency_code;
-  const value = capture.amount?.value ?? unit.amount?.value;
+  const currency = capture.amount?.currency_code;
+  const value = capture.amount?.value;
   if (currency !== expected.currency || value !== moneyValue(expected.amountCents)) return null;
   return capture;
 }

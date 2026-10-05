@@ -8,6 +8,7 @@ export default defineConfig([
     ".next-build/**",
     "out/**",
     "build/**",
+    "downloads/**",
     "next-env.d.ts",
     "**/* - kopie/**",
     "* - kopie.*",

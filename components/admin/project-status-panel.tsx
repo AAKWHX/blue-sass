@@ -1,3 +1,4 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { FolderKanban } from "lucide-react";
 import { setProjectStageAction } from "@/app/actions/projects";
@@ -11,7 +12,7 @@ import { billingCopy } from "@/lib/i18n/billing-copy";
 import { Input } from "@/components/ui/input";
 
 const stages: ProjectStage[] = ["planning", "design", "development", "testing", "review", "completed"];
-const copy = {
+const copy = withExtraLocales({
   ar: { title: "تحديث حالة مشاريع العملاء", empty: "لا توجد مشاريع عملاء بعد.", move: "نقل إلى" },
   en: { title: "Update client project status", empty: "No client projects yet.", move: "Move to" },
   nl: { title: "Status van klantprojecten", empty: "Nog geen klantprojecten.", move: "Verplaats naar" },
@@ -19,7 +20,7 @@ const copy = {
   tr: { title: "Müşteri proje durumları", empty: "Henüz müşteri projesi yok.", move: "Taşı" },
   fr: { title: "Statut des projets clients", empty: "Aucun projet client.", move: "Passer à" },
   es: { title: "Estado de proyectos", empty: "Aún no hay proyectos.", move: "Mover a" },
-} as const;
+} as const);
 
 export async function ProjectStatusPanel({ projects, locale }: { projects: Project[]; locale: string }) {
   if (!isLocale(locale)) return null;

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/public/legal-page";
+import { localizeForLocale } from "@/lib/i18n/extra-locales";
 
 export const metadata: Metadata = { title: "شروط الاستخدام — بلو ساس", description: "الشروط المنظمة لاستخدام موقع بلو ساس وبوابة العملاء." };
 
@@ -23,5 +24,5 @@ const arabicSections = [
 export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (locale === "ar") return <LegalPage eyebrow="معلومات قانونية" title="شروط الاستخدام" updated="21 سبتمبر 2026" updatedLabel="آخر تحديث" introduction="تنظّم هذه الشروط استخدام موقع bluesass.nl وبوابة عملاء Blue Sass. باستخدام الخدمة فإنك توافق على هذه الشروط." sections={arabicSections} />;
-  return <LegalPage eyebrow="Legal" title="Terms of Service" updated="21 September 2026" introduction="These terms govern your access to and use of bluesass.nl and the Blue Sass client portal. By using the service, you agree to these terms." sections={sections} />;
+  return <LegalPage {...localizeForLocale({ eyebrow: "Legal", title: "Terms of Service", updated: "21 September 2026", updatedLabel: "Last updated", introduction: "These terms govern your access to and use of bluesass.nl and the Blue Sass client portal. By using the service, you agree to these terms.", sections }, locale)} />;
 }

@@ -6,8 +6,9 @@ import de from "./dictionaries/de";
 import tr from "./dictionaries/tr";
 import fr from "./dictionaries/fr";
 import es from "./dictionaries/es";
+import { withExtraLocales } from "./extra-locales";
 
-export const dictionaries: Record<Locale, Dictionary> = { en, ar, nl, de, tr, fr, es };
+export const dictionaries: Record<Locale, Dictionary> = withExtraLocales({ en, ar, nl, de, tr, fr, es });
 
 export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale] ?? en;

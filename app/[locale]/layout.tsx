@@ -1,3 +1,4 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Providers } from "@/components/providers";
@@ -14,7 +15,7 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-const seo = {
+const seo = withExtraLocales({
   ar: {
     title: "بلو ساس — تصميم مواقع وتطبيقات ومنتجات رقمية",
     description: "بلو ساس شركة متخصصة في تصميم وتطوير المواقع والتطبيقات والأنظمة الذكية. نحوّل فكرتك إلى منتج رقمي واضح، سريع وجاهز للنمو.",
@@ -50,7 +51,7 @@ const seo = {
     description: "Blue Sass diseña y desarrolla sitios web, aplicaciones y sistemas digitales inteligentes desde la idea hasta el lanzamiento.",
     keywords: ["Blue Sass", "desarrollo web", "aplicaciones móviles", "agencia de software"],
   },
-} as const;
+} as const);
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;

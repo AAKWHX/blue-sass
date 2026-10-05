@@ -12,3 +12,13 @@ export function installmentSchedule(totalCents: number) {
     return { stage, percent: installmentPercentages[index], amountCents };
   });
 }
+
+export function installmentReadiness<T extends { stage: BillingStage; payment: { status: string } | null }>(installments: T[], milestones: Array<{ stage: string; status: string }>) {
+  const next = installments.find(item => item.payment?.status !== "paid") ?? null;
+  const index = next ? billingStages.indexOf(next.stage) : -1;
+  const ready = installments.length === billingStages.length && !!next && billingStages.slice(0, index).every(stage => {
+    const rows = milestones.filter(item => item.stage === stage);
+    return rows.length > 0 && rows.every(item => item.status === "done");
+  });
+  return { next, ready };
+}

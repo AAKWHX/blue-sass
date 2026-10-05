@@ -1,4 +1,5 @@
 "use server";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
@@ -58,7 +59,7 @@ const leadSchema = z.object({
   website: z.string().max(0).optional(),
 });
 
-const milestoneTitles: Record<string, string[]> = {
+const milestoneTitles: Record<string, string[]> = withExtraLocales({
   ar: ["التخطيط واعتماد النطاق", "تصميم تجربة المستخدم والواجهات", "التطوير والربط", "الاختبار وضمان الجودة", "مراجعة العميل والتعديلات", "الإطلاق والتسليم"],
   en: ["Planning and scope approval", "UX and interface design", "Development and integrations", "Testing and quality assurance", "Client review and refinements", "Launch and handover"],
   nl: ["Planning en scopegoedkeuring", "UX- en interfaceontwerp", "Ontwikkeling en koppelingen", "Testen en kwaliteitscontrole", "Klantreview en aanpassingen", "Lancering en overdracht"],
@@ -66,14 +67,14 @@ const milestoneTitles: Record<string, string[]> = {
   tr: ["Planlama ve kapsam onayı", "UX ve arayüz tasarımı", "Geliştirme ve bağlantılar", "Test ve kalite kontrol", "Müşteri incelemesi ve düzenlemeler", "Yayın ve teslim"],
   fr: ["Planification et validation", "UX et conception d’interface", "Développement et intégrations", "Tests et assurance qualité", "Revue client et ajustements", "Lancement et transfert"],
   es: ["Planificación y aprobación", "UX y diseño de interfaz", "Desarrollo e integraciones", "Pruebas y control de calidad", "Revisión y ajustes del cliente", "Lanzamiento y entrega"],
-};
+});
 const stages: ProjectStage[] = ["planning", "design", "development", "testing", "review", "completed"];
-const savedMessages: Record<string, string> = {
+const savedMessages: Record<string, string> = withExtraLocales({
   ar: "تم حفظ الطلب وإنشاء مساحة المشروع في لوحة حسابك.", en: "Your request is saved and its project workspace is ready in your dashboard.",
   nl: "Uw aanvraag is opgeslagen en de projectruimte staat klaar in uw dashboard.", de: "Ihre Anfrage wurde gespeichert und der Projektbereich ist im Dashboard verfügbar.",
   tr: "Talebiniz kaydedildi ve proje alanı panelinizde hazır.", fr: "Votre demande est enregistrée et l’espace projet est prêt dans votre tableau de bord.",
   es: "Su solicitud está guardada y el espacio del proyecto está listo en su panel.",
-};
+});
 
 /**
  * Public quote submission. Saves the calculator output alongside the contact

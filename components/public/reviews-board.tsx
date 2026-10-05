@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import { useActionState } from "react";
 import { MessageSquareQuote, Send, Star } from "lucide-react";
@@ -11,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Locale } from "@/lib/i18n";
 import type { Review } from "@/lib/db/schema";
 
-const copy = {
+const copy = withExtraLocales({
   ar: { eyebrow: "آراء حقيقية · نشر بعد المراجعة", title: "شارك تجربتك مع Blue Sass", intro: "اقرأ آراء العملاء أو أرسل تجربتك. لا ننشر أي رأي قبل فحصه، ولا نعرض بريدك الإلكتروني.", form: "أرسل رأيك", rating: "التقييم", body: "اكتب تجربتك بالتفصيل", placeholder: "ما الخدمة التي حصلت عليها؟ وما أكثر شيء أفاد مشروعك؟", submit: "إرسال للمراجعة", empty: "لم تُنشر آراء بعد. يمكنك أن تكون أول من يشارك تجربته.", login: "سجّل الدخول لإرسال رأيك" },
   en: { eyebrow: "Real feedback · Moderated before publishing", title: "Share your Blue Sass experience", intro: "Read customer feedback or submit your experience. We never publish a review before moderation or reveal your email.", form: "Submit a review", rating: "Rating", body: "Describe your experience", placeholder: "Which service did you use and what helped your project most?", submit: "Send for review", empty: "No reviews have been published yet. You can be the first to share your experience.", login: "Sign in to submit a review" },
   nl: { eyebrow: "Echte feedback · Eerst beoordeeld", title: "Deel uw Blue Sass-ervaring", intro: "Lees ervaringen of deel die van u. E-mailadressen worden nooit getoond.", form: "Review plaatsen", rating: "Beoordeling", body: "Uw ervaring", placeholder: "Welke dienst gebruikte u en wat hielp het meest?", submit: "Ter beoordeling verzenden", empty: "Nog geen gepubliceerde reviews.", login: "Log in om een review te plaatsen" },
@@ -19,7 +20,7 @@ const copy = {
   tr: { eyebrow: "Gerçek görüşler · Yayından önce incelenir", title: "Blue Sass deneyiminizi paylaşın", intro: "Müşteri yorumlarını okuyun veya deneyiminizi paylaşın. E-posta adresiniz gösterilmez.", form: "Yorum gönder", rating: "Puan", body: "Deneyiminiz", placeholder: "Hangi hizmeti kullandınız?", submit: "İncelemeye gönder", empty: "Henüz yayınlanan yorum yok.", login: "Yorum için giriş yapın" },
   fr: { eyebrow: "Avis réels · Modérés avant publication", title: "Partagez votre expérience Blue Sass", intro: "Lisez ou partagez des avis. Votre e-mail n’est jamais affiché.", form: "Envoyer un avis", rating: "Note", body: "Votre expérience", placeholder: "Quel service avez-vous utilisé ?", submit: "Envoyer pour validation", empty: "Aucun avis publié pour le moment.", login: "Connectez-vous pour laisser un avis" },
   es: { eyebrow: "Opiniones reales · Moderadas", title: "Comparta su experiencia Blue Sass", intro: "Lea o comparta opiniones. Nunca mostramos su correo.", form: "Enviar opinión", rating: "Valoración", body: "Su experiencia", placeholder: "¿Qué servicio utilizó?", submit: "Enviar para revisión", empty: "Aún no hay opiniones publicadas.", login: "Inicie sesión para opinar" },
-} as const;
+} as const);
 
 export function ReviewsBoard({ locale, reviews, signedIn }: { locale: Locale; reviews: Review[]; signedIn: boolean }) {
   const c = copy[locale];

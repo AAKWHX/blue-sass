@@ -1,3 +1,4 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,7 +8,7 @@ import { getDictionary, isLocale } from "@/lib/i18n";
 import { subscriptionDetails } from "@/lib/subscription-details";
 import { subscriptionPlans, subscriptionPurchaseNote } from "@/lib/subscriptions";
 
-const copy = {
+const copy = withExtraLocales({
   ar: { eyebrow: "اشتراكات بلو ساس", title: "موقعك تحت المتابعة، لا تحت الانتظار.", subtitle: "استضافة وصيانة وتحسينات شهرية بخطة واضحة. اختر مستوى المتابعة الذي يناسب نشاطك.", monthly: "شهريًا", choose: "اشترِ الاشتراك", popular: "الأكثر اختيارًا", response: "زمن الاستجابة", hours: "الوقت المشمول", note: "الاشتراكات تغطي الاستضافة والصيانة والدعم الموضح. تنفيذ مشروع جديد أو تغيير كبير يُسعّر بشكل منفصل بعد مراجعة النطاق.", compare: "كل خطة تشمل شهادة SSL، مراقبة أساسية، وتواصلًا مباشرًا مع فريق بلو ساس.", talk: "تحدث معنا" },
   en: { eyebrow: "Blue Sass subscriptions", title: "Your website stays managed, monitored and moving.", subtitle: "Hosting, maintenance and monthly improvements in one clear plan.", monthly: "per month", choose: "Buy this plan", popular: "Most popular", response: "Response time", hours: "Included time", note: "Plans cover the listed hosting, maintenance and support. New builds or major scope changes are quoted separately.", compare: "Every plan includes SSL, essential monitoring and direct contact with the Blue Sass team.", talk: "Talk to us" },
   nl: { eyebrow: "Blue Sass-abonnementen", title: "Uw website blijft beheerd, bewaakt en in beweging.", subtitle: "Hosting, onderhoud en maandelijkse verbeteringen in één duidelijk plan.", monthly: "per maand", choose: "Dit plan kopen", popular: "Meest gekozen", response: "Reactietijd", hours: "Inbegrepen tijd", note: "De plannen dekken de genoemde hosting, het onderhoud en support. Nieuwe projecten of grote wijzigingen worden apart begroot.", compare: "Elk plan bevat SSL, essentiële monitoring en direct contact met Blue Sass.", talk: "Neem contact op" },
@@ -15,7 +16,7 @@ const copy = {
   tr: { eyebrow: "Blue Sass paketleri", title: "Siteniz yönetilir, izlenir ve gelişmeye devam eder.", subtitle: "Hosting, bakım ve aylık iyileştirmeler tek net pakette.", monthly: "aylık", choose: "Bu paketi satın al", popular: "En çok seçilen", response: "Yanıt süresi", hours: "Dahil süre", note: "Paketler belirtilen hosting, bakım ve desteği kapsar. Yeni projeler ve büyük değişiklikler ayrıca fiyatlandırılır.", compare: "Her paket SSL, temel izleme ve Blue Sass ekibiyle doğrudan iletişim içerir.", talk: "Bize ulaşın" },
   fr: { eyebrow: "Abonnements Blue Sass", title: "Votre site reste géré, surveillé et évolutif.", subtitle: "Hébergement, maintenance et améliorations mensuelles dans une formule claire.", monthly: "par mois", choose: "Acheter cette formule", popular: "Le plus choisi", response: "Délai de réponse", hours: "Temps inclus", note: "Les formules couvrent les prestations indiquées. Les nouveaux projets et changements importants sont chiffrés séparément.", compare: "Chaque formule inclut SSL, la surveillance essentielle et un contact direct avec Blue Sass.", talk: "Nous contacter" },
   es: { eyebrow: "Planes Blue Sass", title: "Su sitio permanece gestionado, vigilado y en evolución.", subtitle: "Alojamiento, mantenimiento y mejoras mensuales en un plan claro.", monthly: "al mes", choose: "Comprar este plan", popular: "Más elegido", response: "Tiempo de respuesta", hours: "Tiempo incluido", note: "Los planes cubren los servicios indicados. Los proyectos nuevos o cambios importantes se cotizan por separado.", compare: "Cada plan incluye SSL, monitoreo esencial y contacto directo con Blue Sass.", talk: "Hablar con nosotros" },
-} as const;
+} as const);
 
 export const metadata: Metadata = { title: "اشتراكات بلو ساس — الاستضافة والصيانة والدعم", description: "خطط اشتراك شهرية من بلو ساس للاستضافة المُدارة والصيانة والحماية والدعم والتحسينات المستمرة." };
 

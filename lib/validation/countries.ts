@@ -1,3 +1,4 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 /**
  * Dial-code table used by the phone field and by the server-side validator.
  *
@@ -84,7 +85,7 @@ export const countries: Country[] = [
 ];
 
 /** Default selection per UI locale, so the field opens on a sensible country. */
-export const localeDefaultCountry: Record<string, string> = {
+export const localeDefaultCountry: Record<string, string> = withExtraLocales({
   ar: "SA",
   en: "GB",
   nl: "NL",
@@ -92,7 +93,7 @@ export const localeDefaultCountry: Record<string, string> = {
   tr: "TR",
   fr: "FR",
   es: "ES",
-};
+});
 
 export function findCountry(iso: string): Country | undefined {
   return countries.find((c) => c.iso === iso);

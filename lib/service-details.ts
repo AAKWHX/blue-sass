@@ -1,9 +1,10 @@
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import type { Locale } from "@/lib/i18n";
 import type { ServiceSlug } from "@/lib/service-catalog";
 
 export type ServiceDetail = { idealFor: string; timeline: string; outcome: string };
 
-const rows: Record<Locale, string[]> = {
+const rows: Record<Locale, string[]> = withExtraLocales({
   ar: [
     "الشركات والخدمات التي تحتاج حضورًا رقميًا واضحًا وجلب طلبات جديدة.|4–8 أسابيع|موقع سريع ومتجاوب، قابل للإدارة ومهيأ للبحث والتحويل.",
     "الخدمات والمنصات التي تريد الوصول إلى مستخدمي أندرويد.|10–16 أسبوعًا|تطبيق أندرويد جاهز للاختبار والنشر مع لوحة وخدمات خلفية عند الحاجة.",
@@ -74,7 +75,7 @@ const rows: Record<Locale, string[]> = {
     "Equipos que pierden tiempo en tareas repetitivas o datos.|6–14 semanas|Automatización o IA conectada a sus herramientas con resultados medibles.",
     "Nuevas marcas y productos que necesitan identidad e interfaces coherentes.|3–7 semanas|Sistema visual, archivos de identidad y prototipo listo para desarrollo.",
   ],
-};
+});
 
 export function serviceDetails(locale: Locale): Record<ServiceSlug, ServiceDetail> {
   const slugs: ServiceSlug[] = ["web", "android", "ios", "windows", "store", "erp", "ai", "design"];

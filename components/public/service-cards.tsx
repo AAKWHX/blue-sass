@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import { useI18n } from "@/components/providers";
 import { Reveal } from "@/components/ui/motion";
@@ -19,7 +20,7 @@ const serviceImages = [
   "/media/service-ai-3d.webp",
   "/media/service-design-3d.webp",
 ] as const;
-const actions = {
+const actions = withExtraLocales({
   ar: { start: "ابدأ مشروعًا", previous: "الخدمة السابقة", next: "الخدمة التالية" },
   en: { start: "Start project", previous: "Previous service", next: "Next service" },
   nl: { start: "Start project", previous: "Vorige dienst", next: "Volgende dienst" },
@@ -27,9 +28,9 @@ const actions = {
   tr: { start: "Proje başlat", previous: "Önceki hizmet", next: "Sonraki hizmet" },
   fr: { start: "Démarrer", previous: "Service précédent", next: "Service suivant" },
   es: { start: "Empezar", previous: "Servicio anterior", next: "Servicio siguiente" },
-} as const;
+} as const);
 
-const headings = {
+const headings = withExtraLocales({
   ar: "اختر ما تريد بناءه",
   en: "Choose what you want to build",
   nl: "Kies wat u wilt bouwen",
@@ -37,7 +38,7 @@ const headings = {
   tr: "Ne inşa etmek istediğinizi seçin",
   fr: "Choisissez ce que vous voulez créer",
   es: "Elija lo que quiere crear",
-} as const;
+} as const);
 
 export function Services() {
   const { locale, t } = useI18n();

@@ -1,8 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { canChangeRequest } from "../lib/project-policy.ts";
-import { quoteReturnPath } from "../lib/auth/return-path.ts";
-import { experience } from "../lib/i18n/experience.ts";
+import { load } from "./test-typescript-loader.mjs";
+const { canChangeRequest } = load("lib/project-policy.ts");
+const { quoteReturnPath } = load("lib/auth/return-path.ts");
+const { experience } = load("lib/i18n/experience.ts");
+const { locales } = load("lib/i18n/config.ts");
 const planning = { clientId: "owner", stage: "planning" };
 const open = { locked: false, cancelled: false };
 test("only the owner can edit or cancel a planning request", () => {
@@ -23,5 +25,5 @@ test("authentication preserves template and subscription choices", () => {
  assert.equal(quoteReturnPath("//evil.example/ar/quote", "ar"), "/ar/portal");
 });
 test("new interface copy is populated in all seven languages", () => {
- for (const locale of ["ar", "en", "nl", "de", "tr", "fr", "es"]) for (const [key,value] of Object.entries(experience(locale))) assert.ok(typeof value === "string" && value.length > 0, `${locale}.${key}`);
+ for (const locale of locales) for (const [key,value] of Object.entries(experience(locale))) assert.ok(typeof value === "string" && value.length > 0, `${locale}.${key}`);
 });

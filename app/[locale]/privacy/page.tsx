@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/public/legal-page";
+import { localizeForLocale } from "@/lib/i18n/extra-locales";
 
 export const metadata: Metadata = { title: "سياسة الخصوصية — بلو ساس", description: "كيف تجمع بلو ساس البيانات الشخصية وتستخدمها وتحميها." };
 
@@ -23,5 +24,5 @@ const arabicSections = [
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (locale === "ar") return <LegalPage eyebrow="معلومات قانونية" title="سياسة الخصوصية" updated="21 سبتمبر 2026" updatedLabel="آخر تحديث" introduction="تحترم Blue Sass خصوصيتك. توضح هذه السياسة البيانات التي نجمعها وسبب استخدامها والخيارات المتاحة لك." sections={arabicSections} />;
-  return <LegalPage eyebrow="Legal" title="Privacy Policy" updated="21 September 2026" introduction="Blue Sass respects your privacy. This policy explains what information we collect through bluesass.nl, why we use it, and the choices available to you." sections={sections} />;
+  return <LegalPage {...localizeForLocale({ eyebrow: "Legal", title: "Privacy Policy", updated: "21 September 2026", updatedLabel: "Last updated", introduction: "Blue Sass respects your privacy. This policy explains what information we collect through bluesass.nl, why we use it, and the choices available to you.", sections }, locale)} />;
 }

@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -12,7 +13,7 @@ import { serviceCatalog, type ServiceSlug } from "@/lib/service-catalog";
 import { serviceTemplates } from "@/lib/service-templates";
 import type { Locale } from "@/lib/i18n";
 
-const galleryCopy: Record<Locale, { search: string; catalog: string; live: string; results: string; empty: string; hint: string }> = {
+const galleryCopy: Record<Locale, { search: string; catalog: string; live: string; results: string; empty: string; hint: string }> = withExtraLocales({
   ar: { search: "ابحث عن قالب أو خدمة", catalog: "فهرس القوالب", live: "معاينة حية", results: "قالب متاح", empty: "لا توجد قوالب مطابقة. جرّب تصنيفًا آخر.", hint: "مرّر فوق المعاينة، ثم افتحها بالحجم الكامل قبل اختيارها." },
   en: { search: "Search templates or services", catalog: "Template catalog", live: "Live preview", results: "templates available", empty: "No matching templates. Try another category.", hint: "Hover the preview, then open it full-size before choosing." },
   nl: { search: "Zoek sjablonen of diensten", catalog: "Sjablooncatalogus", live: "Live voorbeeld", results: "sjablonen beschikbaar", empty: "Geen passende sjablonen. Kies een andere categorie.", hint: "Beweeg over het voorbeeld en open het groot voordat u kiest." },
@@ -20,7 +21,7 @@ const galleryCopy: Record<Locale, { search: string; catalog: string; live: strin
   tr: { search: "Şablon veya hizmet ara", catalog: "Şablon kataloğu", live: "Canlı önizleme", results: "şablon mevcut", empty: "Eşleşen şablon yok. Başka kategori deneyin.", hint: "Seçmeden önce önizlemeyi tam boyutta açın." },
   fr: { search: "Rechercher un modèle ou service", catalog: "Catalogue de modèles", live: "Aperçu interactif", results: "modèles disponibles", empty: "Aucun modèle correspondant. Essayez une autre catégorie.", hint: "Survolez puis ouvrez l’aperçu en grand avant de choisir." },
   es: { search: "Buscar plantillas o servicios", catalog: "Catálogo de plantillas", live: "Vista interactiva", results: "plantillas disponibles", empty: "No hay plantillas coincidentes. Pruebe otra categoría.", hint: "Explore y abra la vista completa antes de elegir." },
-};
+});
 
 export function TemplateGallery({ service, group, embedded = false, maxItems }: { service?: ServiceSlug; group?: string; embedded?: boolean; maxItems?: number }) {
   const { locale, t } = useI18n();

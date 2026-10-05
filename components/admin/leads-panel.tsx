@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 /**
  * Sales inbox: every quote request submitted from the public estimator.
@@ -20,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import type { Lead, LeadStatus } from "@/lib/db/schema";
 
-const panelCopy = {
+const panelCopy = withExtraLocales({
   ar: { title: "طلبات التسعير", empty: "لا توجد طلبات تسعير بعد. ستظهر هنا الطلبات المرسلة من حاسبة المشروع.", contact: "جهة الاتصال", scope: "النطاق", estimate: "التقدير", status: "الحالة", weeks: "أسبوع", next: "نقل إلى" },
   en: { title: "Quote requests", empty: "No quote requests yet. Requests from the project estimator will appear here.", contact: "Contact", scope: "Scope", estimate: "Estimate", status: "Status", weeks: "weeks", next: "Move to" },
   nl: { title: "Offerteaanvragen", empty: "Nog geen aanvragen. Aanvragen uit de projectcalculator verschijnen hier.", contact: "Contact", scope: "Omvang", estimate: "Schatting", status: "Status", weeks: "weken", next: "Verplaats naar" },
@@ -28,7 +29,7 @@ const panelCopy = {
   tr: { title: "Teklif talepleri", empty: "Henüz teklif talebi yok. Proje hesaplayıcısından gelen talepler burada görünür.", contact: "İletişim", scope: "Kapsam", estimate: "Tahmin", status: "Durum", weeks: "hafta", next: "Taşı" },
   fr: { title: "Demandes de devis", empty: "Aucune demande pour le moment. Les demandes du calculateur apparaîtront ici.", contact: "Contact", scope: "Périmètre", estimate: "Estimation", status: "Statut", weeks: "semaines", next: "Passer à" },
   es: { title: "Solicitudes de presupuesto", empty: "Todavía no hay solicitudes. Las del estimador aparecerán aquí.", contact: "Contacto", scope: "Alcance", estimate: "Estimación", status: "Estado", weeks: "semanas", next: "Mover a" },
-} as const;
+} as const);
 
 const NEXT_STATUS: Record<LeadStatus, LeadStatus> = {
   new: "contacted",

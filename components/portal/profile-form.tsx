@@ -1,4 +1,5 @@
 "use client";
+import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import { useActionState, useState } from "react";
 import { Camera, Save } from "lucide-react";
@@ -12,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { localeMeta, locales, type Locale } from "@/lib/i18n";
 
-const copy = {
+const copy = withExtraLocales({
   ar: { photo: "الصورة الشخصية", hint: "PNG أو JPG أو WebP، بحد أقصى 750 KB", name: "الاسم الكامل", company: "الشركة", title: "المسمى الوظيفي", phone: "رقم الهاتف", email: "البريد الإلكتروني", language: "لغة الحساب", save: "حفظ التعديلات", settings: "إعدادات الحساب", note: "تُستخدم هذه البيانات في لوحة مشاريعك والتواصل مع الفريق.", marketing: "العروض والتحديثات", marketingHint: "أوافق على استقبال عروض Blue Sass وتحديثات الخدمات. يمكنني إلغاء الاشتراك في أي وقت." },
   en: { photo: "Profile photo", hint: "PNG, JPG or WebP, up to 750 KB", name: "Full name", company: "Company", title: "Job title", phone: "Phone", email: "Email", language: "Account language", save: "Save changes", settings: "Account settings", note: "These details are used in your project workspace and team communication.", marketing: "Offers and updates", marketingHint: "I agree to receive Blue Sass offers and service updates. I can opt out at any time." },
   nl: { photo: "Profielfoto", hint: "PNG, JPG of WebP, maximaal 750 KB", name: "Volledige naam", company: "Bedrijf", title: "Functie", phone: "Telefoon", email: "E-mail", language: "Accounttaal", save: "Wijzigingen opslaan", settings: "Accountinstellingen", note: "Deze gegevens worden gebruikt in uw projectomgeving.", marketing: "Aanbiedingen en updates", marketingHint: "Ik wil aanbiedingen en service-updates van Blue Sass ontvangen." },
@@ -20,7 +21,7 @@ const copy = {
   tr: { photo: "Profil fotoğrafı", hint: "PNG, JPG veya WebP, en fazla 750 KB", name: "Ad soyad", company: "Şirket", title: "Unvan", phone: "Telefon", email: "E-posta", language: "Hesap dili", save: "Değişiklikleri kaydet", settings: "Hesap ayarları", note: "Bu bilgiler proje alanınızda kullanılır.", marketing: "Teklifler ve güncellemeler", marketingHint: "Blue Sass teklifleri ve hizmet güncellemelerini almak istiyorum." },
   fr: { photo: "Photo de profil", hint: "PNG, JPG ou WebP, 750 Ko maximum", name: "Nom complet", company: "Entreprise", title: "Fonction", phone: "Téléphone", email: "E-mail", language: "Langue du compte", save: "Enregistrer", settings: "Paramètres du compte", note: "Ces informations sont utilisées dans votre espace projet.", marketing: "Offres et actualités", marketingHint: "Je souhaite recevoir les offres et actualités de Blue Sass." },
   es: { photo: "Foto de perfil", hint: "PNG, JPG o WebP, máximo 750 KB", name: "Nombre completo", company: "Empresa", title: "Cargo", phone: "Teléfono", email: "Correo", language: "Idioma de la cuenta", save: "Guardar cambios", settings: "Ajustes de cuenta", note: "Estos datos se usan en su espacio de proyectos.", marketing: "Ofertas y novedades", marketingHint: "Quiero recibir ofertas y novedades de servicios de Blue Sass." },
-} as const;
+} as const);
 
 export function ProfileForm({ locale, user }: { locale: Locale; user: { name: string | null; email: string; image: string | null; company: string | null; title: string | null; phone: string | null; locale: string; marketingOptIn: boolean } }) {
   const c = copy[locale];

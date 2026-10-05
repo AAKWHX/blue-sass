@@ -16,6 +16,8 @@ import { accounts, sessions, users, verificationTokens } from "@/lib/db/schema";
 import type { AppRole } from "@/lib/db/schema";
 import { requireEmailVerification } from "@/lib/auth/policy";
 import { createHash } from "node:crypto";
+import { takeRateLimit } from "@/lib/rate-limit";
+import { isLocale } from "@/lib/i18n/config";
 
 declare module "next-auth" {
   interface Session {
@@ -34,8 +36,8 @@ declare module "next-auth" {
 }
 
 const credentialsSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+  email: z.string().trim().email().max(254),
+  password: z.string().min(8).max(128),
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -66,6 +68,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!isDatabaseConfigured) return null;
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
+        const loginKey = createHash("sha256").update(parsed.data.email.toLowerCase()).digest("hex");
+        if (!takeRateLimit(`credentials:${loginKey}`, 10, 15 * 60_000)) return null;
 
         const [record] = await db
           .select()
@@ -114,8 +118,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.company = user.company ?? null;
         token.locale = user.locale ?? "ar";
       }
-      if (trigger === "update" && session?.locale) {
-        token.locale = session.locale as string;
+      if (trigger === "update" && typeof session?.locale === "string" && isLocale(session.locale)) {
+        token.locale = session.locale;
       }
       token.role = record.role;
       return token;
