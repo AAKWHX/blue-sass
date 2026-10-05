@@ -22,7 +22,7 @@ const galleryCopy: Record<Locale, { search: string; catalog: string; live: strin
   es: { search: "Buscar plantillas o servicios", catalog: "Catálogo de plantillas", live: "Vista interactiva", results: "plantillas disponibles", empty: "No hay plantillas coincidentes. Pruebe otra categoría.", hint: "Explore y abra la vista completa antes de elegir." },
 };
 
-export function TemplateGallery({ service, group, embedded = false }: { service?: ServiceSlug; group?: string; embedded?: boolean }) {
+export function TemplateGallery({ service, group, embedded = false, maxItems }: { service?: ServiceSlug; group?: string; embedded?: boolean; maxItems?: number }) {
   const { locale, t } = useI18n();
   const c = t.experience;
   const labels = galleryCopy[locale];
@@ -30,7 +30,8 @@ export function TemplateGallery({ service, group, embedded = false }: { service?
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<string>(service ?? "all");
   const catalog = serviceCatalog(locale);
-  const source = serviceTemplates(locale, service).filter((item) => group === "web" ? ["web", "store", "design"].includes(item.service) : group === "apps" ? ["android", "ios", "windows", "erp", "ai"].includes(item.service) : true);
+  const allTemplates = serviceTemplates(locale, service).filter((item) => group === "web" ? ["web", "store", "design"].includes(item.service) : group === "apps" ? ["android", "ios", "windows", "erp", "ai"].includes(item.service) : true);
+  const source = maxItems ? allTemplates.filter((item, index, array) => array.findIndex(candidate => candidate.service === item.service) === index).slice(0, maxItems) : allTemplates;
   const items = useMemo(() => source.filter((item) => {
     if (filter !== "all" && item.service !== filter) return false;
     const serviceName = catalog.find((entry) => entry.slug === item.service)?.title ?? "";
@@ -40,7 +41,7 @@ export function TemplateGallery({ service, group, embedded = false }: { service?
   const featureLabel = (key: string) => t.quote.features[key as keyof typeof t.quote.features];
   const start = (item: typeof source[number]) => `/${locale}/quote?service=${item.service}&template=${item.id}`;
 
-  return <section id="templates" className={`${embedded ? "" : "min-h-screen"} bg-[#050608] py-16 text-white`}><div className="container-x"><div className="grid gap-8 xl:grid-cols-[15rem_minmax(0,1fr)]">
+  return <section id="templates" className={`template-catalog ${embedded ? "" : "min-h-screen"} bg-[#050608] py-12 text-white`}><div className="container-x"><div className="grid gap-8 xl:grid-cols-[15rem_minmax(0,1fr)]">
     <aside className="xl:sticky xl:top-28 xl:self-start"><div className="mb-6 flex items-center gap-2 text-sm font-bold"><LayoutGrid className="size-4"/>{labels.catalog}</div><div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-1">
       {!service && <Button variant="unstyled" size="auto" className={`justify-start rounded-xl border px-3 py-2.5 text-xs ${filter === "all" ? "border-white bg-white text-black" : "border-white/10 bg-white/[.03] text-white/65 hover:border-white/25 hover:text-white"}`} onClick={() => setFilter("all")}>{c.allServices}<span className="ms-auto opacity-50">{source.length}</span></Button>}
       {catalog.filter((entry) => source.some((item) => item.service === entry.slug)).map((entry) => <Button key={entry.slug} variant="unstyled" size="auto" className={`justify-start rounded-xl border px-3 py-2.5 text-start text-xs ${filter === entry.slug ? "border-white bg-white text-black" : "border-white/10 bg-white/[.03] text-white/65 hover:border-white/25 hover:text-white"}`} onClick={() => setFilter(entry.slug)}>{entry.title}<span className="ms-auto opacity-50">{source.filter((item) => item.service === entry.slug).length}</span></Button>)}

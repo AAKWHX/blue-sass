@@ -4,6 +4,10 @@ import { useI18n } from "@/components/providers";
 import { Reveal } from "@/components/ui/motion";
 import { SqueezeCarousel, type SqueezeSlide } from "@/components/ui/carousel-squeeze";
 import { serviceCatalog } from "@/lib/service-catalog";
+import { translated } from "@/lib/i18n/project-builder";
+
+const pause = translated("إيقاف الحركة", "Pause carousel", "Carrousel pauzeren", "Karussell pausieren", "Kaydırmayı durdur", "Suspendre le défilement", "Pausar carrusel");
+const play = translated("تشغيل الحركة", "Play carousel", "Carrousel afspelen", "Karussell abspielen", "Kaydırmayı başlat", "Reprendre le défilement", "Reanudar carrusel");
 
 const serviceImages = [
   "/media/service-web-3d.webp",
@@ -37,7 +41,6 @@ const headings = {
 
 export function Services() {
   const { locale, t } = useI18n();
-  const ar = locale === "ar";
   const services = serviceCatalog(locale);
   const action = actions[locale];
   const slides: SqueezeSlide[] = services.map((item, index) => ({
@@ -54,11 +57,11 @@ export function Services() {
     detailHref: `/${locale}/services/${item.slug}`,
   }));
   return (
-    <section id="services" className="section-y scroll-mt-24 bg-white">
+    <section id="services" className="section-y scroll-mt-24 bg-black text-white">
       <div className="container-x">
-        <Reveal className="text-center"><h2 className="mx-auto max-w-3xl text-4xl font-bold text-black sm:text-6xl">{headings[locale]}</h2></Reveal>
+        <Reveal className="text-center"><h2 className="mx-auto max-w-3xl text-4xl font-bold text-white sm:text-6xl">{headings[locale]}</h2></Reveal>
 
-        <Reveal className="mt-12"><SqueezeCarousel slides={slides} label={t.services.title} previousLabel={action.previous} nextLabel={action.next} /></Reveal>
+        <Reveal className="mt-8"><SqueezeCarousel slides={slides} label={t.services.title} previousLabel={action.previous} nextLabel={action.next} pauseLabel={pause[locale]} playLabel={play[locale]} /></Reveal>
       </div>
     </section>
   );

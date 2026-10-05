@@ -13,6 +13,9 @@ import { isLocale } from "@/lib/i18n";
 import { paymentCopy } from "@/lib/i18n/payment-copy";
 import { paymentSafetyCopy } from "@/lib/i18n/payment-safety-copy";
 import { getPayPalClientConfig } from "@/lib/paypal";
+import { billingState } from "@/lib/db/billing";
+import { InstallmentSummary } from "@/components/portal/installment-summary";
+import { billingCopy } from "@/lib/i18n/billing-copy";
 
 function formatMoney(amountCents: number, currency: string, locale: string) {
   return new Intl.NumberFormat(locale, { style: "currency", currency }).format(amountCents / 100);
@@ -30,10 +33,11 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
   const config = getPayPalClientConfig();
   const copy = paymentCopy[locale];
   const safetyCopy = paymentSafetyCopy[locale];
+  const billing = await billingState(detail.project);
 
   let payable: { amountCents: number; currency: string } | null = null;
   try {
-    payable = projectPaymentAmount(detail.project);
+    payable = billing ? billing.next && billing.ready && billing.plan.approvedTotalCents ? { amountCents: billing.next.amountCents, currency: "EUR" } : null : projectPaymentAmount(detail.project);
   } catch {
     payable = null;
   }
@@ -44,7 +48,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
   return (
     <>
       <PortalNav locale={locale} />
-      <main className="container-x min-h-[70vh] py-10 sm:py-14">
+      <main className="payment-page container-x min-h-[70vh] py-10 sm:py-14">
         <Button asChild variant="ghostNeon" size="sm">
           <Link href={`/${locale}/portal/projects/${id}`}>{copy.back}</Link>
         </Button>
@@ -90,7 +94,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
                     initialStatus={payment?.status ?? "idle"}
                   />
                 ) : (
-                  <div className="rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm leading-6 text-red-200">{copy.unavailable}</div>
+                  <div className="rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm leading-6 text-red-200">{billing && !billing.plan.approvedTotalCents ? billingCopy.approval[locale] : billing && !billing.ready ? billingCopy.waiting[locale] : copy.unavailable}</div>
                 )}
               </div>
             </section>
@@ -119,6 +123,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
           </div>
         </div>
       </main>
+      {billing ? <InstallmentSummary locale={locale} billing={billing}/> : null}
     </>
   );
 }

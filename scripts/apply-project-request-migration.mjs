@@ -17,5 +17,18 @@ if (!process.env.DATABASE_URL) {
       updated_at timestamptz NOT NULL DEFAULT now()
     )`;
     console.log("Structured project request storage ready.");
+    await sql.begin(async tx => {
+      await tx`CREATE TABLE IF NOT EXISTS public.project_billing (
+        project_id uuid PRIMARY KEY REFERENCES public.projects(id) ON DELETE CASCADE,
+        approved_total_cents integer CHECK (approved_total_cents > 0),
+        approved_by uuid REFERENCES public.users(id) ON DELETE RESTRICT,
+        approved_at timestamptz,
+        created_at timestamptz NOT NULL DEFAULT now()
+      )`;
+      await tx`ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS billing_stage text NOT NULL DEFAULT 'legacy'`;
+      await tx`CREATE UNIQUE INDEX IF NOT EXISTS payments_project_environment_stage_unique ON public.payments(project_id, environment, billing_stage)`;
+      await tx`DROP INDEX IF EXISTS public.payments_project_environment_unique`;
+    });
+    console.log("Stage billing storage ready; existing payments retained as legacy.");
   } finally { await sql.end({ timeout: 5 }); }
 }

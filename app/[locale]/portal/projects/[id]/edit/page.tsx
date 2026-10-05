@@ -11,6 +11,7 @@ import type { ProjectType, FeatureKey } from "@/lib/pricing";
 import { isLocale } from "@/lib/i18n";
 import { ProjectBuilder } from "@/components/public/project-builder";
 import { PortalNav } from "@/components/portal/portal-nav";
+import { billingState } from "@/lib/db/billing";
 
 export default async function EditProjectPage({ params, searchParams }: { params: Promise<{ locale: string; id: string }>; searchParams: Promise<{ step?: string }> }) {
   const { locale, id } = await params;
@@ -20,7 +21,8 @@ export default async function EditProjectPage({ params, searchParams }: { params
   const detail = await getProjectDetail(id);
   if (!detail || detail.project.clientId !== viewer.id) notFound();
   const [state, payment, request] = await Promise.all([lifecycleState(id), getProjectPayment(id, viewer.id), getProjectRequest(id)]);
-  if (!canChangeRequest(detail.project, viewer.id, state) || payment?.status === "pending" || payment?.status === "paid") redirect(`/${locale}/portal/projects/${id}`);
+  const billing = await billingState(detail.project);
+  if (!canChangeRequest(detail.project, viewer.id, state) || payment?.status === "pending" || payment?.status === "paid" || billing?.paidCents) redirect(`/${locale}/portal/projects/${id}`);
   if (!(detail.project.industry in featureOptions)) redirect(`/${locale}/portal/projects/${id}`);
   const fallback = initialConfiguration(detail.project.industry as ProjectType);
   fallback.projectName = detail.project.name;
@@ -28,6 +30,7 @@ export default async function EditProjectPage({ params, searchParams }: { params
   fallback.languages = [locale];
   fallback.features = [...new Set([...fallback.features, ...detail.project.tech.filter(f => featureOptions[fallback.type].includes(f as FeatureKey)) as FeatureKey[]])];
   fallback.notes = detail.project.summary;
+  const configuration = { ...(request?.configuration ?? fallback), priceVersion: request?.configuration.priceVersion ?? 1 as const, promotionPercent: request?.configuration.promotionPercent ?? (request?.estimate.baseLow ? Math.round(request.estimate.discount / request.estimate.baseLow * 100) : undefined) };
   const requestedStep = Number((await searchParams).step ?? 0);
-  return <><PortalNav locale={locale}/><ProjectBuilder initial={request?.configuration ?? fallback} email={viewer.email} projectId={id} initialStep={Number.isInteger(requestedStep) ? requestedStep : 0}/></>;
+  return <><PortalNav locale={locale}/><ProjectBuilder initial={configuration} email={viewer.email} projectId={id} initialStep={Number.isInteger(requestedStep) ? requestedStep : 0}/></>;
 }

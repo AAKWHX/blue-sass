@@ -5,6 +5,8 @@ import { payments, projectMilestones, projectRequests, projects, type Payment, t
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { reservationDeposit, type ProjectType } from "@/lib/pricing";
 import { getPayPalEnvironment } from "@/lib/paypal";
+import { billingState } from "@/lib/db/billing";
+import { lockProject } from "@/lib/db/project-lifecycle";
 
 const projectTypes = new Set<ProjectType>(["web", "mobile", "ai", "ecommerce", "erp", "brand"]);
 
@@ -42,11 +44,15 @@ export function projectPaymentAmount(project: Project) {
 export async function getProjectPayment(projectId: string, userId: string) {
   if (!isDatabaseConfigured) return null;
   try {
+    const [project] = await db.select().from(projects).where(and(eq(projects.id, projectId), eq(projects.clientId, userId))).limit(1);
+    if (!project) return null;
+    const billing = await billingState(project);
+    if (billing) return billing.next?.payment ?? (billing.installments.length === 6 && !billing.next ? billing.installments.at(-1)?.payment : null) ?? null;
     const [row] = await db
       .select({ payment: payments })
       .from(payments)
       .innerJoin(projects, eq(projects.id, payments.projectId))
-      .where(and(eq(payments.projectId, projectId), eq(payments.environment, getPayPalEnvironment()), eq(projects.clientId, userId)))
+      .where(and(eq(payments.projectId, projectId), eq(payments.environment, getPayPalEnvironment()), eq(payments.billingStage, "legacy"), eq(projects.clientId, userId)))
       .limit(1);
     return row?.payment ?? null;
   } catch (error) {
@@ -72,12 +78,15 @@ export async function preparePayPalPayment(projectId: string, userId: string) {
     const lifecycle = await lifecycleState(projectId, tx);
     if (lifecycle.cancelled) throw new PaymentAccessError("A cancelled project cannot be paid.");
 
-    const amount = projectPaymentAmount(project);
+    const billing = await billingState(project, tx);
+    if (billing && (!billing.plan.approvedTotalCents || !billing.next || !billing.ready)) throw new PaymentAccessError("The approved stage is not ready for payment.");
+    const amount = billing?.next ? { amountCents: billing.next.amountCents, currency: "EUR" } : projectPaymentAmount(project);
+    const billingStage = billing?.next?.stage ?? "legacy";
     const environment = getPayPalEnvironment();
     const [existing] = await tx
       .select()
       .from(payments)
-      .where(and(eq(payments.projectId, projectId), eq(payments.environment, environment)))
+      .where(and(eq(payments.projectId, projectId), eq(payments.environment, environment), eq(payments.billingStage, billingStage)))
       .for("update")
       .limit(1);
 
@@ -116,7 +125,7 @@ export async function preparePayPalPayment(projectId: string, userId: string) {
 
     const [payment] = await tx
       .insert(payments)
-      .values({ projectId, userId, environment, ...amount })
+      .values({ projectId, userId, environment, billingStage, ...amount })
       .returning();
     return { payment, needsProviderOrder: true };
   });
@@ -152,16 +161,20 @@ export async function getOwnedPayPalPayment(orderId: string, userId: string) {
 export async function markPaymentPaid(payment: Payment, captureId: string) {
   const updated = await db.transaction(async (tx) => {
     const now = new Date();
+    const project = await lockProject(tx, payment.projectId);
+    if (!project) throw new PaymentAccessError();
     const [paid] = await tx.update(payments).set({ status: "paid", providerCaptureId: captureId, failureCode: null, paidAt: now, updatedAt: now }).where(and(eq(payments.id, payment.id), eq(payments.status, "pending"))).returning();
     if (!paid) return null;
+    if ((await lifecycleState(project.id, tx)).cancelled) return paid;
     const [request] = await tx.select({ configuration: projectRequests.configuration }).from(projectRequests).where(eq(projectRequests.projectId, paid.projectId)).limit(1);
     const days = request?.configuration.deliveryDays;
-    await tx.update(projects).set({ startDate: now, ...(days ? { deadline: new Date(now.getTime() + days * 86_400_000) } : {}), updatedAt: now }).where(eq(projects.id, paid.projectId));
-    if (days) {
+    const firstPayment = payment.billingStage === "legacy" || payment.billingStage === "planning";
+    if (firstPayment) await tx.update(projects).set({ startDate: now, ...(days ? { deadline: new Date(now.getTime() + days * 86_400_000) } : {}), updatedAt: now }).where(eq(projects.id, paid.projectId));
+    if (days && firstPayment) {
       const milestones = await tx.select({ id: projectMilestones.id }).from(projectMilestones).where(eq(projectMilestones.projectId, paid.projectId)).orderBy(asc(projectMilestones.orderIndex));
       for (const [index, milestone] of milestones.entries()) await tx.update(projectMilestones).set({ dueDate: new Date(now.getTime() + Math.ceil(days * (index + 1) / Math.max(1, milestones.length)) * 86_400_000) }).where(eq(projectMilestones.id, milestone.id));
     }
-    const [first] = await tx.select({ id: projectMilestones.id }).from(projectMilestones).where(eq(projectMilestones.projectId, paid.projectId)).orderBy(asc(projectMilestones.orderIndex)).limit(1);
+    const [first] = await tx.select({ id: projectMilestones.id }).from(projectMilestones).where(and(eq(projectMilestones.projectId, paid.projectId), ...(payment.billingStage === "legacy" ? [] : [eq(projectMilestones.stage, payment.billingStage as Project["stage"])]))).orderBy(asc(projectMilestones.orderIndex)).limit(1);
     if (first) await tx.update(projectMilestones).set({ status: "in_progress" }).where(eq(projectMilestones.id, first.id));
     return paid;
   });

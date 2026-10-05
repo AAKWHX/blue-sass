@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -60,5 +61,6 @@ export async function updateProfileAction(_previous: ProfileState, formData: For
 
   revalidatePath("/", "layout");
   revalidatePath(`/${locale}/portal/profile`);
+  if (viewer.locale !== locale) redirect(`/${locale}/portal/profile`);
   return { ok: true, message: locale === "ar" ? "تم حفظ الملف الشخصي." : "Profile saved." };
 }

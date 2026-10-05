@@ -10,7 +10,6 @@ import {
   projectFiles,
   projectMilestones,
   projects,
-  payments,
 } from "@/lib/db/schema";
 import {
   assertCanEditProject,
@@ -21,12 +20,7 @@ import {
 } from "@/lib/db/access";
 
 import { lifecycleState, lockProject, recordLifecycle, type ProjectTransaction } from "@/lib/db/project-lifecycle";
-import { getPayPalEnvironment } from "@/lib/paypal";
-
-async function hasCompletedPayment(projectId: string, tx: ProjectTransaction) {
-  const [row] = await tx.select({ id: payments.id }).from(payments).where(and(eq(payments.projectId, projectId), eq(payments.environment, getPayPalEnvironment()), eq(payments.status, "paid"))).limit(1);
-  return Boolean(row);
-}
+import { isStagePaid } from "@/lib/db/billing";
 
 export interface MutationState {
   ok: boolean;
@@ -49,12 +43,16 @@ async function recalcProgress(projectId: string, tx: ProjectTransaction, actorId
   const done = rows.filter((r) => r.status === "done").length;
   const progress = Math.round((done / rows.length) * 100);
   const active = rows.find((r) => r.status !== "done");
-  if (progress === 100 || active?.stage !== "planning" || rows.some(r => r.stage !== "planning" && r.status !== "todo")) await recordLifecycle(tx, projectId, "locked", actorId);
+  const project = await lockProject(tx, projectId);
+  if (!project) return;
+  const target = progress === 100 ? "completed" : active?.stage ?? "planning";
+  const mayAdvance = !project.clientId || await isStagePaid(project, target, tx);
+  if (mayAdvance && (progress === 100 || active?.stage !== "planning" || rows.some(r => r.stage !== "planning" && r.status !== "todo"))) await recordLifecycle(tx, projectId, "locked", actorId);
   await tx
     .update(projects)
     .set({
       progress,
-      stage: progress === 100 ? "completed" : (active?.stage ?? "planning"),
+      stage: mayAdvance ? target : project.stage,
       updatedAt: new Date(),
     })
     .where(eq(projects.id, projectId));
@@ -78,7 +76,7 @@ export async function setProjectStageAction(formData: FormData) {
   await db.transaction(async tx => {
     const project = await lockProject(tx, parsed.data.projectId);
     if (!project || (await lifecycleState(project.id, tx)).cancelled) return;
-    if (project.clientId && !(await hasCompletedPayment(project.id, tx))) return;
+    if (project.clientId && !(await isStagePaid(project, parsed.data.stage, tx))) return;
     const targetIndex = stageOrder.indexOf(parsed.data.stage);
     if (project.stage !== "planning" || parsed.data.stage !== "planning") await recordLifecycle(tx, project.id, "locked", viewer.id);
     const rows = await tx.select({ id: projectMilestones.id, stage: projectMilestones.stage }).from(projectMilestones).where(eq(projectMilestones.projectId, project.id));
@@ -108,7 +106,8 @@ export async function setMilestoneStatusAction(
   const changed = await db.transaction(async tx => {
     const project = await lockProject(tx, parsed.data.projectId);
     if (!project || (await lifecycleState(project.id, tx)).cancelled) return false;
-    if (project.clientId && !(await hasCompletedPayment(project.id, tx))) return false;
+    const [milestone] = await tx.select().from(projectMilestones).where(and(eq(projectMilestones.id, parsed.data.milestoneId), eq(projectMilestones.projectId, project.id))).limit(1);
+    if (!milestone || (project.clientId && !(await isStagePaid(project, milestone.stage, tx)))) return false;
     if (project.stage !== "planning") await recordLifecycle(tx, project.id, "locked", viewer.id);
     const rows = await tx.update(projectMilestones).set({ status: parsed.data.status }).where(and(eq(projectMilestones.id, parsed.data.milestoneId), eq(projectMilestones.projectId, project.id))).returning({ id: projectMilestones.id });
     if (!rows.length) return false;

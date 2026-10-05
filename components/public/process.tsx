@@ -83,7 +83,7 @@ export function CallToAction() {
     <section className="section-y bg-base">
       <div className="container-x">
         <Reveal>
-          <div className="relative overflow-hidden rounded-[2rem] border border-black bg-neon-cyan p-8 sm:p-12 lg:p-16">
+          <div className="home-cta-panel relative overflow-hidden rounded-[2rem] border border-black bg-neon-cyan p-8 sm:p-12 lg:p-16">
             <span aria-hidden className="absolute -end-12 -top-14 text-[13rem] font-black leading-none text-white/45">B</span>
             <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
               <div><h2 className="max-w-3xl text-3xl font-bold text-black sm:text-6xl">{ar ? "جاهز نحول فكرتك إلى منتج حقيقي؟" : t.quote.title}</h2>

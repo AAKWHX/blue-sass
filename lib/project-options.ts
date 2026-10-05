@@ -1,11 +1,11 @@
 import { translated } from "./i18n/project-builder";
 import type { Locale } from "./i18n/config";
-import { estimate, featureCost, speedModifier, type FeatureKey, type ProjectType, type Speed } from "./pricing";
+import { estimate, featureCost, implementationPrice, speedModifier, type FeatureKey, type ProjectType, type Speed } from "./pricing";
 import { websitePackages, websitePackage, websitePackageName } from "./website-packages";
 
 type Names = Record<Locale, string>;
 export type ProjectOption = { id: string; type: ProjectType; names: Names; price: number; weeks: number; features: FeatureKey[] };
-const option = (id: string, type: ProjectType, price: number, weeks: number, features: FeatureKey[], names: Names): ProjectOption => ({ id, type, price, weeks, features, names });
+const option = (id: string, type: ProjectType, price: number, weeks: number, features: FeatureKey[], names: Names): ProjectOption => ({ id, type, price: websitePackage(id) ? price : implementationPrice(price), weeks, features, names });
 export const projectOptions: ProjectOption[] = [
   ...websitePackages.map(p => option(p.id, p.type, p.low, p.weeks, p.features, Object.fromEntries((["ar", "en", "nl", "de", "tr", "fr", "es"] as Locale[]).map(l => [l, websitePackageName(p.id, l)])) as Names)),
   option("android", "mobile", 2450, 8, ["appstore"], translated("تطبيق أندرويد", "Android app", "Android-app", "Android-App", "Android uygulaması", "Application Android", "Aplicación Android")),
@@ -36,7 +36,7 @@ export const featureOptions: Record<ProjectType, FeatureKey[]> = {
 export type PricedOption = { id: string; names: Names; price: number; period: "once" | "month" | "year"; types: ProjectType[] };
 const all: ProjectType[] = ["web", "mobile", "ai", "ecommerce", "erp", "brand"];
 const software: ProjectType[] = ["web", "mobile", "ai", "ecommerce", "erp"];
-const priced = (id: string, price: number, period: PricedOption["period"], types: ProjectType[], names: Names): PricedOption => ({ id, price, period, types, names });
+const priced = (id: string, price: number, period: PricedOption["period"], types: ProjectType[], names: Names): PricedOption => ({ id, price: period === "once" ? implementationPrice(price) : price, period, types, names });
 export const extraOptions = [
   priced("domain", 8, "year", software, translated("نطاق قياسي وربطه بالمشروع", "Standard domain and setup", "Standaarddomein en koppeling", "Standarddomain und Einrichtung", "Standart alan adı ve kurulum", "Domaine standard et configuration", "Dominio estándar y configuración")),
   priced("email", 3, "month", software, translated("بريد الدومين: صندوق مهني واحد", "Domain email: one professional mailbox", "Domeinmail: één zakelijke mailbox", "Domain-E-Mail: ein Geschäftspostfach", "Alan adı e-postası: bir posta kutusu", "E-mail du domaine : une boîte pro", "Correo del dominio: un buzón profesional")),
@@ -75,21 +75,24 @@ export const performanceOptions = [
 export const projectLanguages = ["ar", "en", "nl", "de", "tr", "fr", "es", "it", "pt", "zh", "ja", "ru"];
 export const languageNames: Record<string, string> = { ar: "العربية", en: "English", nl: "Nederlands", de: "Deutsch", tr: "Türkçe", fr: "Français", es: "Español", it: "Italiano", pt: "Português", zh: "中文", ja: "日本語", ru: "Русский" };
 export type ProjectConfiguration = {
+  priceVersion?: 1 | 2;
+  promotionPercent?: number;
   version: 1; type: ProjectType; kind: string; features: FeatureKey[]; extras: string[]; providers: string[]; languages: string[]; modules: string[]; performance: string[];
   speed: Speed; deliveryDays: number; projectName: string; domain: string; name: string; company: string; notes: string; templateId: string;
 };
 export function initialConfiguration(type: ProjectType = "web", kind?: string): ProjectConfiguration {
   const selected = projectOption(kind ?? "") ?? projectOptions.find(p => p.type === type)!;
-  return { version: 1, type: selected.type, kind: selected.id, features: [...selected.features], extras: [], providers: [], languages: ["ar"], modules: [], performance: [], speed: "standard", deliveryDays: selected.weeks * 7, projectName: "", domain: "", name: "", company: "", notes: "", templateId: "" };
+  return { version: 1, priceVersion: 2, type: selected.type, kind: selected.id, features: [...selected.features], extras: [], providers: [], languages: ["ar"], modules: [], performance: [], speed: "standard", deliveryDays: selected.weeks * 7, projectName: "", domain: "", name: "", company: "", notes: "", templateId: "" };
 }
 export function configuredEstimate(config: ProjectConfiguration) {
+  const factor = config.priceVersion === 1 ? 2.5 : 1;
   const selected = projectOption(config.kind)!;
   const pack = websitePackage(config.kind) ?? { type: selected.type, low: selected.price, high: Math.round(selected.price * 1.4), weeks: selected.weeks, features: selected.features };
   // Language count is charged separately, never twice as the generic i18n module.
-  const result = estimate(config.type, config.features.filter(f => f !== "i18n"), config.speed, pack);
+  const result = estimate(config.type, config.features.filter(f => f !== "i18n"), config.speed, { ...pack, low: Math.round(pack.low * factor), high: Math.round(pack.high * factor) }, factor, config.promotionPercent);
   const chosen = [...extraOptions.filter(p => config.extras.includes(p.id)), ...providerOptions.filter(p => config.providers.includes(p.id)), ...moduleOptions.filter(p => config.modules.includes(p.id)), ...performanceOptions.filter(p => config.performance.includes(p.id))];
-  const languagePrice = Math.max(0, config.languages.length - 1) * featureCost.i18n.price;
-  const setup = chosen.filter(p => p.period === "once").reduce((sum, p) => sum + p.price, languagePrice);
+  const languagePrice = Math.max(0, config.languages.length - 1) * featureCost.i18n.price * factor;
+  const setup = chosen.filter(p => p.period === "once").reduce((sum, p) => sum + Math.round(p.price * factor), languagePrice);
   const simpleDays: Record<string, number> = { landing: 3, personal: 7, portfolio: 10, company: 14, restaurant: 10, blog: 14, "social-design": 3, "visual-identity": 10 };
   const scopeDays = config.kind in simpleDays
     ? Math.ceil(simpleDays[config.kind] * speedModifier[config.speed].weeks) + Math.max(0, result.weeks - Math.ceil(selected.weeks * speedModifier[config.speed].weeks)) * 7

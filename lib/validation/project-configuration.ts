@@ -4,6 +4,8 @@ import { featureCost } from "../pricing";
 
 const selection = z.array(z.string().max(40)).max(30).refine(a => new Set(a).size === a.length, "Duplicate options");
 export const configurationSchema = z.object({
+  priceVersion: z.union([z.literal(1), z.literal(2)]).optional(),
+  promotionPercent: z.number().int().min(0).max(20).optional(),
   version: z.literal(1), type: z.enum(["web", "mobile", "ai", "ecommerce", "erp", "brand"]), kind: z.string().max(40),
   features: z.array(z.enum(Object.keys(featureCost) as [keyof typeof featureCost, ...Array<keyof typeof featureCost>])).max(20),
   extras: selection, providers: selection, languages: selection.min(1), modules: selection, performance: selection,

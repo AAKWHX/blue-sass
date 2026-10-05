@@ -66,13 +66,12 @@ export default async function ServicePage({ params }: { params: Promise<{ locale
           <div className="mt-8 grid gap-4 sm:grid-cols-3">{item.features.map((point) => <Reveal key={point} className="rounded-2xl border border-black bg-white p-6"><CheckCircle2 className="h-5 w-5 text-neon-blue" /><h3 className="mt-5 font-semibold text-black">{point}</h3></Reveal>)}</div>
           <ul className="mt-8 grid gap-3 sm:grid-cols-2">{c.points.map(point=><li key={point} className="flex gap-3 text-ink-low"><CheckCircle2 className="size-5 shrink-0"/>{point}</li>)}</ul>
         </section>
-        <TemplateGallery service={item.slug}/>
         <section className="mt-20 rounded-[2rem] border border-black bg-neon-cyan p-8 text-center sm:p-12">
           <h2 className="text-3xl font-bold">{c.steps}</h2>
           <p className="mx-auto mt-4 max-w-2xl text-ink-low">{t.process.subtitle}</p>
           <Button asChild variant="neon" className="mt-8"><Link href={`/${locale}/quote?type=${item.quoteType}&service=${item.slug}`}>{c.estimate}<ArrowRight className="h-4 w-4 flip-x" /></Link></Button>
         </section>
       </div>
-    </div></div>
+    </div><TemplateGallery service={item.slug}/></div>
   );
 }

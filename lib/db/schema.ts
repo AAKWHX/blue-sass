@@ -276,6 +276,7 @@ export const payments = pgTable(
       .references(() => users.id, { onDelete: "restrict" }),
     provider: text("provider").notNull().default("paypal"),
     environment: text("environment").notNull().default("sandbox"),
+    billingStage: text("billing_stage").notNull().default("legacy"),
     providerOrderId: text("provider_order_id").unique(),
     providerCaptureId: text("provider_capture_id").unique(),
     status: paymentStatus("status").notNull().default("pending"),
@@ -289,7 +290,7 @@ export const payments = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex("payments_project_environment_unique").on(t.projectId, t.environment),
+    uniqueIndex("payments_project_environment_stage_unique").on(t.projectId, t.environment, t.billingStage),
     index("payments_project_idx").on(t.projectId),
     index("payments_user_idx").on(t.userId),
     index("payments_status_idx").on(t.status),
@@ -371,6 +372,14 @@ export const projectRequests = pgTable("project_requests", {
   configuration: jsonb("configuration").$type<ProjectConfiguration>().notNull(),
   estimate: jsonb("estimate").$type<ReturnType<typeof configuredEstimate>>().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const projectBilling = pgTable("project_billing", {
+  projectId: uuid("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
+  approvedTotalCents: integer("approved_total_cents"),
+  approvedBy: uuid("approved_by").references(() => users.id, { onDelete: "restrict" }),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export type User = typeof users.$inferSelect;

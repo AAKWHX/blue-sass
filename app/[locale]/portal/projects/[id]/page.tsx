@@ -14,6 +14,8 @@ import { paymentCopy } from "@/lib/i18n/payment-copy";
 import { getProjectRequest } from "@/lib/db/project-requests";
 import { ProjectRequestSummary } from "@/components/public/project-request-summary";
 import { builderCopy } from "@/lib/i18n/project-builder";
+import { billingState } from "@/lib/db/billing";
+import { InstallmentSummary } from "@/components/portal/installment-summary";
 
 export default async function ProjectPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = await params;
@@ -29,14 +31,16 @@ export default async function ProjectPage({ params }: { params: Promise<{ locale
   ]);
   const c = getDictionary(locale).experience;
   const pc = paymentCopy[locale];
-  const editable = detail.project.clientId === viewer.id && detail.project.stage === "planning" && !state.locked && !state.cancelled && payment?.status !== "pending" && payment?.status !== "paid";
+  const billing = await billingState(detail.project);
+  const editable = detail.project.clientId === viewer.id && detail.project.stage === "planning" && !state.locked && !state.cancelled && payment?.status !== "pending" && payment?.status !== "paid" && !billing?.paidCents;
 
   return (
     <>
       <PortalNav locale={locale} />
-      <ProjectControls project={detail.project} cancelled={state.cancelled} editable={detail.project.clientId === viewer.id && detail.project.stage === "planning" && !state.locked && !state.cancelled && payment?.status !== "pending" && payment?.status !== "paid"} />
+      <ProjectControls project={detail.project} cancelled={state.cancelled} editable={editable} />
       {request ? <section className="container-x request-builder mt-8 py-8"><h1 className="mb-6 text-3xl font-bold">{detail.project.name}</h1><ProjectRequestSummary configuration={request.configuration} quote={request.estimate} email={detail.project.clientId === viewer.id ? viewer.email : undefined} editHref={editable ? `/${locale}/portal/projects/${id}/edit` : undefined}/><p className="mt-5 text-sm leading-7">{state.cancelled ? c.cancelled : builderCopy.timing[locale]}</p>{!editable && !state.cancelled ? <p className="mt-4 text-sm leading-7">{builderCopy.blocked[locale]}</p> : null}</section> : null}
-      <ClientDashboard viewerName={viewer.name ?? viewer.email} viewerCompany={null} projects={[{ ...detail, summary: summariseProgress(detail), paymentStatus: payment?.status ?? null, cancelled: state.cancelled }]} orders={[]} />
+      {billing ? <InstallmentSummary locale={locale} billing={billing}/> : null}
+      <ClientDashboard viewerName={viewer.name ?? viewer.email} viewerCompany={null} projects={[{ ...detail, summary: summariseProgress(detail), paymentStatus: billing?.paidCents ? "paid" : payment?.status ?? null, cancelled: state.cancelled }]} orders={[]} />
       <section className="container-x pb-12">
         <div className="rounded-2xl border border-black/15 bg-neon-cyan/15 p-6">
           <div className="flex flex-wrap items-start justify-between gap-5">

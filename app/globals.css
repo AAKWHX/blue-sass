@@ -4,6 +4,37 @@
 /* Tailwind v4: a single @import replaces the three @tailwind directives. */
 @import "tailwindcss";
 
+/* Continuous public-page rhythm; cards keep their own readable contrast. */
+.public-flow { background:#050608; color:#f5f5f5; --section-y:clamp(2.5rem,5vw,4rem); }
+.public-flow > section { background:#050608; }
+.public-flow > #portfolio > h2 { color:#f5f5f5; }
+.service-page-flow #pricing > .mb-10 h2, .service-page-flow > section > h2 { color:#f5f5f5; }
+.service-page-flow #pricing > p, .service-page-flow #pricing > .mb-10 p, .service-page-flow > section > p { color:#c2c8d0; }
+.service-page-flow article.bg-white { color:#080808; }
+.service-page-flow #pricing > .my-7 [data-variant="outline"] { color:#f5f5f5; border-color:#68717e; }
+.public-flow .home-faq h2, .public-flow .home-faq button, .public-flow .home-faq p { color:#f5f5f5; }
+.public-flow .home-faq article { background:#101216; border-color:#232630; }
+.public-flow .home-faq article p { color:#c2c8d0; border-color:#232630; }
+.public-flow .home-cta-panel { background:#101216; border-color:#232630; }
+.public-flow .home-cta-panel h2 { color:#f5f5f5; }
+.public-flow .home-cta-panel p { color:#c2c8d0; }
+.public-flow .shiny-cta, .template-catalog .shiny-cta { color:#fff; }
+.service-reel { --service-card-width:min(82vw,36rem); }
+.service-reel-card { width:var(--service-card-width); height:clamp(19rem,35vw,29rem); }
+.service-reel-track { transition:transform .8s cubic-bezier(.2,.7,.2,1); }
+.template-catalog { background:#050608; color:#fff; }
+.template-catalog [data-variant="outline"] { white-space:normal; height:auto; min-height:2.75rem; }
+.template-catalog [data-variant="neon"] { white-space:normal; height:auto; min-height:2.75rem; text-align:center; }
+.paypal-checkout-scope { isolation:isolate; }
+.payment-page { color:#f5f5f5; background:#050608; }
+.payment-page h1, .payment-page h2, .payment-page dd { color:#f5f5f5; }
+.payment-page section, .payment-page aside { background:#101216; }
+.payment-page .text-ink-low { color:#c2c8d0; }
+.payment-page .text-ink-high { color:#f5f5f5; }
+.payment-page .btn-ghost { color:#fff; border-color:#68717e; }
+@media (min-width:768px) { .service-reel { --service-card-width:min(48vw,40rem); } }
+@media (prefers-reduced-motion:reduce) { .service-reel-track { transition:none; } }
+
 .request-builder { color: #f5f5f5; background: #050608; border-radius: 1.5rem; margin-block: 1.5rem; }
 .request-builder h1, .request-builder h2, .request-builder h3, .request-panel h1, .request-panel h2, .request-panel h3 { color: inherit; }
 .request-builder [data-slot="button"][data-variant="outline"], .request-panel [data-slot="button"][data-variant="outline"], .request-builder [data-slot="button"][data-variant="ghostNeon"], .request-panel [data-slot="button"][data-variant="ghostNeon"] { color: #f5f5f5; border-color: #6a707c; background: transparent; }

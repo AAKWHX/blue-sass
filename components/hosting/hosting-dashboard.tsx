@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { HostedSite } from "@/lib/db/schema";
 import type { Locale } from "@/lib/i18n";
+import { hostingCopy } from "@/lib/i18n/hosting-copy";
 
 const copy = {
   ar: { name: "اسم الموقع", type: "نوع المشروع", static: "موقع Static", next: "تطبيق Next.js", folder: "اختر فولدر المشروع", chosen: "ملف محدد", confirm: "أؤكد أن الملفات تخصني ولا تحتوي على كلمات مرور أو مفاتيح سرية.", deploy: "استضافة الموقع", deploying: "جارٍ رفع الملفات وبدء النشر…", preparing: "جارٍ فحص الملفات وتجهيزها…", waiting: "اكتمل الرفع، جارٍ إنشاء الموقع. قد يستغرق ذلك دقيقة…", network: "تعذر الاتصال بخدمة الاستضافة. تحقق من الإنترنت ثم أعد المحاولة.", invalid: "وصل رد غير صالح من الخادم. أعد المحاولة، وإن استمرت المشكلة تواصل معنا.", tooLarge: "تجاوزت الملفات الحد المسموح: 200 ملف وبحجم إجمالي 4 MB.", limits: "حتى 200 ملف و4 MB. لا ترفع .env أو node_modules أو مجلدات البناء.", sites: "مواقعك المستضافة", empty: "لا توجد مواقع مستضافة بعد.", details: "الإعدادات والتفاصيل", visit: "زيارة الموقع", ready: "جاهز", building: "قيد البناء", uploading: "قيد الرفع", failed: "فشل" },
@@ -39,10 +40,11 @@ function uploadDeployment(formData: FormData, onProgress: (value: number) => voi
   });
 }
 
-export function HostingDashboard({ locale, initialSites }: { locale: Locale; initialSites: HostedSite[] }) {
+export function HostingDashboard({ locale, initialSites, canDeploy = false }: { locale: Locale; initialSites: HostedSite[]; canDeploy?: boolean }) {
   const c = copy[locale]; const router = useRouter(); const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]); const [framework, setFramework] = useState("static"); const [confirmed, setConfirmed] = useState(false); const [busy, setBusy] = useState(false); const [message, setMessage] = useState(""); const [phase, setPhase] = useState<"idle"|"preparing"|"uploading"|"waiting">("idle"); const [progress, setProgress] = useState(0);
   async function submit(formData: FormData) {
+    if (!canDeploy) { setMessage(hostingCopy.required[locale]); return; }
     if (!files.length || !confirmed) return;
     const bytes = files.reduce((sum, file) => sum + file.size, 0);
     if (files.length > 200 || bytes > 4 * 1024 * 1024) { setMessage("tooLarge" in c ? c.tooLarge : c.limits); return; }
@@ -52,7 +54,7 @@ export function HostingDashboard({ locale, initialSites }: { locale: Locale; ini
     try {
       setPhase("uploading");
       const response = await uploadDeployment(formData, setProgress);
-      if (response.status < 200 || response.status >= 300 || !response.body.id) { setMessage(response.body.error || ("invalid" in c ? c.invalid : "Deployment failed.")); return; }
+      if (response.status < 200 || response.status >= 300 || !response.body.id) { setMessage(response.body.error === "HOSTING_SUBSCRIPTION_REQUIRED" ? hostingCopy.required[locale] : response.body.error || ("invalid" in c ? c.invalid : "Deployment failed.")); return; }
       setProgress(100); setPhase("waiting");
       router.push(`/${locale}/hosting/${response.body.id}`); router.refresh();
     } catch (error) {
@@ -68,7 +70,7 @@ export function HostingDashboard({ locale, initialSites }: { locale: Locale; ini
       <div className="mt-5"><Input ref={inputRef} type="file" multiple className="sr-only" onChange={event=>setFiles(Array.from(event.target.files || []))} {...folderProps}/><Button type="button" variant="outline" className="w-full border-white/25 bg-white/10 text-white" onClick={()=>inputRef.current?.click()}><FolderOpen className="size-4"/>{c.folder}</Button>{files.length ? <p className="mt-2 text-sm text-white/65">{files.length} {c.chosen}</p> : null}</div>
       <label className="mt-5 flex cursor-pointer items-start gap-3 text-sm leading-6 text-white/70"><Checkbox checked={confirmed} onCheckedChange={value=>setConfirmed(value === true)} className="mt-1"/><span>{c.confirm}</span></label><p className="mt-4 text-xs leading-6 text-white/45">{c.limits}</p>
       {busy ? <div className="mt-5 rounded-2xl border border-white/15 bg-white/[.06] p-4" role="status" aria-live="polite"><div className="flex items-center gap-3 text-sm font-semibold"><LoaderCircle className="size-4 animate-spin"/><span>{phase === "preparing" && "preparing" in c ? c.preparing : phase === "waiting" && "waiting" in c ? c.waiting : c.deploying}</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-white transition-[width] duration-300" style={{width:`${phase === "waiting" ? 100 : Math.max(progress, 5)}%`}}/></div><p className="mt-2 text-xs text-white/50">{phase === "uploading" ? `${progress}%` : phase === "waiting" ? "100%" : "…"}</p></div> : null}
-      {message ? <Alert variant="destructive" className="mt-5">{message}</Alert> : null}<Button type="submit" variant="neon" className="mt-6 w-full" disabled={busy || !files.length || !confirmed}>{busy ? <LoaderCircle className="size-4 animate-spin"/> : <CloudUpload className="size-4"/>}{busy ? c.deploying : c.deploy}</Button>
+      {message ? <Alert variant="destructive" className="mt-5">{message}</Alert> : null}<Button type="submit" variant="neon" className="mt-6 w-full" disabled={busy || !canDeploy || !files.length || !confirmed}>{busy ? <LoaderCircle className="size-4 animate-spin"/> : <CloudUpload className="size-4"/>}{busy ? c.deploying : c.deploy}</Button>
     </form>
     <section><h2 className="text-3xl font-black text-black">{c.sites}</h2><div className="mt-6 space-y-3">{initialSites.length ? initialSites.map(site=><article key={site.id} className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm"><div className="flex flex-wrap items-center justify-between gap-4"><div><div className="flex items-center gap-2"><CheckCircle2 className="size-4"/><h3 className="font-black text-black">{site.name}</h3></div><p className="mt-1 text-xs uppercase tracking-wider text-ink-low">{site.framework} · {statusLabel(site.status)}</p></div><div className="flex gap-2"><Button asChild variant="outline" size="sm"><Link href={`/${locale}/hosting/${site.id}`}>{c.details}</Link></Button>{site.url ? <Button asChild variant="neon" size="sm"><a href={`https://${site.url}`} target="_blank" rel="noreferrer">{c.visit}<ExternalLink className="size-3"/></a></Button> : null}</div></div></article>) : <p className="rounded-2xl border border-dashed border-black/20 p-8 text-center text-ink-low">{c.empty}</p>}</div></section>
   </div>;

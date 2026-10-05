@@ -113,7 +113,7 @@ export function PayPalCheckout({
   }[state as Exclude<CheckoutState, "idle">];
 
   return (
-    <div className="space-y-4">
+    <div className="paypal-checkout-scope relative isolate z-content space-y-4">
       <Script
         id="paypal-checkout-sdk"
         src={`https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(currency)}&intent=capture&components=buttons&enable-funding=card`}

@@ -13,7 +13,7 @@ function load(path) {
   const compiled = { exports: {} };
   cache.set(file, compiled.exports);
   const source = ts.transpileModule(readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  const require = spec => spec.startsWith(".") ? load(resolve(dirname(file), `${spec.replace(/\.ts$/, "")}.ts`)) : nativeRequire(spec);
+  const require = spec => spec.startsWith("@/") ? load(`${spec.slice(2)}.ts`) : spec.startsWith(".") ? load(resolve(dirname(file), `${spec.replace(/\.ts$/, "")}.ts`)) : nativeRequire(spec);
   new Function("require", "module", "exports", source)(require, compiled, compiled.exports);
   cache.set(file, compiled.exports);
   return compiled.exports;
@@ -21,6 +21,25 @@ function load(path) {
 const { projectOptions, initialConfiguration, configuredEstimate, extraOptions, providerOptions, moduleOptions, performanceOptions } = load("lib/project-options.ts");
 const { configurationSchema } = load("lib/validation/project-configuration.ts");
 const { builderCopy } = load("lib/i18n/project-builder.ts");
+const { installmentSchedule } = load("lib/installments.ts");
+test("installments allocate 100% exactly, including cent rounding", () => {
+  for (const cents of [100, 101, 999, 11800, 40567, 100_000_000]) {
+    const rows = installmentSchedule(cents);
+    assert.equal(rows.length, 6);
+    assert.deepEqual(rows.map(row => row.percent), [10, 20, 35, 15, 10, 10]);
+    assert.equal(rows.reduce((sum, row) => sum + row.amountCents, 0), cents);
+    assert.ok(rows.every(row => Number.isSafeInteger(row.amountCents) && row.amountCents > 0));
+  }
+  for (const value of [0, 99, -1, 1.5, NaN, Infinity, 100_000_001]) assert.throws(() => installmentSchedule(value));
+});
+test("60% lower price book preserves the previous price book", () => {
+  assert.equal(projectOptions.find(p => p.id === "landing").price, 118);
+  const c = valid("landing");
+  const current = configuredEstimate(c);
+  const previous = configuredEstimate({ ...c, priceVersion: 1 });
+  assert.equal(previous.baseLow, 295);
+  assert.equal(current.baseLow, 118);
+});
 function valid(kind = "company") {
   const c = initialConfiguration("web", kind);
   c.name = "Test Client"; c.projectName = "Test Project";
@@ -53,13 +72,13 @@ test("provider setup is a one-time fee; included auth is not charged twice", () 
   const c = valid("booking"); const base = configuredEstimate(c);
   c.providers = ["google", "apple", "email-password"];
   const quote = configuredEstimate(c);
-  assert.equal(quote.totalLow - base.totalLow, 60);
+  assert.equal(quote.totalLow - base.totalLow, 24);
   assert.equal(quote.monthly, 0);
 });
 test("one base language is free; extra languages charged once", () => {
   const c = valid(); const base = configuredEstimate(c);
   c.languages = ["ar", "en", "nl"]; c.features.push("i18n");
-  assert.equal(configuredEstimate(c).totalLow - base.totalLow, 250);
+  assert.equal(configuredEstimate(c).totalLow - base.totalLow, 100);
 });
 test("rejects incompatible project modules and unknown prices", () => {
   assert.equal(configurationSchema.safeParse({ ...valid("visual-identity"), modules: ["shipping"] }).success, false);

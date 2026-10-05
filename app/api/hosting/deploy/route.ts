@@ -6,6 +6,7 @@ import { AuthorisationError, requireViewer } from "@/lib/db/access";
 import { createVercelDeployment } from "@/lib/hosting/vercel";
 import { takeRateLimit } from "@/lib/rate-limit";
 import { assertSameOrigin } from "@/lib/api-security";
+import { hasHostingSubscription } from "@/lib/db/hosting-entitlement";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
     assertSameOrigin(request, true);
     if (!isDatabaseConfigured) return NextResponse.json({ error: "Hosting database is not configured." }, { status: 503 });
     const viewer = await requireViewer();
+    if (!(await hasHostingSubscription(viewer.id))) return NextResponse.json({ error: "HOSTING_SUBSCRIPTION_REQUIRED" }, { status: 402 });
     if (!takeRateLimit(`hosting:${viewer.id}`, 2, 60 * 60_000)) return NextResponse.json({ error: "Please wait before starting another deployment." }, { status: 429 });
     if (!process.env.VERCEL_TOKEN) return NextResponse.json({ error: "Hosting is being configured. Please contact Blue Sass." }, { status: 503 });
     const form = await readLimitedFormData(request);
