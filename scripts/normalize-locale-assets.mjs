@@ -40,7 +40,10 @@ for (const [locale, values] of Object.entries(labels)) {
   }
   keys.forEach((key, index) => { lexicon[key] = values[index]; });
   lexicon["Sign in"] = signIn[locale];
-  if (locale === "it") lexicon["We turn your idea"] = "Trasformiamo la tua idea";
+  const heroTitles = { it: "Trasformiamo la tua idea", pt: "Transformamos a sua ideia", pl: "Zamieniamy Twój pomysł", uk: "Перетворюємо вашу ідею", ru: "Превращаем вашу идею", zh: "将您的创意", ja: "あなたのアイデアを", ko: "당신의 아이디어를" };
+  const heroEnds = { zh: "转化为数字产品", ja: "デジタル製品に変えます", ko: "디지털 제품으로 만듭니다" };
+  lexicon["We turn your idea"] = heroTitles[locale];
+  if (locale in heroEnds) lexicon["into a digital product"] = heroEnds[locale];
   for (const brand of ["PayPal", "Google", "Apple", "GitHub", "Microsoft", "LinkedIn", "Facebook", "Windows", "Android", "iPhone", "EUR", "API", "CRM", "ERP", "SSL", "PWA", "SaaS"]) if (brand in lexicon) lexicon[brand] = brand;
   fs.writeFileSync(file, JSON.stringify(lexicon, null, 2) + "\n");
 }
