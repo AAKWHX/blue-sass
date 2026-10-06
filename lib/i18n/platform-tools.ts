@@ -1,11 +1,14 @@
 import { withExtraLocales } from "./extra-locales";
 import type { Locale } from "./config";
+import { auditExplanations } from "./audit-explanations";
 import nl from "./tools-base/nl.json";
 import de from "./tools-base/de.json";
 import tr from "./tools-base/tr.json";
 import fr from "./tools-base/fr.json";
 import es from "./tools-base/es.json";
 export const toolEnglish = {
+  preparingFiles: "Preparing the selected folder. Filtering files and calculating size; keep this page open.", processedFiles: "Files reviewed", readyFiles: "Files ready", browserPicker: "Your browser reads the folder before returning it to this page. Preparation progress appears after you confirm your selection.", waitingAnalysis: "Upload complete. The server is analysing your project; this is not the final report yet.", waitingDeployment: "Upload complete. The server is creating the deployment; wait for its status page.",
+  auditDetails: auditExplanations.en,
   team: "Team and permissions", owner: "Platform owner", permissions: "Permissions", permissionHelp: "Roles do not automatically grant access. Only the owner can invite, change permissions or suspend accounts. Unselected permissions are denied.",
   accounts: "Accounts", email: "Email", invite: "Send staff invitation", invitations: "Invitations", save: "Save permissions", enabled: "Active", disabled: "Suspended", deactivate: "Suspend account", reactivate: "Restore account", confirm: "I confirm this account change", revoke: "Revoke invitation", auditLog: "Activity log", empty: "Nothing here yet", protected: "The owner account cannot be suspended or changed here.",
   assignment: "Assign project access", project: "Project", member: "Staff member", assign: "Assign", remove: "Remove assignment", accept: "Accept invitation", inviteHelp: "Sign in with the invited email, then reopen your invitation link. Invitations expire after seven days.", admin: "Administration",
@@ -29,6 +32,8 @@ export const toolEnglish = {
   events: { "permissions.updated": "Permissions changed", "account.enabled": "Account restored", "account.disabled": "Account suspended", "invitation.sent": "Invitation sent", "invitation.revoked": "Invitation revoked", "invitation.accepted": "Invitation accepted", "project.assigned": "Project assigned", "project.unassigned": "Assignment removed", "price.approved": "Final price approved", "stage.updated": "Project stage changed" },
 };
 const toolArabic: typeof toolEnglish = {
+  preparingFiles: "جارٍ تجهيز المجلد المختار وفرز الملفات وحساب الحجم. اترك الصفحة مفتوحة.", processedFiles: "الملفات التي روجعت", readyFiles: "الملفات الجاهزة", browserPicker: "يقرأ المتصفح المجلد أولًا قبل إرساله للصفحة. يظهر تقدم التجهيز بعد تأكيد اختيارك.", waitingAnalysis: "اكتمل الرفع. يحلّل الخادم مشروعك الآن؛ هذه ليست النتيجة النهائية بعد.", waitingDeployment: "اكتمل الرفع. ينشئ الخادم عملية النشر؛ انتظر ظهور صفحة حالتها.",
+  auditDetails: auditExplanations.ar,
   team: "الموظفون والصلاحيات", owner: "مالك المنصة", permissions: "الصلاحيات", permissionHelp: "اسم الدور لا يمنح صلاحيات تلقائيًا. المالك وحده يرسل الدعوات ويعدل الصلاحيات ويوقف الحسابات. أي صلاحية غير محددة تُرفض.",
   accounts: "الحسابات", email: "البريد الإلكتروني", invite: "إرسال دعوة موظف", invitations: "الدعوات", save: "حفظ الصلاحيات", enabled: "نشط", disabled: "موقوف", deactivate: "إيقاف الحساب", reactivate: "إعادة تفعيل الحساب", confirm: "أؤكد تغيير حالة هذا الحساب", revoke: "إلغاء الدعوة", auditLog: "سجل التغييرات", empty: "لا توجد بيانات بعد", protected: "لا يمكن إيقاف حساب المالك أو تعديل ملكيته من هنا.",
   assignment: "إسناد الوصول للمشروع", project: "المشروع", member: "الموظف", assign: "إسناد", remove: "إزالة الإسناد", accept: "قبول الدعوة", inviteHelp: "سجّل الدخول بالبريد المدعو، ثم افتح رابط الدعوة مرة أخرى. تنتهي صلاحية الدعوة بعد سبعة أيام.", admin: "لوحة الإدارة",

@@ -1,6 +1,5 @@
 import { Hero } from "@/components/public/hero";
 import { Services } from "@/components/public/service-cards";
-import { CompanySection } from "@/components/public/company-section";
 import { CallToAction } from "@/components/public/process";
 import { HomeFaq } from "@/components/public/home-extras";
 import { LivePortfolio } from "@/components/public/live-portfolio";
@@ -23,7 +22,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <AuditPromo locale={locale}/>
       <PromotionBanner/>
       {portfolio.length > 0 && <LivePortfolio entries={portfolio} embedded/>}
-      <CompanySection />
       <HostingSection />
       <HomeFaq />
       <CallToAction />

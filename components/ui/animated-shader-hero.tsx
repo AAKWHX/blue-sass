@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMotionActive } from "@/hooks/use-motion-active";
 
 export interface AnimatedShaderHeroProps {
   locale: string;
@@ -21,7 +23,9 @@ export interface AnimatedShaderHeroProps {
  */
 export function AnimatedShaderHero({ locale, headline, subtitle, primary, secondary, trustLine }: AnimatedShaderHeroProps) {
   const base = `/${locale}`;
-  return <section className="shader-hero noise relative isolate flex min-h-svh overflow-hidden bg-black text-white">
+  const sectionRef = useRef<HTMLElement>(null);
+  const motionActive = useMotionActive(sectionRef);
+  return <section ref={sectionRef} data-motion-active={motionActive} className="shader-hero noise relative isolate flex min-h-svh overflow-hidden bg-black text-white">
     <div aria-hidden="true" className="absolute inset-0 z-backdrop overflow-hidden pointer-events-none">
       <div className="hero-artwork absolute inset-0"><Image src="/media/hero-chrome-ribbon-v1.webp" alt="" fill sizes="100vw" quality={92} preload className="hero-artwork-image"/></div>
       <div className="hero-artwork-shade absolute inset-0"/>

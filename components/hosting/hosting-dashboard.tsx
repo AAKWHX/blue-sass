@@ -14,6 +14,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { HostedSite } from "@/lib/db/schema";
 import type { Locale } from "@/lib/i18n";
 import { hostingCopy } from "@/lib/i18n/hosting-copy";
+import { platformCopy } from "@/lib/i18n/platform-tools";
+import { useFileSelection } from "@/hooks/use-file-selection";
+function allowedHostingFile(file: File) {
+  const parts = (file.webkitRelativePath || file.name).split("/");
+  const path = parts.length > 1 ? parts.slice(1).join("/") : parts[0];
+  return path.length <= 300 && !path.includes("..") && !/(^|\/)(node_modules|\.git|\.next|\.next-build|\.vercel|dist|build|coverage)(\/|$)|(^|\/)\.env[^/]*$|(^|\/)(id_rsa|id_ed25519)$|\.(pem|key|p12|pfx|exe|dll|msi|bat|cmd|ps1|sh|com|scr)$/i.test(path);
+}
 
 const copy = withExtraLocales({
   ar: { name: "اسم الموقع", type: "نوع المشروع", static: "موقع Static", next: "تطبيق Next.js", folder: "اختر فولدر المشروع", chosen: "ملف محدد", confirm: "أؤكد أن الملفات تخصني ولا تحتوي على كلمات مرور أو مفاتيح سرية.", deploy: "استضافة الموقع", deploying: "جارٍ رفع الملفات وبدء النشر…", preparing: "جارٍ فحص الملفات وتجهيزها…", waiting: "اكتمل الرفع، جارٍ إنشاء الموقع. قد يستغرق ذلك دقيقة…", network: "تعذر الاتصال بخدمة الاستضافة. تحقق من الإنترنت ثم أعد المحاولة.", invalid: "وصل رد غير صالح من الخادم. أعد المحاولة، وإن استمرت المشكلة تواصل معنا.", tooLarge: "تجاوزت الملفات الحد المسموح: 200 ملف وبحجم إجمالي 4 MB.", limits: "حتى 200 ملف و4 MB. لا ترفع .env أو node_modules أو مجلدات البناء.", sites: "مواقعك المستضافة", empty: "لا توجد مواقع مستضافة بعد.", details: "الإعدادات والتفاصيل", visit: "زيارة الموقع", ready: "جاهز", building: "قيد البناء", uploading: "قيد الرفع", failed: "فشل" },
@@ -43,24 +50,27 @@ function uploadDeployment(formData: FormData, onProgress: (value: number) => voi
 
 export function HostingDashboard({ locale, initialSites, canDeploy = false }: { locale: Locale; initialSites: HostedSite[]; canDeploy?: boolean }) {
   const c = copy[locale]; const router = useRouter(); const inputRef = useRef<HTMLInputElement>(null);
-  const [files, setFiles] = useState<File[]>([]); const [framework, setFramework] = useState("static"); const [confirmed, setConfirmed] = useState(false); const [busy, setBusy] = useState(false); const [message, setMessage] = useState(""); const [phase, setPhase] = useState<"idle"|"preparing"|"uploading"|"waiting">("idle"); const [progress, setProgress] = useState(0);
+  const labels = platformCopy(locale); const selection = useFileSelection(allowedHostingFile, 200); const files = selection.files;
+  const [framework, setFramework] = useState("static"); const [confirmed, setConfirmed] = useState(false); const [busy, setBusy] = useState(false); const [message, setMessage] = useState(""); const [phase, setPhase] = useState<"idle"|"preparing"|"uploading"|"waiting">("idle"); const [progress, setProgress] = useState(0);
+  const overLimit = selection.count > 200 || selection.bytes > 4_000_000;
   async function submit(formData: FormData) {
+    if (busy || selection.preparing) return;
     if (!canDeploy) { setMessage(hostingCopy.required[locale]); return; }
     if (!files.length || !confirmed) return;
-    const bytes = files.reduce((sum, file) => sum + file.size, 0);
-    if (files.length > 200 || bytes > 4 * 1024 * 1024) { setMessage("tooLarge" in c ? c.tooLarge : c.limits); return; }
+    if (overLimit) { setMessage("tooLarge" in c ? c.tooLarge : c.limits); return; }
     setBusy(true); setMessage(""); setPhase("preparing"); setProgress(0);
     formData.set("framework", framework); formData.set("paths", JSON.stringify(files.map(file => file.webkitRelativePath || file.name)));
     files.forEach(file => formData.append("files", file, file.name));
+    let navigating = false;
     try {
       setPhase("uploading");
-      const response = await uploadDeployment(formData, setProgress);
+      const response = await uploadDeployment(formData, value => { setProgress(value); if (value === 100) setPhase("waiting"); });
       if (response.status < 200 || response.status >= 300 || !response.body.id) { setMessage(response.body.error === "HOSTING_SUBSCRIPTION_REQUIRED" ? hostingCopy.required[locale] : response.body.error || ("invalid" in c ? c.invalid : "Deployment failed.")); return; }
       setProgress(100); setPhase("waiting");
-      router.push(`/${locale}/hosting/${response.body.id}`); router.refresh();
+      navigating = true; router.push(`/${locale}/hosting/${response.body.id}`); router.refresh();
     } catch (error) {
       setMessage(error instanceof Error && error.message === "invalid" && "invalid" in c ? c.invalid : "network" in c ? c.network : "Deployment failed.");
-    } finally { setBusy(false); }
+    } finally { if (!navigating) setBusy(false); }
   }
   const folderProps = { webkitdirectory: "", directory: "" } as React.InputHTMLAttributes<HTMLInputElement> & { webkitdirectory: string; directory: string };
   const statusLabel = (status: HostedSite["status"]) => c[status];
@@ -68,10 +78,12 @@ export function HostingDashboard({ locale, initialSites, canDeploy = false }: { 
     <form action={submit} className="rounded-[2rem] border border-black bg-black p-6 text-white shadow-2xl sm:p-8">
       <CloudUpload className="size-10 text-white"/><div className="mt-6"><Label htmlFor="hosting-name" className="text-white">{c.name}</Label><Input id="hosting-name" name="name" required minLength={2} maxLength={80} className="border-white/20 bg-white/10 text-white"/></div>
       <div className="mt-5"><Label className="text-white">{c.type}</Label><Select value={framework} onValueChange={setFramework}><SelectTrigger className="border-white/20 bg-white/10 text-white"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="static">{c.static}</SelectItem><SelectItem value="nextjs">{c.next}</SelectItem></SelectContent></Select></div>
-      <div className="mt-5"><Input ref={inputRef} type="file" multiple className="sr-only" onChange={event=>setFiles(Array.from(event.target.files || []))} {...folderProps}/><Button type="button" variant="outline" className="w-full border-white/25 bg-white/10 text-white" onClick={()=>inputRef.current?.click()}><FolderOpen className="size-4"/>{c.folder}</Button>{files.length ? <p className="mt-2 text-sm text-white/65">{files.length} {c.chosen}</p> : null}</div>
+      <div className="mt-5"><Input ref={inputRef} type="file" multiple className="sr-only" disabled={busy || selection.preparing} onChange={event=>{setMessage("");setConfirmed(false);void selection.select(event.target.files);}} {...folderProps}/><Button type="button" variant="outline" disabled={busy || selection.preparing} className="w-full border-white/25 bg-white/10 text-white" onClick={()=>inputRef.current?.click()}><FolderOpen className="size-4"/>{c.folder}</Button><p className="mt-3 text-xs leading-7 text-white/60">{labels.browserPicker}</p>{selection.total > 0 && <p className="mt-2 text-sm leading-7 text-white/75">{labels.readyFiles}: {selection.count} · {(selection.bytes/1_000_000).toFixed(2)} MB · {labels.ignored}: {selection.excluded}</p>}</div>
+      {selection.preparing && <div role="status" aria-live="polite" className="mt-5 rounded-xl border border-white/25 p-4"><p className="flex items-start gap-3 text-sm leading-7"><LoaderCircle className="mt-1 size-4 shrink-0 animate-spin"/>{labels.preparingFiles}</p><p className="mt-3 text-sm tabular-nums">{labels.processedFiles}: {selection.processed} / {selection.total}</p><div role="progressbar" aria-label={labels.preparingFiles} aria-valuemin={0} aria-valuemax={selection.total} aria-valuenow={selection.processed} className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-white" style={{width:`${selection.total ? selection.processed/selection.total*100 : 0}%`}}/></div></div>}
+      {!selection.preparing && overLimit && <Alert variant="destructive" className="mt-4">{"tooLarge" in c ? c.tooLarge : c.limits}</Alert>}
       <label className="mt-5 flex cursor-pointer items-start gap-3 text-sm leading-6 text-white/70"><Checkbox checked={confirmed} onCheckedChange={value=>setConfirmed(value === true)} className="mt-1"/><span>{c.confirm}</span></label><p className="mt-4 text-xs leading-6 text-white/45">{c.limits}</p>
-      {busy ? <div className="mt-5 rounded-2xl border border-white/15 bg-white/[.06] p-4" role="status" aria-live="polite"><div className="flex items-center gap-3 text-sm font-semibold"><LoaderCircle className="size-4 animate-spin"/><span>{phase === "preparing" && "preparing" in c ? c.preparing : phase === "waiting" && "waiting" in c ? c.waiting : c.deploying}</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-white transition-[width] duration-300" style={{width:`${phase === "waiting" ? 100 : Math.max(progress, 5)}%`}}/></div><p className="mt-2 text-xs text-white/50">{phase === "uploading" ? `${progress}%` : phase === "waiting" ? "100%" : "…"}</p></div> : null}
-      {message ? <Alert variant="destructive" className="mt-5">{message}</Alert> : null}<Button type="submit" variant="neon" className="mt-6 w-full" disabled={busy || !canDeploy || !files.length || !confirmed}>{busy ? <LoaderCircle className="size-4 animate-spin"/> : <CloudUpload className="size-4"/>}{busy ? c.deploying : c.deploy}</Button>
+      {busy ? <div className="mt-5 rounded-2xl border border-white/15 bg-white/[.06] p-4" role="status" aria-live="polite"><div className="flex items-start gap-3 text-sm font-semibold leading-7"><LoaderCircle className="mt-1 size-4 shrink-0 animate-spin"/><span>{phase === "preparing" ? labels.preparingFiles : phase === "waiting" ? labels.waitingDeployment : c.deploying}</span></div><div role="progressbar" aria-label={c.uploading} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-white" style={{width:`${progress}%`}}/></div><p className="mt-2 text-xs text-white/70">{progress}%</p></div> : null}
+      {message ? <Alert variant="destructive" className="mt-5">{message}</Alert> : null}<Button type="submit" variant="neon" className="mt-6 w-full" disabled={busy || selection.preparing || overLimit || !canDeploy || !files.length || !confirmed}>{busy ? <LoaderCircle className="size-4 animate-spin"/> : <CloudUpload className="size-4"/>}{busy ? c.deploying : c.deploy}</Button>
     </form>
     <section><h2 className="text-3xl font-black text-black">{c.sites}</h2><div className="mt-6 space-y-3">{initialSites.length ? initialSites.map(site=><article key={site.id} className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm"><div className="flex flex-wrap items-center justify-between gap-4"><div><div className="flex items-center gap-2"><CheckCircle2 className="size-4"/><h3 className="font-black text-black">{site.name}</h3></div><p className="mt-1 text-xs uppercase tracking-wider text-ink-low">{site.framework} · {statusLabel(site.status)}</p></div><div className="flex gap-2"><Button asChild variant="outline" size="sm"><Link href={`/${locale}/hosting/${site.id}`}>{c.details}</Link></Button>{site.url ? <Button asChild variant="neon" size="sm"><a href={`https://${site.url}`} target="_blank" rel="noreferrer">{c.visit}<ExternalLink className="size-3"/></a></Button> : null}</div></div></article>) : <p className="rounded-2xl border border-dashed border-black/20 p-8 text-center text-ink-low">{c.empty}</p>}</div></section>
   </div>;

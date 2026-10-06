@@ -24,10 +24,11 @@ export async function analyzeWebsite(input: string): Promise<AuditReport> {
     if (links.size === 3) break;
   }
   let tested = 0; let unavailable = 0;
+  const pages: NonNullable<AuditReport["pages"]> = [{ url: page.url.href, method: "GET", status: page.status }];
   for (const link of links) {
-    try { const result = await readPublicPage(link, "HEAD", 0, expiresAt); tested += 1; if (result.status >= 400) unavailable += 1; } catch { unavailable += 1; }
+    try { const result = await readPublicPage(link, "HEAD", 0, expiresAt); tested += 1; pages.push({ url: result.url.href, method: "HEAD", status: result.status }); if (result.status >= 400) unavailable += 1; } catch { unavailable += 1; pages.push({ url: link, method: "HEAD", status: null }); }
   }
   checks.push({ code: "sample_links", category: "links", status: unavailable ? "warning" : tested ? "pass" : "not_tested", count: unavailable });
   checks.push({ code: "full_crawl", category: "links", status: "not_tested" }, { code: "runtime_database", category: "security", status: "not_tested" });
-  return { version: 1, source: "url", target: page.url.origin, checks: checks as AuditCheck[], scannedFiles: 0, skippedFiles: 0, bytes: page.bytes, fetchedPages: 1, generatedAt: new Date().toISOString(), pageKey: createHash("sha256").update(page.url.pathname).digest("hex") };
+  return { version: 1, source: "url", target: page.url.origin, pageUrl: page.url.href, pages, checks: checks as AuditCheck[], scannedFiles: 0, skippedFiles: 0, bytes: page.bytes, fetchedPages: 1, generatedAt: new Date().toISOString(), pageKey: createHash("sha256").update(page.url.pathname).digest("hex") };
 }

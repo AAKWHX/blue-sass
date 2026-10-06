@@ -5,7 +5,8 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { PayPalCheckout } from "@/components/portal/paypal-checkout";
 import { PortalNav } from "@/components/portal/portal-nav";
-import { getViewer } from "@/lib/db/access";
+import { getViewer, hasCapability } from "@/lib/db/access";
+import { PriceApprovalForm } from "@/components/admin/price-approval-form";
 import { getProjectPayment, projectPaymentAmount } from "@/lib/db/payments";
 import { getProjectDetail } from "@/lib/db/queries";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
@@ -59,6 +60,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
 
         <div className="mx-auto mt-8 max-w-5xl">
           {!scopeReady && <p className="mb-5 rounded-xl border border-white/25 p-4 text-sm leading-7">{workspaceCopy(locale).scopeRequired}</p>}
+          {billing && !billing.plan.approvedTotalCents && hasCapability(viewer, "billing.approve") && <div className="tool-surface tool-card mb-6 rounded-2xl border border-white/20 p-5"><PriceApprovalForm projectId={id} locale={locale} amount={detail.project.budget} locked={lifecycle.cancelled || lifecycle.locked || detail.project.stage !== "planning"}/></div>}
           <div className="mb-8 max-w-2xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neon-emerald/30 bg-neon-emerald/10 px-3 py-1 text-xs font-bold text-neon-emerald">
               <LockKeyhole className="size-3.5" />
@@ -99,7 +101,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
                     initialStatus={payment?.status ?? "idle"}
                   />
                 ) : (
-                  <div className="rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm leading-6 text-red-200">{billing && !billing.plan.approvedTotalCents ? billingCopy.approval[locale] : billing && !billing.ready ? billingCopy.waiting[locale] : copy.unavailable}</div>
+                  <div className="rounded-xl border border-white/25 bg-white/5 p-4 text-sm leading-7 text-white"><p>{billing && !billing.plan.approvedTotalCents ? billingCopy.approval[locale] : !scopeReady ? workspaceCopy(locale).scopeRequired : billing && !billing.ready ? billingCopy.waiting[locale] : copy.unavailable}</p><Button asChild variant="outline" className="mt-4 w-full"><Link href={`/${locale}/portal/projects/${id}`}>{copy.back}</Link></Button></div>
                 )}
               </div>
             </section>

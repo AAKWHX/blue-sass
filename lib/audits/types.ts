@@ -5,4 +5,6 @@ export type AuditReport = {
   scannedFiles: number; skippedFiles: number; bytes: number; fetchedPages: number;
   generatedAt: string;
   pageKey?: string;
+  pageUrl?: string;
+  pages?: { url: string; method: "GET" | "HEAD"; status: number | null }[];
 };

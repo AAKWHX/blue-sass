@@ -4,6 +4,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { useFormStatus } from "react-dom";
 
 /**
  * shadcn Button, restyled onto the AWWA neon system.
@@ -49,10 +50,28 @@ function Button({
   variant,
   size,
   asChild = false,
+  onClick,
+  disabled,
+  type,
   ...props
 }: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "button";
-  return <Comp data-slot="button" data-variant={variant ?? "default"} data-size={size ?? "default"} className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+  const form = useFormStatus();
+  const [pressed, setPressed] = React.useState(false);
+  const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  const pending = !asChild && type !== "button" && form.pending;
+  function click(event: React.MouseEvent<HTMLButtonElement>) {
+    if (pending || pressed || disabled) { event.preventDefault(); return; }
+    onClick?.(event);
+    setPressed(true);
+    timer.current = setTimeout(() => setPressed(false), 600);
+  }
+  return <Comp {...props} type={type} onClick={click} disabled={asChild ? undefined : disabled || pending}
+    aria-busy={pending || undefined} aria-disabled={asChild && disabled ? true : undefined}
+    data-pressed={pressed || pending ? "true" : undefined} data-pending={pending ? "true" : undefined}
+    data-slot="button" data-variant={variant ?? "default"} data-size={size ?? "default"}
+    className={cn(buttonVariants({ variant, size }), variant !== "unstyled" && variant !== "link" && size !== "icon" && "site-action", className)} />;
 }
 
 export { Button, buttonVariants };
