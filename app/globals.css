@@ -6,6 +6,7 @@
 
 .tool-surface { background:#050608; color:#f5f5f5; }
 .tool-surface h1, .tool-surface h2, .tool-surface h3 { color:inherit; }
+.tool-surface [data-slot=label] { color:#e8ecf0; }
 .tool-surface .tool-card { background:#101216; color:#f5f5f5; border-color:#30343b; box-shadow:none; }
 .tool-surface input:not([type=hidden]), .tool-surface textarea, .tool-surface [data-slot=select-trigger] { background:#090a0d; color:#f5f5f5; border-color:#515865; }
 .tool-surface [data-variant=outline] { color:#f5f5f5; border-color:#68717e; background:transparent; }
