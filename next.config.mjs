@@ -7,6 +7,8 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  serverExternalPackages: ["@react-pdf/renderer"],
+  outputFileTracingIncludes: { "/api/audits/*/pdf": ["./public/report-fonts/*.ttf"] },
   images: { qualities: [75, 92] },
   async headers() {
     return [{

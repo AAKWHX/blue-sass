@@ -15,5 +15,5 @@ export default async function ReportPage({ params, searchParams }: { params: Pro
   const candidate = entitlement.compare && z.string().uuid().safeParse(query.compare).success ? await ownedReport(query.compare!) : null;
   const previous = candidate?.status === "completed" && candidate.report && auditTargetKey(candidate.source, candidate.target) === key && (current.source !== "url" || candidate.report.pageKey === current.report.pageKey) ? candidate.report : null;
   const history = entitlement.compare ? (await ownedReports()).reports.filter(row => row.id !== id && row.status === "completed" && auditTargetKey(row.source, row.target) === key).slice(0, 8).map(row => ({ id: row.id, createdAt: row.createdAt.toISOString() })) : [];
-  return <div className="tool-surface audit-report py-12"><div className="container-x max-w-6xl"><AuditReportView id={id} report={current.report} canExport={entitlement.jsonExport} previous={previous} compareLinks={history}/></div></div>;
+  return <div className="tool-surface audit-report py-12"><div className="container-x max-w-6xl"><AuditReportView id={id} report={current.report} canExport={entitlement.jsonExport} previous={previous} compareLinks={history} shareExpires={current.shareExpiresAt?.toISOString()??null}/></div></div>;
 }

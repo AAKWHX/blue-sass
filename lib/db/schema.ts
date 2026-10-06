@@ -423,8 +423,10 @@ export const siteAudits = pgTable("site_audits", {
   source: text("source").notNull(), target: text("target").notNull(),
   status: text("status").notNull().default("pending"),
   report: jsonb("report").$type<import("../audits/types").AuditReport>(),
+  shareTokenHash: text("share_token_hash"),
+  shareExpiresAt: timestamp("share_expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [index("site_audits_user_created_idx").on(table.userId, table.createdAt)]);
+}, table => [index("site_audits_user_created_idx").on(table.userId, table.createdAt), uniqueIndex("site_audits_share_token_idx").on(table.shareTokenHash)]);
 export const projectAgreements = pgTable("project_agreements", {
   projectId: uuid("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
   agreement: jsonb("agreement").$type<import("../project-agreement").ProjectAgreement>().notNull(),

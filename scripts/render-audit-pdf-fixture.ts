@@ -1,0 +1,6 @@
+import { mkdirSync, writeFileSync } from "node:fs";
+import { renderAuditPdf } from "../lib/audits/pdf-document";
+import type { AuditReport } from "../lib/audits/types";
+const report:AuditReport={version:1,source:"url",target:"https://www.bluesass.nl",pageUrl:"https://www.bluesass.nl/ar",generatedAt:new Date().toISOString(),scannedFiles:0,skippedFiles:0,bytes:92000,fetchedPages:1,pages:[{url:"https://www.bluesass.nl/ar",method:"GET",status:200}],checks:[{code:"https",category:"security",status:"pass"},{code:"csp",category:"security",status:"warning"},{code:"runtime_database",category:"security",status:"not_tested"},{code:"title",category:"seo",status:"pass"},{code:"description",category:"seo",status:"warning"},{code:"image_alt",category:"accessibility",status:"warning",count:2},{code:"html_fetch_ms",category:"performance",status:"pass",metric:530},{code:"full_crawl",category:"links",status:"not_tested"}]};
+mkdirSync("tmp/pdfs",{recursive:true});
+for(const locale of ["ar","en","ja"] as const){const buffer=await renderAuditPdf("00000000-0000-4000-8000-000000000001",report,locale);writeFileSync(`tmp/pdfs/audit-${locale}.pdf`,buffer);console.log(`${locale}: generated ${buffer.length} bytes`);}

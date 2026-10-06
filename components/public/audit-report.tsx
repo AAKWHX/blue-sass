@@ -8,10 +8,11 @@ import { platformCopy } from "@/lib/i18n/platform-tools";
 import type { AuditReport, AuditCategory, AuditCheck } from "@/lib/audits/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { AuditSharing } from "./audit-sharing";
 const categories: AuditCategory[] = ["security", "seo", "accessibility", "performance", "links", "source"];
 const urgentCodes = new Set(["secret_indicators", "tls_disabled", "dynamic_execution", "html_injection_review"]);
 const metricCodes = new Set(["html_fetch_ms", "html_bytes", "files_read"]);
-export function AuditReportView({ id, report, canExport, previous, compareLinks }: { id: string; report: AuditReport; canExport: boolean; previous: AuditReport | null; compareLinks: { id: string; createdAt: string }[] }) {
+export function AuditReportView({ id, report, canExport, previous, compareLinks, shared=false, shareExpires=null }: { id: string; report: AuditReport; canExport: boolean; previous: AuditReport | null; compareLinks: { id: string; createdAt: string }[]; shared?:boolean;shareExpires?:string|null }) {
   const { locale, t } = useI18n(); const c = platformCopy(locale); const d = c.auditDetails;
   const [visible, setVisible] = useState(40);
   const totals = { pass: report.checks.filter(r=>r.status==="pass").length, warning: report.checks.filter(r=>r.status==="warning").length, not_tested: report.checks.filter(r=>r.status==="not_tested").length };
@@ -36,7 +37,8 @@ export function AuditReportView({ id, report, canExport, previous, compareLinks 
     </li>;
   }
   return <div className="audit-document space-y-7">
-    <div className="grid gap-3 sm:flex sm:flex-wrap" data-no-print><Button type="button" variant="neon" onClick={print}><Printer className="size-4"/>{c.print}</Button>{canExport && <Button asChild variant="outline"><Link href={`/api/audits/${id}/export`}><Download className="size-4"/>{c.exportJson}</Link></Button>}<Button asChild variant="outline"><Link href={`/${locale}/audit`}>{c.history}</Link></Button></div>
+    {!shared&&<AuditSharing key={`${id}-${locale}`} id={id} initialExpires={shareExpires}/>}
+    <div className="grid gap-3 sm:flex sm:flex-wrap" data-no-print><Button type="button" variant="neon" onClick={print}><Printer className="size-4"/>{c.print}</Button>{canExport && !shared && <Button asChild variant="outline"><Link href={`/api/audits/${id}/export`}><Download className="size-4"/>{c.exportJson}</Link></Button>}{!shared&&<Button asChild variant="outline"><Link href={`/${locale}/audit`}>{c.history}</Link></Button>}</div>
     <table className="audit-print-layout w-full"><thead><tr><td><div className="audit-letterhead flex flex-wrap items-center justify-between gap-4 border-b border-white/20 pb-5"><div className="flex items-center gap-3"><Image src="/icon.svg" alt="Blue Sass" width={44} height={44} unoptimized/><div><strong className="text-xl">Blue Sass</strong><p className="mt-1 text-xs">{d.publisher}</p></div></div><div className="text-xs leading-6" dir="ltr">www.bluesass.nl<br/>help@bluesass.nl</div></div></td></tr></thead><tbody><tr><td className="pt-6">
       <div className="mb-7"><h1 className="text-3xl font-bold sm:text-5xl">{c.report}</h1><p className="mt-4 break-all text-lg" dir="auto">{report.pageUrl??report.target}</p><dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2"><div><dt>{d.generated}</dt><dd className="mt-1" dir="ltr">{report.generatedAt.slice(0,19).replace("T"," ")} UTC</dd></div><div><dt>{d.reportId}</dt><dd className="mt-1 break-all" dir="ltr">{id}</dd></div></dl></div>
       <div className="audit-overview mb-7 grid gap-4 sm:grid-cols-3">{[{label:d.passed,value:totals.pass,tone:"passed"},{label:c.warning,value:totals.warning,tone:"warning"},{label:d.untested,value:totals.not_tested,tone:"excluded"}].map(item=><div key={item.tone} className={`audit-finding audit-${item.tone}`}><p className="text-sm leading-6">{item.label}</p><p className="mt-3 text-3xl font-bold">{item.value}</p></div>)}</div>
