@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { leads, projectMilestones, projects, type ProjectStage } from "@/lib/db/schema";
-import { getViewer, requireRole, assertCanWrite } from "@/lib/db/access";
+import { getViewer, requirePermission, assertCanWrite } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
 import { takeRateLimit } from "@/lib/rate-limit";
 import { estimate, featureCost, getImplementationPromotion, type FeatureKey } from "@/lib/pricing";
@@ -192,7 +192,7 @@ export async function submitLeadAction(
 
 /** Admin: move a lead through the sales pipeline. */
 export async function updateLeadStatusAction(formData: FormData) {
-  await requireRole("super_admin", "admin", "pm");
+  await requirePermission("leads.manage");
   const id = String(formData.get("id"));
   const status = String(formData.get("status")) as (typeof leads.$inferSelect)["status"];
   await db.update(leads).set({ status }).where(eq(leads.id, id));

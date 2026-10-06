@@ -8,16 +8,19 @@ import { portfolioEntries } from "@/lib/db/portfolio";
 import { PromotionBanner } from "@/components/public/website-pricing";
 import { AgencyProofStrip } from "@/components/ui/agency-proof-strip";
 import { HostingSection } from "@/components/public/hosting-section";
-import { TemplateGallery } from "@/components/public/template-gallery";
+import { AuditPromo } from "@/components/public/audit-promo";
+import { isLocale } from "@/lib/i18n/config";
+import { notFound } from "next/navigation";
 
-export default async function HomePage() {
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params; if (!isLocale(locale)) notFound();
   const portfolio = (await portfolioEntries()).slice(0, 3);
   return (
     <div className="public-flow">
       <Hero />
       <AgencyProofStrip />
-      <Services />
-      <TemplateGallery embedded maxItems={6}/>
+      <Services solutionsOnly />
+      <AuditPromo locale={locale}/>
       <PromotionBanner/>
       {portfolio.length > 0 && <LivePortfolio entries={portfolio} embedded/>}
       <CompanySection />

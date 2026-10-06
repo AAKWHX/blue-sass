@@ -10,12 +10,13 @@ import {
   projectFiles,
   projectMilestones,
   projects,
+  adminAudit,
 } from "@/lib/db/schema";
 import {
   assertCanEditProject,
   assertCanViewProject,
   requireViewer,
-  requireRole,
+  requirePermission,
   assertCanWrite,
 } from "@/lib/db/access";
 
@@ -70,9 +71,10 @@ const stageOrder = ["planning", "design", "development", "testing", "review", "c
 /** Managers move the complete project workflow; the client sees the update immediately. */
 export async function setProjectStageAction(formData: FormData) {
   if (!isDatabaseConfigured) return;
-  const viewer = await requireRole("super_admin", "admin", "pm");
+  const viewer = await requirePermission("projects.stage");
   const parsed = projectStageSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
+  await assertCanViewProject(parsed.data.projectId);
   await db.transaction(async tx => {
     const project = await lockProject(tx, parsed.data.projectId);
     if (!project || (await lifecycleState(project.id, tx)).cancelled) return;
@@ -86,6 +88,7 @@ export async function setProjectStageAction(formData: FormData) {
       await tx.update(projectMilestones).set({ status }).where(eq(projectMilestones.id, row.id));
     }
     await tx.update(projects).set({ stage: parsed.data.stage, progress: parsed.data.stage === "completed" ? 100 : Math.round((targetIndex / 5) * 100), updatedAt: new Date() }).where(eq(projects.id, project.id));
+    await tx.insert(adminAudit).values({ actorId: viewer.id, targetId: project.id, action: "stage.updated", details: { from: project.stage, to: parsed.data.stage } });
   });
   revalidatePath("/[locale]/portal", "layout");
   revalidatePath("/[locale]/admin", "page");

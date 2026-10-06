@@ -4,6 +4,19 @@
 /* Tailwind v4: a single @import replaces the three @tailwind directives. */
 @import "tailwindcss";
 
+.tool-surface { background:#050608; color:#f5f5f5; }
+.tool-surface h1, .tool-surface h2, .tool-surface h3 { color:inherit; }
+.tool-surface .tool-card { background:#101216; color:#f5f5f5; border-color:#30343b; box-shadow:none; }
+.tool-surface input:not([type=hidden]), .tool-surface textarea, .tool-surface [data-slot=select-trigger] { background:#090a0d; color:#f5f5f5; border-color:#515865; }
+.tool-surface [data-variant=outline] { color:#f5f5f5; border-color:#68717e; background:transparent; }
+.tool-surface [data-variant=neon] { background:#f5f5f5; color:#080808; border-color:#f5f5f5; }
+@media print {
+  body:has(.audit-report) header, body:has(.audit-report) footer, .audit-report [data-no-print] { display:none !important; }
+  body:has(.audit-report), .audit-report, .audit-report .tool-card { background:#fff !important; color:#080808 !important; box-shadow:none !important; }
+  .audit-report .tool-card { border-color:#b8bec8 !important; break-inside:avoid; }
+  .audit-report p, .audit-report span, .audit-report h1, .audit-report h2, .audit-report h3 { color:#080808 !important; }
+}
+
 /* Continuous public-page rhythm; cards keep their own readable contrast. */
 .public-flow { background:#050608; color:#f5f5f5; --section-y:clamp(2.5rem,5vw,4rem); }
 .public-flow > section { background:#050608; }

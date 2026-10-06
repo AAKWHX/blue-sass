@@ -144,7 +144,7 @@ export default async function LocaleLayout({
         <Providers locale={locale}>
           {/* relative + z-content keeps every page above the fixed 3D field. */}
           <div className="relative z-content flex min-h-screen flex-col">
-            <SiteHeader signedIn={Boolean(viewer)} userName={viewer?.name ?? undefined} userImage={viewer?.image ?? undefined} />
+            <SiteHeader signedIn={Boolean(viewer)} userName={viewer?.name ?? undefined} userImage={viewer?.image ?? undefined} canAdmin={Boolean(viewer?.isOwner || viewer?.permissions.length)} />
             <main className="flex-1">{children}</main>
             <SiteFooter />
           </div>

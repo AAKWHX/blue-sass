@@ -8,7 +8,7 @@ import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
@@ -18,6 +18,7 @@ import { requireEmailVerification } from "@/lib/auth/policy";
 import { createHash } from "node:crypto";
 import { takeRateLimit } from "@/lib/rate-limit";
 import { isLocale } from "@/lib/i18n/config";
+import { credentialRevision } from "@/lib/auth/credential-revision";
 
 declare module "next-auth" {
   interface Session {
@@ -26,6 +27,7 @@ declare module "next-auth" {
       role: AppRole;
       company: string | null;
       locale: string;
+      canAdmin: boolean;
     } & DefaultSession["user"];
   }
   interface User {
@@ -77,7 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .where(eq(users.email, parsed.data.email.toLowerCase()))
           .limit(1);
 
-        if (!record?.passwordHash) return null;
+        if (!record?.passwordHash || record.disabledAt) return null;
         const ok = await bcrypt.compare(parsed.data.password, record.passwordHash);
         if (!ok) return null;
         // Second gate: `loginAction` already reports this with a resend button,
@@ -107,9 +109,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user, trigger, session }) {
       const id = user?.id ?? token.uid ?? token.sub;
       if (!isDatabaseConfigured || typeof id !== "string") return null;
-      const [record] = await db.select({ role: users.role, passwordHash: users.passwordHash }).from(users).where(eq(users.id, id)).limit(1);
-      if (!record) return null;
-      const revision = createHash("sha256").update(record.passwordHash ?? "oauth-only").digest("hex");
+      const [record] = await db.select({ role: users.role, passwordHash: users.passwordHash, disabledAt: users.disabledAt, accessVersion: users.accessVersion,
+        canAdmin: sql<boolean>`exists (select 1 from public.platform_owner o where o.slot = 1 and o.user_id = ${users.id}) or exists (select 1 from public.staff_access a where a.user_id = ${users.id} and jsonb_array_length(a.permissions) > 0)`,
+      }).from(users).where(eq(users.id, id)).limit(1);
+      if (!record || record.disabledAt) return null;
+      const revision = credentialRevision(record.passwordHash, record.accessVersion);
       if (!user && token.credentialRevision !== revision) return null;
       token.credentialRevision = revision;
       if (user) {
@@ -122,6 +126,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.locale = session.locale;
       }
       token.role = record.role;
+      token.canAdmin = record.canAdmin;
       return token;
     },
     session({ session, token }) {
@@ -130,6 +135,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.role = (token.role as AppRole) ?? "client";
         session.user.company = (token.company as string | null) ?? null;
         session.user.locale = (token.locale as string) ?? "ar";
+        session.user.canAdmin = token.canAdmin === true;
       }
       return session;
     },

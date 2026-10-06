@@ -3,6 +3,7 @@ import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import { useI18n } from "@/components/providers";
 import { AnimatedShaderHero } from "@/components/ui/animated-shader-hero";
+import { solutionCopy } from "@/lib/i18n/solution-copy";
 
 const heroLabels = withExtraLocales({
   ar: { line1: "نحوّل فكرتك", line2: "إلى منتج رقمي", secondary: "استكشف أعمالنا", trustLine: "فريق واحد يرافقك من التخطيط حتى الإطلاق." },
@@ -17,5 +18,5 @@ const heroLabels = withExtraLocales({
 export function Hero() {
   const { locale, t } = useI18n();
   const labels = heroLabels[locale];
-  return <AnimatedShaderHero locale={locale} headline={{ line1: labels.line1, line2: labels.line2 }} subtitle={t.hero.subtitle} primary={t.hero.ctaPrimary} secondary={labels.secondary} trustLine={labels.trustLine}/>;
+  return <AnimatedShaderHero locale={locale} headline={{ line1: labels.line1, line2: labels.line2 }} subtitle={solutionCopy(locale).audience} primary={t.hero.ctaPrimary} secondary={labels.secondary} trustLine={labels.trustLine}/>;
 }

@@ -97,6 +97,8 @@ export const users = pgTable("users", {
   phone: text("phone"),
   locale: text("locale").notNull().default("ar"),
   marketingOptIn: boolean("marketing_opt_in").notNull().default(false),
+  disabledAt: timestamp("disabled_at", { withTimezone: true }),
+  accessVersion: integer("access_version").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -381,6 +383,65 @@ export const projectBilling = pgTable("project_billing", {
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const platformOwner = pgTable("platform_owner", {
+  slot: integer("slot").primaryKey().default(1),
+  userId: uuid("user_id").notNull().unique().references(() => users.id, { onDelete: "restrict" }),
+});
+export const staffAccess = pgTable("staff_access", {
+  userId: uuid("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  permissions: jsonb("permissions").$type<string[]>().notNull().default([]),
+  updatedBy: uuid("updated_by").notNull().references(() => users.id, { onDelete: "restrict" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export const staffInvitations = pgTable("staff_invitations", {
+  id: uuid("id").defaultRandom().primaryKey(), email: text("email").notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  permissions: jsonb("permissions").$type<string[]>().notNull(),
+  createdBy: uuid("created_by").notNull().references(() => users.id, { onDelete: "restrict" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [index("staff_invitations_email_idx").on(table.email)]);
+export const adminAudit = pgTable("admin_audit", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  actorId: uuid("actor_id").notNull().references(() => users.id, { onDelete: "restrict" }),
+  targetId: uuid("target_id"), action: text("action").notNull(),
+  details: jsonb("details").$type<Record<string, unknown>>().notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [index("admin_audit_created_idx").on(table.createdAt)]);
+export const subscriptionOrders = pgTable("subscription_orders", {
+  projectId: uuid("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
+  version: integer("version").notNull().default(2), planId: text("plan_id").notNull(),
+  snapshot: jsonb("snapshot").$type<{ reports: number; sites: number; compare: boolean; jsonExport: boolean; price: number; durationDays: number }>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export const siteAudits = pgTable("site_audits", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  source: text("source").notNull(), target: text("target").notNull(),
+  status: text("status").notNull().default("pending"),
+  report: jsonb("report").$type<import("../audits/types").AuditReport>(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [index("site_audits_user_created_idx").on(table.userId, table.createdAt)]);
+export const projectAgreements = pgTable("project_agreements", {
+  projectId: uuid("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
+  agreement: jsonb("agreement").$type<import("../project-agreement").ProjectAgreement>().notNull(),
+  updatedBy: uuid("updated_by").notNull().references(() => users.id, { onDelete: "restrict" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export const projectDecisions = pgTable("project_decisions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  requestedBy: uuid("requested_by").notNull().references(() => users.id, { onDelete: "restrict" }),
+  title: text("title").notNull(), detail: text("detail").notNull(),
+  priceCents: integer("price_cents"), extraDays: integer("extra_days"),
+  state: text("state").notNull().default("pending"), response: text("response"),
+  answeredBy: uuid("answered_by").references(() => users.id, { onDelete: "restrict" }),
+  answeredAt: timestamp("answered_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [index("project_decisions_project_idx").on(table.projectId)]);
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

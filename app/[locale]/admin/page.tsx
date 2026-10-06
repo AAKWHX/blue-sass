@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { AdminView } from "@/components/admin/admin-view";
 import { LeadsPanel } from "@/components/admin/leads-panel";
-import { getViewer, isStaff, isReadOnlyAssistant } from "@/lib/db/access";
+import { getViewer, canOpenAdmin, hasCapability } from "@/lib/db/access";
 import { listLeads } from "@/lib/db/queries";
 import { listViewerProjects } from "@/lib/db/queries";
 import { ProjectStatusPanel } from "@/components/admin/project-status-panel";
@@ -9,6 +9,11 @@ import { PortfolioEditor } from "@/components/admin/portfolio-editor";
 import { portfolioEntries } from "@/lib/db/portfolio";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { toolOrderIds } from "@/lib/db/tool-subscriptions";
+import { assignmentDirectory } from "@/lib/db/staff";
+import { ProjectAssignmentForm } from "@/components/admin/staff-forms";
+import { platformCopy } from "@/lib/i18n/platform-tools";
+import { isLocale } from "@/lib/i18n/config";
 
 export const metadata = { title: "Administration — Blue Sass" };
 
@@ -26,22 +31,27 @@ export default async function AdminPage({
 
   const viewer = await getViewer();
   if (!viewer) redirect(`/${locale}/login`);
-  if (!isStaff(viewer.role)) redirect(`/${locale}/portal`);
+  if (!canOpenAdmin(viewer)) redirect(`/${locale}/portal`);
 
   const [leads, projects] = await Promise.all([listLeads(), listViewerProjects()]);
-  const canPublish = !isReadOnlyAssistant(viewer) && ["super_admin", "admin", "pm"].includes(viewer.role);
+  const toolIds = await toolOrderIds(projects.map(project => project.id));
+  const assignment = hasCapability(viewer, "projects.assign") ? await assignmentDirectory() : null;
+  const canPublish = hasCapability(viewer, "portfolio.manage");
   const portfolio = canPublish ? await portfolioEntries(true) : [];
 
   return (
     <>
       <div className="container-x flex flex-wrap gap-3 pt-8">
-        {canPublish && <Button asChild variant="outline"><Link href={`/${locale}/admin/reviews`}>مراجعة آراء العملاء</Link></Button>}
-        {["super_admin", "admin"].includes(viewer.role) && <Button asChild variant="outline"><Link href={`/${locale}/admin/announcements`}>إرسال العروض والتحديثات</Link></Button>}
+        {isLocale(locale) && <Button asChild variant="outline"><Link href={`/${locale}/portal`}>{platformCopy(locale).project}</Link></Button>}
+        {viewer.isOwner && <Button asChild variant="neon"><Link href={`/${locale}/admin/team`}>إدارة الموظفين والصلاحيات</Link></Button>}
+        {hasCapability(viewer, "reviews.manage") && <Button asChild variant="outline"><Link href={`/${locale}/admin/reviews`}>مراجعة آراء العملاء</Link></Button>}
+        {hasCapability(viewer, "announcements.send") && <Button asChild variant="outline"><Link href={`/${locale}/admin/announcements`}>إرسال العروض والتحديثات</Link></Button>}
       </div>
-      <LeadsPanel leads={leads} locale={locale} readOnly={isReadOnlyAssistant(viewer) || !["super_admin", "admin", "pm"].includes(viewer.role)} />
-      {!isReadOnlyAssistant(viewer) && ["super_admin", "admin", "pm"].includes(viewer.role) && <ProjectStatusPanel projects={projects} locale={locale} />}
+      {assignment && <section className="container-x tool-surface rounded-2xl p-5"><ProjectAssignmentForm {...assignment}/></section>}
+      {(hasCapability(viewer, "leads.read") || hasCapability(viewer, "leads.manage")) && <LeadsPanel leads={leads} locale={locale} readOnly={!hasCapability(viewer, "leads.manage")} />}
+      {(hasCapability(viewer, "billing.approve") || hasCapability(viewer, "projects.stage")) && <ProjectStatusPanel projects={projects.filter(project => !toolIds.has(project.id))} locale={locale} canApprove={hasCapability(viewer, "billing.approve")} canStage={hasCapability(viewer, "projects.stage")} />}
       {canPublish && <PortfolioEditor entries={portfolio}/>}
-      {viewer.role === "super_admin" && !isReadOnlyAssistant(viewer) && <AdminView demoMode={false} />}
+      {hasCapability(viewer, "cms.manage") && <AdminView demoMode={false} />}
     </>
   );
 }

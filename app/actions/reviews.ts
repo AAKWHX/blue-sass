@@ -4,7 +4,7 @@ import { localizeForLocale } from "@/lib/i18n/extra-locales";
 import { and, count, eq, gte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { assertCanWrite, requireRole, requireViewer } from "@/lib/db/access";
+import { assertCanWrite, requirePermission, requireViewer } from "@/lib/db/access";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { reviews } from "@/lib/db/schema";
 import { isLocale } from "@/lib/i18n";
@@ -28,7 +28,7 @@ export async function submitReviewAction(_previous: ReviewState, formData: FormD
 }
 
 export async function moderateReviewAction(formData: FormData) {
-  await requireRole("super_admin", "admin", "pm");
+  await requirePermission("reviews.manage");
   const id = z.string().uuid().parse(formData.get("id"));
   const status = z.enum(["approved", "rejected"]).parse(formData.get("status"));
   await db.update(reviews).set({ status, moderatedAt: new Date() }).where(eq(reviews.id, id));

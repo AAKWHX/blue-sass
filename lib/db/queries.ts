@@ -17,7 +17,7 @@ import {
   users,
 } from "@/lib/db/schema";
 import type { Project } from "@/lib/db/schema";
-import { getViewer, isStaff, isReadOnlyAssistant, visibleProjectsFilter } from "@/lib/db/access";
+import { getViewer, hasCapability, visibleProjectsFilter } from "@/lib/db/access";
 import * as mock from "@/lib/mock-data";
 
 /** Public portfolio — only projects explicitly marked public. */
@@ -60,7 +60,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
     .limit(1);
   if (!project) return null;
 
-  const clientOnly = !viewer || !isStaff(viewer.role);
+  const clientOnly = !viewer || !(hasCapability(viewer, "projects.read_all") || hasCapability(viewer, "projects.edit_all") || hasCapability(viewer, "projects.edit_assigned"));
 
   const [ms, fs, fb, msgs] = await Promise.all([
     db
@@ -98,7 +98,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
 /** Admin: every lead captured by the public quote form. */
 export async function listLeads() {
   const viewer = await getViewer();
-  if (!viewer || !isStaff(viewer.role)) return [];
+  if (!viewer || !(hasCapability(viewer, "leads.read") || hasCapability(viewer, "leads.manage"))) return [];
   if (!isDatabaseConfigured) return [];
   return db.select().from(leads).orderBy(desc(leads.createdAt));
 }
@@ -119,7 +119,7 @@ export async function getViewerLead(id: string, email: string) {
 /** Admin: the client directory. */
 export async function listUsers() {
   const viewer = await getViewer();
-  if (!viewer || viewer.role !== "super_admin" || isReadOnlyAssistant(viewer)) return [];
+  if (!viewer?.isOwner) return [];
   if (!isDatabaseConfigured) return [];
   return db.select({ id: users.id, name: users.name, email: users.email, role: users.role }).from(users).orderBy(asc(users.name));
 }

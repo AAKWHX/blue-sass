@@ -3,18 +3,20 @@ import { withExtraLocales } from "@/lib/i18n/extra-locales";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { platformCopy } from "@/lib/i18n/platform-tools";
 import { useState, useSyncExternalStore } from "react";
 import { ArrowUpLeft, ChevronDown, FolderKanban, LogIn, LogOut, Menu, Settings, UserRound } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
 import { useI18n } from "@/components/providers";
 import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { LanguageSwitcher } from "@/components/ui/switchers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export interface SiteHeaderProps { signedIn?: boolean; userName?: string; userImage?: string }
+export interface SiteHeaderProps { signedIn?: boolean; userName?: string; userImage?: string; canAdmin?: boolean }
 
 function subscribeToScroll(onChange: () => void) {
   window.addEventListener("scroll", onChange, { passive: true });
@@ -34,13 +36,14 @@ const navCopy = withExtraLocales({
   es: { home: "Inicio", about: "Nosotros", services: "Servicios", subscriptions: "Planes", hosting: "Hosting", projects: "Proyectos", reviews: "Opiniones", contact: "Contacto", team: "Equipo", start: "Empezar proyecto", account: "Perfil", allProjects: "Todos los proyectos", settings: "Ajustes" },
 } as const);
 
-export function SiteHeader({ signedIn = false, userName, userImage }: SiteHeaderProps) {
+export function SiteHeader({ signedIn = false, userName, userImage, canAdmin = false }: SiteHeaderProps) {
   const { locale, t } = useI18n();
   const pathname = usePathname();
   const scrolled = useSyncExternalStore(subscribeToScroll, getScrolledSnapshot, getServerScrolledSnapshot);
   const [open, setOpen] = useState(false);
   const base = `/${locale}`;
   const c = navCopy[locale];
+  const tools = platformCopy(locale);
   const isHome = pathname === base || pathname === `${base}/`;
   const links = [
     { href: base, label: c.home },
@@ -72,7 +75,7 @@ export function SiteHeader({ signedIn = false, userName, userImage }: SiteHeader
           {signedIn ? (
             <DropdownMenu modal={false} dir={locale === "ar" ? "rtl" : "ltr"}>
               <DropdownMenuTrigger asChild><Button variant="unstyled" size="auto" aria-label={c.account} className="rounded-full border border-white/20 p-1 text-white"><Avatar className="size-9 border border-white/15"><AvatarImage src={userImage} alt={userName || c.account}/><AvatarFallback className="bg-white text-black">{userName?.trim().charAt(0).toUpperCase() || <UserRound className="size-4"/>}</AvatarFallback></Avatar><ChevronDown className="me-1 size-3"/></Button></DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-56"><div className="px-3 py-2"><p className="font-bold text-white">{userName || c.account}</p><p className="text-xs text-ink-faint">{c.account}</p></div><DropdownMenuItem asChild><Link href={`${base}/portal/profile`}><UserRound className="size-4"/>{c.account}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal`}><FolderKanban className="size-4"/>{c.allProjects}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal/profile#settings`}><Settings className="size-4"/>{c.settings}</Link></DropdownMenuItem><form action={signOutAction}><input type="hidden" name="locale" value={locale}/><Button type="submit" variant="ghost" className="w-full justify-start"><LogOut className="size-4"/>{t.auth.signOut}</Button></form></DropdownMenuContent>
+              <DropdownMenuContent align="end" className="min-w-56 border-white/20 bg-[#101216] text-white"><div className="px-3 py-2"><p className="font-bold text-white">{userName || c.account}</p><p className="text-xs text-white/55">{c.account}</p></div><DropdownMenuItem asChild><Link href={`${base}/portal/profile`}><UserRound className="size-4"/>{c.account}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal`}><FolderKanban className="size-4"/>{c.allProjects}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/audit`}><FolderKanban className="size-4"/>{tools.history}</Link></DropdownMenuItem>{canAdmin && <DropdownMenuItem asChild><Link href={`${base}/admin`}><Settings className="size-4"/>{tools.admin}</Link></DropdownMenuItem>}<DropdownMenuItem asChild><Link href={`${base}/portal/profile#settings`}><Settings className="size-4"/>{c.settings}</Link></DropdownMenuItem><form action={signOutAction}><Input type="hidden" name="locale" value={locale}/><Button type="submit" variant="ghost" className="w-full justify-start text-white hover:bg-white/10 hover:text-white"><LogOut className="size-4"/>{t.auth.signOut}</Button></form></DropdownMenuContent>
             </DropdownMenu>
           ) : <><Button asChild variant="unstyled" size="auto" className={`hidden rounded-xl border border-white/20 px-3 py-2.5 font-semibold text-white transition hover:bg-white/10 ${isHome ? "xl:inline-flex" : "2xl:inline-flex"}`}><Link href={`${base}/login`}><LogIn className="size-4"/>{t.auth.signIn}</Link></Button>{!isHome && <Button asChild variant="unstyled" size="auto" className="hidden rounded-xl bg-neon-cyan px-5 py-3 font-bold text-black transition hover:bg-white sm:inline-flex"><Link href={`${base}/create-project`}>{c.start}<ArrowUpLeft className="size-4 flip-x"/></Link></Button>}</>}
           {isHome && <Button asChild variant="neon" size="sm" className="hidden md:inline-flex"><Link href={`${base}/create-project`}>{c.start}<ArrowUpLeft className="size-4 flip-x"/></Link></Button>}

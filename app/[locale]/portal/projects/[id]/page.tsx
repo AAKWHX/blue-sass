@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
-import { getViewer } from "@/lib/db/access";
+import { getViewer, hasCapability, isReadOnlyAssistant } from "@/lib/db/access";
 import { getProjectPayment } from "@/lib/db/payments";
 import { getProjectDetail, summariseProgress } from "@/lib/db/queries";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
@@ -16,6 +16,10 @@ import { ProjectRequestSummary } from "@/components/public/project-request-summa
 import { builderCopy } from "@/lib/i18n/project-builder";
 import { billingState } from "@/lib/db/billing";
 import { InstallmentSummary } from "@/components/portal/installment-summary";
+import { ownToolOrder } from "@/lib/db/tool-subscriptions";
+import { ToolSubscriptionDetail } from "@/components/portal/tool-subscription-detail";
+import { projectWorkspace } from "@/lib/db/project-workspace";
+import { ProjectWorkspace } from "@/components/portal/project-workspace";
 
 export default async function ProjectPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = await params;
@@ -24,6 +28,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ locale
   if (!viewer) redirect(`/${locale}/login?next=${encodeURIComponent(`/${locale}/portal/projects/${id}`)}`);
   const detail = await getProjectDetail(id);
   if (!detail) notFound();
+  if (detail.project.industry === "subscription" && detail.project.clientId === viewer.id) {
+    const toolOrder = await ownToolOrder(id);
+    if (toolOrder) return <><PortalNav locale={locale}/><ToolSubscriptionDetail locale={locale} data={toolOrder} userId={viewer.id}/></>;
+  }
   const [state, payment, request] = await Promise.all([
     lifecycleState(id),
     detail.project.clientId === viewer.id ? getProjectPayment(id, viewer.id) : Promise.resolve(null),
@@ -32,12 +40,16 @@ export default async function ProjectPage({ params }: { params: Promise<{ locale
   const c = getDictionary(locale).experience;
   const pc = paymentCopy[locale];
   const billing = await billingState(detail.project);
+  const workspace = await projectWorkspace(id);
+  const offerEditable = detail.project.stage === "planning" && !state.locked && !state.cancelled && !workspace.hasPayment;
+  const mayReview = !state.cancelled && !isReadOnlyAssistant(viewer) && (hasCapability(viewer, "projects.edit_all") || hasCapability(viewer, "projects.edit_assigned"));
   const editable = detail.project.clientId === viewer.id && detail.project.stage === "planning" && !state.locked && !state.cancelled && payment?.status !== "pending" && payment?.status !== "paid" && !billing?.paidCents;
 
   return (
     <>
       <PortalNav locale={locale} />
       <ProjectControls project={detail.project} cancelled={state.cancelled} editable={editable} />
+      <ProjectWorkspace projectId={id} agreement={workspace.agreement} decisions={workspace.decisions} canManageOffer={hasCapability(viewer, "billing.approve")} canRequestReview={mayReview} canPriceChanges={hasCapability(viewer, "billing.approve")} isClient={detail.project.clientId === viewer.id && !isReadOnlyAssistant(viewer)} editable={offerEditable} updatedAt={detail.project.updatedAt.toISOString()}/>
       {request ? <section className="container-x request-builder mt-8 py-8"><h1 className="mb-6 text-3xl font-bold">{detail.project.name}</h1><ProjectRequestSummary configuration={request.configuration} quote={request.estimate} email={detail.project.clientId === viewer.id ? viewer.email : undefined} editHref={editable ? `/${locale}/portal/projects/${id}/edit` : undefined}/><p className="mt-5 text-sm leading-7">{state.cancelled ? c.cancelled : builderCopy.timing[locale]}</p>{!editable && !state.cancelled ? <p className="mt-4 text-sm leading-7">{builderCopy.blocked[locale]}</p> : null}</section> : null}
       {billing ? <InstallmentSummary locale={locale} billing={billing}/> : null}
       <ClientDashboard viewerName={viewer.name ?? viewer.email} viewerCompany={null} projects={[{ ...detail, summary: summariseProgress(detail), paymentStatus: billing?.paidCents ? "paid" : payment?.status ?? null, cancelled: state.cancelled }]} orders={[]} />

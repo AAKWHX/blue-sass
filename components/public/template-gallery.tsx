@@ -23,7 +23,7 @@ const galleryCopy: Record<Locale, { search: string; catalog: string; live: strin
   es: { search: "Buscar plantillas o servicios", catalog: "Catálogo de plantillas", live: "Vista interactiva", results: "plantillas disponibles", empty: "No hay plantillas coincidentes. Pruebe otra categoría.", hint: "Explore y abra la vista completa antes de elegir." },
 });
 
-export function TemplateGallery({ service, group, embedded = false, maxItems }: { service?: ServiceSlug; group?: string; embedded?: boolean; maxItems?: number }) {
+export function TemplateGallery({ service, group, embedded = false, maxItems, allowedServices }: { service?: ServiceSlug; group?: string; embedded?: boolean; maxItems?: number; allowedServices?: readonly ServiceSlug[] }) {
   const { locale, t } = useI18n();
   const c = t.experience;
   const labels = galleryCopy[locale];
@@ -31,7 +31,7 @@ export function TemplateGallery({ service, group, embedded = false, maxItems }: 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<string>(service ?? "all");
   const catalog = serviceCatalog(locale);
-  const allTemplates = serviceTemplates(locale, service).filter((item) => group === "web" ? ["web", "store", "design"].includes(item.service) : group === "apps" ? ["android", "ios", "windows", "erp", "ai"].includes(item.service) : true);
+  const allTemplates = serviceTemplates(locale, service).filter((item) => allowedServices ? allowedServices.includes(item.service) : group === "web" ? ["web", "store", "design"].includes(item.service) : group === "apps" ? ["android", "ios", "windows", "erp", "ai"].includes(item.service) : true);
   const source = maxItems ? allTemplates.filter((item, index, array) => array.findIndex(candidate => candidate.service === item.service) === index).slice(0, maxItems) : allTemplates;
   const items = useMemo(() => source.filter((item) => {
     if (filter !== "all" && item.service !== filter) return false;

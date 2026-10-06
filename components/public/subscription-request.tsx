@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { platformCopy } from "@/lib/i18n/platform-tools";
 
 export function SubscriptionRequest({ id }: { id: SubscriptionId }) {
   const { locale, t } = useI18n();
   const c = t.experience;
+  const tools = platformCopy(locale);
   const plan = subscriptionPlans(locale).find((entry) => entry.id === id)!;
   const [state, action, pending] = useActionState(requestSubscription, { ok: false, message: "" });
   const checkout = locale === "ar" ? "حفظ والمتابعة إلى الدفع الآمن" : localizeForLocale("Save and continue to secure payment", locale);
@@ -23,9 +25,9 @@ export function SubscriptionRequest({ id }: { id: SubscriptionId }) {
     <p className="mt-3 text-sm leading-7 text-ink-low">{subscriptionPurchaseNote[locale]}</p>
     <form action={action} className="mt-7 space-y-4">
       <input type="hidden" name="plan" value={id}/><input type="hidden" name="locale" value={locale}/>
-      <Label htmlFor="subscription-name">{c.name}</Label><Input id="subscription-name" name="name" minLength={2} maxLength={120} required/>
+      <Label htmlFor="subscription-name">{tools.currentPlan}</Label><Input id="subscription-name" name="name" minLength={2} maxLength={120} required defaultValue={plan.name}/>
       <Label htmlFor="subscription-message">{c.summary}</Label><Textarea id="subscription-message" name="message" maxLength={3000} rows={5}/>
-      <p className="text-sm leading-7 text-ink-low">{c.planLimits}</p>
+      <ul className="space-y-2 text-sm leading-7">{plan.features.map(feature => <li key={feature}>{feature}</li>)}</ul><p className="text-sm leading-7 text-ink-low">{tools.planNote}</p>
       <Button type="submit" variant="neon" disabled={pending || state.ok}>{checkout}</Button>
       <p role="status">{state.message}</p>
       {state.ok && state.projectId && <Button asChild variant="neon" className="w-full"><Link href={`/${locale}/portal/projects/${state.projectId}/payment`}>PayPal · Visa · Mastercard</Link></Button>}

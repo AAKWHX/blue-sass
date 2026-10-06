@@ -15,6 +15,14 @@ function shell(lang: Locale, siteUrl: string, heading: string, body: string, act
   return `<!doctype html><html lang="${lang}" dir="${dir}"><body style="margin:0;padding:32px 16px;background:#050608;font-family:Arial,'Segoe UI',sans-serif;color:#fff"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center"><table role="presentation" width="100%" style="max-width:600px;background:#101216;border:1px solid #232630;border-radius:20px;padding:32px" cellpadding="0" cellspacing="0" dir="${dir}"><tr><td><a href="${escapeHtml(siteUrl)}" style="display:inline-flex;align-items:center;text-decoration:none;color:#fff;font-size:17px;font-weight:800"><img src="${escapeHtml(siteUrl)}/icon.png" width="42" height="42" alt="Blue Sass" style="border-radius:12px;vertical-align:middle;margin-inline-end:10px"> Blue Sass</a></td></tr><tr><td style="padding-top:22px;font-size:26px;line-height:1.35;font-weight:800">${escapeHtml(heading)}</td></tr><tr><td style="padding-top:14px;font-size:15px;line-height:1.85;color:#b9c0c9">${body}</td></tr>${actionHtml}<tr><td style="padding-top:28px;border-top:1px solid #232630;font-size:12px;line-height:1.7;color:#747d88">Blue Sass · Websites · Apps · Digital systems<br><a href="mailto:help@bluesass.nl" style="color:#dfe5ec">help@bluesass.nl</a></td></tr></table></td></tr></table></body></html>`;
 }
 
+export function staffInvitationEmail(locale: string, siteUrl: string, link: string) {
+  const lang = isLocale(locale) ? locale : "en";
+  const heading = lang === "ar" ? "دعوة للانضمام إلى فريق Blue Sass" : "Invitation to join the Blue Sass team";
+  const body = lang === "ar" ? "دعاك مالك المنصة للانضمام بصلاحيات محددة. سجّل الدخول بالبريد الذي استلم هذه الرسالة، ثم افتح رابط الدعوة واقبلها. الرابط صالح لمدة 7 أيام، ولا يمنحك ملكية المنصة. لا تشارك الرابط مع أي شخص." : "The platform owner invited you with specific permissions. Sign in using the email that received this message, then reopen and accept the invitation. The link expires in 7 days and does not grant platform ownership. Do not share it.";
+  const label = lang === "ar" ? "عرض الدعوة" : "View invitation";
+  return { subject: heading, text: `${heading}\n\n${body}\n\n${link}`, html: shell(lang, siteUrl, heading, `<p>${escapeHtml(body)}</p>`, { label, url: link }) };
+}
+
 export function verificationEmail(locale: string, link: string) {
   const lang: Locale = isLocale(locale) ? locale : "en";
   const t = getDictionary(lang).emails.verify;

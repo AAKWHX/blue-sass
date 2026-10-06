@@ -13,12 +13,13 @@ sys.path.insert(0, str(root / 'downloads' / 'i18n-runtime'))
 import ctranslate2
 import sentencepiece
 
-source = json.loads((root / 'downloads/i18n/source.json').read_text(encoding='utf-8'))
+tool_base = '--tool-base' in sys.argv
+source = json.loads((root / ('downloads/i18n/tool-source.json' if tool_base else 'downloads/i18n/source.json')).read_text(encoding='utf-8'))
 index = json.loads(urllib.request.urlopen('https://raw.githubusercontent.com/argosopentech/argospm-index/main/index.json', timeout=30).read())
-targets = ['it', 'pt', 'pl', 'uk', 'ru', 'zh', 'ja', 'ko']
+targets = ['nl', 'de', 'tr', 'fr', 'es'] if tool_base else ['it', 'pt', 'pl', 'uk', 'ru', 'zh', 'ja', 'ko']
 
 def translate_language(code):
-    destination = root / f'lib/i18n/locales-extra/{code}.json'
+    destination = root / f'lib/i18n/{"tools-base" if tool_base else "locales-extra"}/{code}.json'
     existing = json.loads(destination.read_text(encoding='utf-8')) if destination.exists() else {}
     pending = [text for text in source if text not in existing or ('|' in text and existing[text].count('|') != text.count('|'))]
     if not pending:

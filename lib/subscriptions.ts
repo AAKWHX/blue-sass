@@ -1,10 +1,12 @@
 import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import type { Locale } from "@/lib/i18n";
+import { platformCopy } from "@/lib/i18n/platform-tools";
+import { subscriptionToolLimits } from "@/lib/subscription-tools";
 
 export const subscriptionIds = ["launch", "growth", "scale"] as const;
 export type SubscriptionId = (typeof subscriptionIds)[number];
 
-type Plan = { id: SubscriptionId; name: string; description: string; price: number; features: string[]; response: string; hours: string };
+type LegacyPlan = { id: SubscriptionId; name: string; description: string; price: number; features: string[]; response: string; hours: string };
 
 const rows: Record<Locale, string[]> = withExtraLocales({
   ar: [
@@ -45,10 +47,21 @@ const rows: Record<Locale, string[]> = withExtraLocales({
 });
 
 const prices = [25, 65, 150];
-export function subscriptionPlans(locale: Locale): Plan[] {
+export function legacySubscriptionPlans(locale: Locale): LegacyPlan[] {
   return rows[locale].map((row, index) => {
     const [name, description, featureList, response, hours] = row.split("|");
     return { id: subscriptionIds[index], name, description, price: prices[index], features: featureList.split(/[,،、，]/), response, hours };
+  });
+}
+
+/** Version 2 is tool access, not staff working time. Legacy terms stay archived. */
+export function subscriptionPlans(locale: Locale) {
+  const c = platformCopy(locale);
+  return subscriptionIds.map((id, index) => {
+    const limits = subscriptionToolLimits[id];
+    return { id, name: rows[locale][index].split("|")[0], description: c.siteLimit.replace("{count}", String(limits.sites)), price: limits.price, limits,
+      features: [...c.toolFeatures, c.reportLimit.replace("{count}", String(limits.reports)), c.siteLimit.replace("{count}", String(limits.sites)), ...(limits.compare ? [c.comparisonFeature] : []), ...(limits.jsonExport ? [c.jsonFeature] : [])],
+    };
   });
 }
 

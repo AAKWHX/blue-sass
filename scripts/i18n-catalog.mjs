@@ -24,6 +24,7 @@ for (const file of files) {
   const source = ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
   function visit(node) {
     if (ts.isVariableDeclaration(node) && node.name.getText(source) === 'sections' && /[\\/]\[locale\][\\/](privacy|terms)[\\/]/.test(file)) collect(node.initializer);
+    if (ts.isVariableDeclaration(node) && node.name.getText(source) === 'toolEnglish' && file.replaceAll('\\', '/').endsWith('lib/i18n/platform-tools.ts')) collect(node.initializer);
     if (ts.isObjectLiteralExpression(node)) {
       const english = node.properties.find(property => ts.isPropertyAssignment(property) && property.name.getText(source).replace(/["']/g, '') === 'en');
       const arabic = node.properties.some(property => ts.isPropertyAssignment(property) && property.name.getText(source).replace(/["']/g, '') === 'ar');

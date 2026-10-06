@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, eq } from "drizzle-orm";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { payments, projectMilestones, projectRequests, projects, type Payment, type Project } from "@/lib/db/schema";
+import { payments, projectMilestones, projectRequests, projects, projectAgreements, type Payment, type Project } from "@/lib/db/schema";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { reservationDeposit, type ProjectType } from "@/lib/pricing";
 import { getPayPalEnvironment } from "@/lib/paypal";
@@ -79,6 +79,8 @@ export async function preparePayPalPayment(projectId: string, userId: string) {
     if (lifecycle.cancelled) throw new PaymentAccessError("A cancelled project cannot be paid.");
 
     const billing = await billingState(project, tx);
+    const [scope] = await tx.select().from(projectAgreements).where(eq(projectAgreements.projectId, projectId)).limit(1);
+    if (scope && (!scope.agreement.acceptedAt || scope.agreement.acceptedBy !== userId || scope.agreement.priceCents !== billing?.plan.approvedTotalCents)) throw new PaymentAccessError("Project scope approval is required before payment.");
     if (billing && (!billing.plan.approvedTotalCents || !billing.next || !billing.ready)) throw new PaymentAccessError("The approved stage is not ready for payment.");
     const amount = billing?.next ? { amountCents: billing.next.amountCents, currency: "EUR" } : projectPaymentAmount(project);
     const billingStage = billing?.next?.stage ?? "legacy";
@@ -167,7 +169,8 @@ export async function markPaymentPaid(payment: Payment, captureId: string) {
     if (!paid) return null;
     if ((await lifecycleState(project.id, tx)).cancelled) return paid;
     const [request] = await tx.select({ configuration: projectRequests.configuration }).from(projectRequests).where(eq(projectRequests.projectId, paid.projectId)).limit(1);
-    const days = request?.configuration.deliveryDays;
+    const [scope] = await tx.select().from(projectAgreements).where(eq(projectAgreements.projectId, paid.projectId)).limit(1);
+    const days = scope?.agreement.acceptedAt ? scope.agreement.deliveryDays : request?.configuration.deliveryDays;
     const firstPayment = payment.billingStage === "legacy" || payment.billingStage === "planning";
     if (firstPayment) await tx.update(projects).set({ startDate: now, ...(days ? { deadline: new Date(now.getTime() + days * 86_400_000) } : {}), updatedAt: now }).where(eq(projects.id, paid.projectId));
     if (days && firstPayment) {

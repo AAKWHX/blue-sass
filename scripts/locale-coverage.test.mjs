@@ -19,7 +19,7 @@ test("15 locales have flags, full dictionary shape and safe return paths", () =>
     assert.equal(quoteReturnPath(`/${locale}/quote?kind=landing&type=web`, locale), `/${locale}/quote?type=web&kind=landing`);
     assert.equal(serviceCatalog(locale).length, 8);
     for (const item of serviceCatalog(locale)) assert.ok(item.title && item.description && item.features.length);
-    for (const item of subscriptionPlans(locale)) assert.ok(item.name && item.description && item.features.length && item.response && item.hours);
+    for (const item of subscriptionPlans(locale)) { assert.ok(item.name && item.description && item.features.length && item.limits.reports && item.limits.sites); assert.equal("hours" in item, false); }
   }
 });
 

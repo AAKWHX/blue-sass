@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { requireRole } from "@/lib/db/access";
+import { requirePermission } from "@/lib/db/access";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { marketingEmail } from "@/lib/email/templates";
@@ -13,7 +13,7 @@ export type AnnouncementState = { ok: boolean; message: string };
 const schema = z.object({ title: z.string().trim().min(4).max(120), message: z.string().trim().min(20).max(3000), ctaLabel: z.string().trim().min(2).max(60), ctaUrl: z.string().trim().url().max(500) });
 
 export async function sendAnnouncementAction(_previous: AnnouncementState, formData: FormData): Promise<AnnouncementState> {
-  await requireRole("super_admin", "admin");
+  await requirePermission("announcements.send");
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, message: "تحقق من عنوان الرسالة والنص والرابط." };
   const siteUrl = await getSiteUrl();

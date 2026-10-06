@@ -16,6 +16,8 @@ import { getPayPalClientConfig } from "@/lib/paypal";
 import { billingState } from "@/lib/db/billing";
 import { InstallmentSummary } from "@/components/portal/installment-summary";
 import { billingCopy } from "@/lib/i18n/billing-copy";
+import { projectWorkspace } from "@/lib/db/project-workspace";
+import { workspaceCopy } from "@/lib/i18n/workspace-copy";
 
 function formatMoney(amountCents: number, currency: string, locale: string) {
   return new Intl.NumberFormat(locale, { style: "currency", currency }).format(amountCents / 100);
@@ -34,6 +36,8 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
   const copy = paymentCopy[locale];
   const safetyCopy = paymentSafetyCopy[locale];
   const billing = await billingState(detail.project);
+  const workspace = await projectWorkspace(id);
+  const scopeReady = !workspace.agreement || Boolean(workspace.agreement.acceptedAt && workspace.agreement.acceptedBy === viewer.id && workspace.agreement.priceCents === billing?.plan.approvedTotalCents);
 
   let payable: { amountCents: number; currency: string } | null = null;
   try {
@@ -43,7 +47,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
   }
   const amountCents = payment?.amountCents ?? payable?.amountCents ?? 0;
   const currency = payment?.currency ?? payable?.currency ?? "EUR";
-  const available = config.configured && payable && !lifecycle.cancelled;
+  const available = config.configured && payable && !lifecycle.cancelled && scopeReady;
 
   return (
     <>
@@ -54,6 +58,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
         </Button>
 
         <div className="mx-auto mt-8 max-w-5xl">
+          {!scopeReady && <p className="mb-5 rounded-xl border border-white/25 p-4 text-sm leading-7">{workspaceCopy(locale).scopeRequired}</p>}
           <div className="mb-8 max-w-2xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neon-emerald/30 bg-neon-emerald/10 px-3 py-1 text-xs font-bold text-neon-emerald">
               <LockKeyhole className="size-3.5" />
