@@ -19,6 +19,7 @@ import { createHash } from "node:crypto";
 import { takeRateLimit } from "@/lib/rate-limit";
 import { isLocale } from "@/lib/i18n/config";
 import { credentialRevision } from "@/lib/auth/credential-revision";
+import { compactSessionToken } from "@/lib/auth/compact-token";
 
 declare module "next-auth" {
   interface Session {
@@ -91,7 +92,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: record.id,
           email: record.email,
           name: record.name,
-          image: record.image,
+          image: null,
           role: record.role,
           company: record.company,
           locale: record.locale,
@@ -127,7 +128,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       token.role = record.role;
       token.canAdmin = record.canAdmin;
-      return token;
+      return compactSessionToken(token);
     },
     session({ session, token }) {
       if (session.user) {
