@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
-    "prebuild": "node scripts/apply-hosting-migration.mjs && node scripts/apply-project-request-migration.mjs && node scripts/apply-platform-tools-migration.mjs",
+    "prebuild": "node --test scripts/server-table-security.test.mjs && node scripts/apply-hosting-migration.mjs && node scripts/apply-project-request-migration.mjs && node scripts/apply-platform-tools-migration.mjs",
     "build": "node scripts/next-with-dist.mjs build",
     "start": "node scripts/next-with-dist.mjs start",
     "lint": "eslint .",

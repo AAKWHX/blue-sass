@@ -24,7 +24,7 @@ function makeDb() {
     return new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
       get() {
         throw new Error(
-          "DATABASE_URL is not set. Add your Neon connection string to .env.local (see .env.example).",
+          "DATABASE_URL is not set. Configure the server-side PostgreSQL connection (see .env.example).",
         );
       },
     });

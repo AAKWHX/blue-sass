@@ -1,9 +1,9 @@
 /**
- * AWWA platform — Neon Postgres schema (Drizzle ORM).
+ * Blue Sass — PostgreSQL schema (Drizzle ORM).
  *
- * Replaces the previous Supabase schema. Because Neon has no built-in auth
- * layer and no `auth.uid()`, row-level authorisation lives in `lib/db/access.ts`
- * and is enforced by the server actions in `app/actions/*`.
+ * Auth.js owns application sessions. RLS and restricted grants protect the
+ * Supabase Data API; server actions additionally enforce ownership through
+ * `lib/db/access.ts`. Table-creation migrations must enable RLS before commit.
  */
 import {
   boolean,
@@ -101,6 +101,7 @@ export const users = pgTable("users", {
   accessVersion: integer("access_version").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+users.enableRLS();
 
 export const accounts = pgTable(
   "accounts",
@@ -121,6 +122,7 @@ export const accounts = pgTable(
   },
   (t) => [primaryKey({ columns: [t.provider, t.providerAccountId] })],
 );
+accounts.enableRLS();
 
 export const sessions = pgTable("sessions", {
   sessionToken: text("session_token").primaryKey(),
@@ -129,6 +131,7 @@ export const sessions = pgTable("sessions", {
     .references(() => users.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { withTimezone: true, mode: "date" }).notNull(),
 });
+sessions.enableRLS();
 
 export const verificationTokens = pgTable(
   "verification_tokens",
@@ -139,6 +142,7 @@ export const verificationTokens = pgTable(
   },
   (t) => [primaryKey({ columns: [t.identifier, t.token] })],
 );
+verificationTokens.enableRLS();
 
 /* ------------------------------------------------------------------ *
  * Domain tables
@@ -173,7 +177,7 @@ export const projects = pgTable(
     index("projects_client_idx").on(t.clientId),
     index("projects_visibility_idx").on(t.visibility),
   ],
-);
+).enableRLS();
 
 export const projectMembers = pgTable(
   "project_members",
@@ -187,7 +191,7 @@ export const projectMembers = pgTable(
     role: appRole("role").notNull().default("employee"),
   },
   (t) => [primaryKey({ columns: [t.projectId, t.userId] })],
-);
+).enableRLS();
 
 export const projectMilestones = pgTable(
   "project_milestones",
@@ -206,7 +210,7 @@ export const projectMilestones = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("milestones_project_idx").on(t.projectId, t.orderIndex)],
-);
+).enableRLS();
 
 export const projectFiles = pgTable(
   "project_files",
@@ -229,7 +233,7 @@ export const projectFiles = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("files_project_idx").on(t.projectId)],
-);
+).enableRLS();
 
 export const feedback = pgTable(
   "feedback",
@@ -245,7 +249,7 @@ export const feedback = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("feedback_project_idx").on(t.projectId)],
-);
+).enableRLS();
 
 export const messages = pgTable(
   "messages",
@@ -259,7 +263,7 @@ export const messages = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("messages_project_idx").on(t.projectId, t.createdAt)],
-);
+).enableRLS();
 
 /**
  * One authoritative payment record per project and PayPal environment.
@@ -297,7 +301,7 @@ export const payments = pgTable(
     index("payments_user_idx").on(t.userId),
     index("payments_status_idx").on(t.status),
   ],
-);
+).enableRLS();
 
 export const hostedSites = pgTable(
   "hosted_sites",
@@ -317,7 +321,7 @@ export const hostedSites = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("hosted_sites_user_idx").on(t.userId, t.createdAt), index("hosted_sites_status_idx").on(t.status)],
-);
+).enableRLS();
 
 /** Public customer opinions. New submissions stay private until staff approval. */
 export const reviews = pgTable(
@@ -334,7 +338,7 @@ export const reviews = pgTable(
     moderatedAt: timestamp("moderated_at", { withTimezone: true }),
   },
   (t) => [index("reviews_status_created_idx").on(t.status, t.createdAt), index("reviews_user_idx").on(t.userId, t.createdAt)],
-);
+).enableRLS();
 
 /** Public quote form — no account required. */
 export const leads = pgTable(
@@ -363,7 +367,7 @@ export const leads = pgTable(
     index("leads_status_idx").on(t.status),
     uniqueIndex("leads_email_created_idx").on(t.email, t.createdAt),
   ],
-);
+).enableRLS();
 
 /* ------------------------------------------------------------------ *
  * Inferred types — the app imports these instead of hand-written ones.
@@ -374,7 +378,7 @@ export const projectRequests = pgTable("project_requests", {
   configuration: jsonb("configuration").$type<ProjectConfiguration>().notNull(),
   estimate: jsonb("estimate").$type<ReturnType<typeof configuredEstimate>>().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}).enableRLS();
 
 export const projectBilling = pgTable("project_billing", {
   projectId: uuid("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
@@ -382,18 +386,18 @@ export const projectBilling = pgTable("project_billing", {
   approvedBy: uuid("approved_by").references(() => users.id, { onDelete: "restrict" }),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}).enableRLS();
 
 export const platformOwner = pgTable("platform_owner", {
   slot: integer("slot").primaryKey().default(1),
   userId: uuid("user_id").notNull().unique().references(() => users.id, { onDelete: "restrict" }),
-});
+}).enableRLS();
 export const staffAccess = pgTable("staff_access", {
   userId: uuid("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
   permissions: jsonb("permissions").$type<string[]>().notNull().default([]),
   updatedBy: uuid("updated_by").notNull().references(() => users.id, { onDelete: "restrict" }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}).enableRLS();
 export const staffInvitations = pgTable("staff_invitations", {
   id: uuid("id").defaultRandom().primaryKey(), email: text("email").notNull(),
   tokenHash: text("token_hash").notNull().unique(),
@@ -403,20 +407,20 @@ export const staffInvitations = pgTable("staff_invitations", {
   acceptedAt: timestamp("accepted_at", { withTimezone: true }),
   revokedAt: timestamp("revoked_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [index("staff_invitations_email_idx").on(table.email)]);
+}, table => [index("staff_invitations_email_idx").on(table.email)]).enableRLS();
 export const adminAudit = pgTable("admin_audit", {
   id: uuid("id").defaultRandom().primaryKey(),
   actorId: uuid("actor_id").notNull().references(() => users.id, { onDelete: "restrict" }),
   targetId: uuid("target_id"), action: text("action").notNull(),
   details: jsonb("details").$type<Record<string, unknown>>().notNull().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [index("admin_audit_created_idx").on(table.createdAt)]);
+}, table => [index("admin_audit_created_idx").on(table.createdAt)]).enableRLS();
 export const subscriptionOrders = pgTable("subscription_orders", {
   projectId: uuid("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
   version: integer("version").notNull().default(2), planId: text("plan_id").notNull(),
   snapshot: jsonb("snapshot").$type<{ reports: number; sites: number; compare: boolean; jsonExport: boolean; price: number; durationDays: number }>().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}).enableRLS();
 export const siteAudits = pgTable("site_audits", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -426,13 +430,13 @@ export const siteAudits = pgTable("site_audits", {
   shareTokenHash: text("share_token_hash"),
   shareExpiresAt: timestamp("share_expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [index("site_audits_user_created_idx").on(table.userId, table.createdAt), uniqueIndex("site_audits_share_token_idx").on(table.shareTokenHash)]);
+}, table => [index("site_audits_user_created_idx").on(table.userId, table.createdAt), uniqueIndex("site_audits_share_token_idx").on(table.shareTokenHash)]).enableRLS();
 export const projectAgreements = pgTable("project_agreements", {
   projectId: uuid("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
   agreement: jsonb("agreement").$type<import("../project-agreement").ProjectAgreement>().notNull(),
   updatedBy: uuid("updated_by").notNull().references(() => users.id, { onDelete: "restrict" }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}).enableRLS();
 export const projectDecisions = pgTable("project_decisions", {
   id: uuid("id").defaultRandom().primaryKey(),
   projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
@@ -443,7 +447,7 @@ export const projectDecisions = pgTable("project_decisions", {
   answeredBy: uuid("answered_by").references(() => users.id, { onDelete: "restrict" }),
   answeredAt: timestamp("answered_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [index("project_decisions_project_idx").on(table.projectId)]);
+}, table => [index("project_decisions_project_idx").on(table.projectId)]).enableRLS();
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

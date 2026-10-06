@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { protectServerTables } from "./server-table-security.mjs";
 
 if (process.env.APPLY_HOSTING_MIGRATION !== "1") {
   console.log("Hosting migration is disabled; skipping.");
@@ -94,6 +95,7 @@ try {
 
     await transaction.unsafe(`CREATE INDEX IF NOT EXISTS "reviews_status_created_idx" ON "public"."reviews" USING btree ("status", "created_at");`);
     await transaction.unsafe(`CREATE INDEX IF NOT EXISTS "reviews_user_idx" ON "public"."reviews" USING btree ("user_id", "created_at");`);
+    await protectServerTables(transaction, ["hosted_sites", "reviews"]);
   });
 
   console.log("Hosting and customer-experience database migration completed successfully.");

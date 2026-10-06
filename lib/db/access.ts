@@ -1,9 +1,9 @@
 /**
  * Authorisation layer.
  *
- * Neon has no row-level security tied to a session, so every read and write
- * goes through these guards instead. They mirror what the old Supabase RLS
- * policies enforced in the database.
+ * Auth.js sessions do not identify Supabase Data API users. Private tables
+ * have RLS enabled and no client-role grants. The trusted SQL connection can
+ * bypass RLS, so every server read and write must still use these guards.
  */
 import "server-only";
 import { and, eq, or, sql, isNull } from "drizzle-orm";

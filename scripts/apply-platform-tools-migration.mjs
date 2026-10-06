@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { protectServerTables } from "./server-table-security.mjs";
 import { existsSync } from "node:fs";
 for (const file of [".env.local", ".env"]) if (existsSync(file)) process.loadEnvFile(file);
 if (!process.env.DATABASE_URL) {
@@ -31,6 +32,7 @@ if (!process.env.DATABASE_URL) {
       await tx`CREATE INDEX IF NOT EXISTS project_decisions_project_idx ON public.project_decisions(project_id)`;
       await tx`ALTER TABLE public.project_decisions ADD COLUMN IF NOT EXISTS price_cents integer`;
       await tx`ALTER TABLE public.project_decisions ADD COLUMN IF NOT EXISTS extra_days integer`;
+      await protectServerTables(tx, ["platform_owner", "staff_access", "staff_invitations", "admin_audit", "subscription_orders", "site_audits", "project_agreements", "project_decisions"]);
     });
     console.log("Owner permissions, subscription snapshots and private report storage ready.");
   } finally { await sql.end({ timeout: 5 }); }
