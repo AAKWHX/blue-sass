@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useI18n } from "@/components/providers";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +16,8 @@ export function GoogleSignIn({ returnTo }: { returnTo?: string }) {
           setPending(true);
           setFailed(false);
           try {
+            // Account selection is a new sign-in, never an implicit account link.
+            await signOut({ redirect: false });
             await signIn("google", { redirectTo: returnTo ?? `/${locale}/portal` });
           } catch {
             setFailed(true);

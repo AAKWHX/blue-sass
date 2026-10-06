@@ -20,6 +20,8 @@ import { takeRateLimit } from "@/lib/rate-limit";
 import { isLocale } from "@/lib/i18n/config";
 import { credentialRevision } from "@/lib/auth/credential-revision";
 import { compactSessionToken } from "@/lib/auth/compact-token";
+import { verifiedGoogleEmail } from "@/lib/auth/google-identity";
+import { validateGoogleAccountLink } from "@/lib/db/google-identity";
 
 declare module "next-auth" {
   interface Session {
@@ -101,19 +103,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    signIn({ account, profile }) {
+    async signIn({ account, profile }) {
       if (account?.provider === "google") {
-        return isDatabaseConfigured && profile?.email_verified === true;
+        const email = verifiedGoogleEmail(profile);
+        if (!isDatabaseConfigured || !email) return false;
+        const existing = await auth();
+        if (existing?.user?.email && existing.user.email.toLowerCase() !== email) return false;
+        return await validateGoogleAccountLink(account.providerAccountId, email);
       }
       return true;
     },
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger, session, account, profile }) {
       const id = user?.id ?? token.uid ?? token.sub;
       if (!isDatabaseConfigured || typeof id !== "string") return null;
-      const [record] = await db.select({ role: users.role, passwordHash: users.passwordHash, disabledAt: users.disabledAt, accessVersion: users.accessVersion,
+      const [record] = await db.select({ email: users.email, name: users.name, role: users.role, passwordHash: users.passwordHash, disabledAt: users.disabledAt, accessVersion: users.accessVersion,
         canAdmin: sql<boolean>`exists (select 1 from public.platform_owner o where o.slot = 1 and o.user_id = ${users.id}) or exists (select 1 from public.staff_access a where a.user_id = ${users.id} and jsonb_array_length(a.permissions) > 0)`,
       }).from(users).where(eq(users.id, id)).limit(1);
       if (!record || record.disabledAt) return null;
+      if (account?.provider === "google" && verifiedGoogleEmail(profile) !== record.email.toLowerCase()) return null;
       const revision = credentialRevision(record.passwordHash, record.accessVersion);
       if (!user && token.credentialRevision !== revision) return null;
       token.credentialRevision = revision;
@@ -128,6 +135,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       token.role = record.role;
       token.canAdmin = record.canAdmin;
+      token.sub = id;
+      token.uid = id;
+      token.email = record.email;
+      token.name = record.name;
       return compactSessionToken(token);
     },
     session({ session, token }) {

@@ -122,6 +122,10 @@
 .request-choice:disabled { opacity: .8; }
 .request-choice-icon { display: flex; align-items: center; justify-content: center; width: 3rem; height: 3rem; border: 1px solid #454a54; border-radius: 1rem; background: #20232a; }
 .request-builder input:not([type="hidden"]), .request-builder textarea { border-color: #444954; background: #0a0b0e; color: #f5f5f5; }
+.request-builder [data-slot=label], .request-panel [data-slot=label] { color:#e8ecf0; }
+.request-builder [data-slot=select-trigger], .request-panel [data-slot=select-trigger] { background:#101216; color:#f5f5f5; border-color:#68717e; }
+.request-builder input::placeholder, .request-builder textarea::placeholder { color:#aeb6bf; opacity:1; }
+.request-builder #delivery-days { font-size:24px; font-variant-numeric:tabular-nums; direction:ltr; }
 @media (prefers-reduced-motion: reduce) { .request-choice { transition: none; } .request-choice:hover { transform: none; } }
 
 /* Keep the JS config as the single source of truth for the design tokens
