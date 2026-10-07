@@ -22,6 +22,7 @@ import {
 
 import { lifecycleState, lockProject, recordLifecycle, type ProjectTransaction } from "@/lib/db/project-lifecycle";
 import { isStagePaid } from "@/lib/db/billing";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 export interface MutationState {
   ok: boolean;
@@ -145,6 +146,7 @@ export async function postFeedbackAction(
   const viewer = await requireViewer();
   assertCanWrite(viewer);
   await assertCanViewProject(parsed.data.projectId);
+  if (!(await takeRateLimit(`feedback:${viewer.id}`, 10, 60_000))) return { ok: false, message: "Please try again shortly." };
   await db.insert(feedback).values({
     projectId: parsed.data.projectId,
     authorId: viewer.id,
@@ -171,6 +173,7 @@ export async function postMessageAction(
   const viewer = await requireViewer();
   assertCanWrite(viewer);
   await assertCanViewProject(parsed.data.projectId);
+  if (!(await takeRateLimit(`messages:${viewer.id}`, 20, 60_000))) return { ok: false, message: "Please try again shortly." };
   await db.insert(messages).values({
     projectId: parsed.data.projectId,
     senderId: viewer.id,

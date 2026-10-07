@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { CircleAlert, CircleCheck, Clock3, ShieldCheck } from "lucide-react";
 import type { paymentCopy } from "@/lib/i18n/payment-copy";
+import { Button } from "@/components/ui/button";
 
 type Copy = (typeof paymentCopy)[keyof typeof paymentCopy];
 type CheckoutState = "idle" | "processing" | "paid" | "pending" | "failed" | "cancelled";
@@ -37,18 +38,33 @@ export function PayPalCheckout({
   currency,
   copy,
   initialStatus,
+  initialOrderId,
 }: {
   projectId: string;
   clientId: string;
   currency: string;
   copy: Copy;
   initialStatus: CheckoutState;
+  initialOrderId?: string;
 }) {
   const router = useRouter();
   const container = useRef<HTMLDivElement>(null);
   const rendered = useRef(false);
-  const activeOrder = useRef<string | undefined>(undefined);
+  const activeOrder = useRef<string | undefined>(initialOrderId);
   const [state, setState] = useState<CheckoutState>(initialStatus);
+  const [checking, setChecking] = useState(false);
+  const reconcile = useCallback(async () => {
+    const id = activeOrder.current; if (!id) return;
+    setChecking(true);
+    try {
+      const response = await fetch(`/api/paypal/orders/${encodeURIComponent(id)}/reconcile`, { method: "POST" });
+      const body = await responseBody(response);
+      if (response.ok && ["paid", "pending", "failed"].includes(body.status ?? "")) setState(body.status as CheckoutState);
+      else setState("pending");
+      router.refresh();
+    } catch { setState("pending"); }
+    finally { setChecking(false); }
+  }, [router]);
 
   const renderButtons = useCallback(async () => {
     if (rendered.current || !container.current || !window.paypal) return;
@@ -89,20 +105,20 @@ export function PayPalCheckout({
       },
       onCancel: async ({ orderID }) => {
         const id = orderID ?? activeOrder.current;
-        if (id) await fetch(`/api/paypal/orders/${encodeURIComponent(id)}/cancel`, { method: "POST" }).catch(() => undefined);
+        if (id) {
+          const response = await fetch(`/api/paypal/orders/${encodeURIComponent(id)}/cancel`, { method: "POST" }).catch(() => undefined);
+          if (!response?.ok) { await reconcile(); return; }
+        }
         setState("cancelled");
         router.refresh();
       },
       onError: async () => {
-        if (activeOrder.current) {
-          await fetch(`/api/paypal/orders/${encodeURIComponent(activeOrder.current)}/cancel`, { method: "POST" }).catch(() => undefined);
-        }
-        setState("failed");
-        router.refresh();
+        if (activeOrder.current) await reconcile();
+        else setState("failed");
       },
     });
     await buttons.render(container.current);
-  }, [projectId, router]);
+  }, [projectId, router, reconcile]);
 
   const status = {
     processing: { icon: Clock3, text: copy.processing, tone: "border-neon-sky/30 bg-neon-sky/10 text-ink-high" },
@@ -128,6 +144,7 @@ export function PayPalCheckout({
           <span>{status.text}</span>
         </div>
       ) : null}
+      {initialOrderId && state !== "paid" ? <Button type="button" variant="outline" disabled={checking || state === "processing"} onClick={() => void reconcile()}>{checking ? copy.processing : copy.retry}</Button> : null}
       {state !== "paid" ? <div ref={container} aria-label={copy.pay} className="min-h-12 overflow-hidden rounded-xl" /> : null}
       <div className="flex items-start gap-2 text-xs leading-5 text-ink-low">
         <ShieldCheck className="mt-0.5 size-4 shrink-0 text-neon-emerald" />

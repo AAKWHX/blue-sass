@@ -53,7 +53,7 @@ export async function updateProfileAction(_previous: ProfileState, formData: For
   }
 
   const { name, company, title, phone, locale } = parsed.data;
-  await db.update(users).set({
+  const [saved] = await db.update(users).set({
     name,
     company: company || null,
     title: title || null,
@@ -61,7 +61,10 @@ export async function updateProfileAction(_previous: ProfileState, formData: For
     locale,
     marketingOptIn: parsed.data.marketingOptIn === "on",
     ...(image ? { image } : {}),
-  }).where(eq(users.id, viewer.id));
+  }).where(eq(users.id, viewer.id)).returning({ id: users.id });
+  if (!saved) {
+    return { ok: false, message: responseLocale === "ar" ? "تعذر حفظ الملف الشخصي. أعد تسجيل الدخول وحاول مجددًا." : localizeForLocale("Unable to save your profile. Sign in again and retry.", responseLocale) };
+  }
 
   (await cookies()).set("awwa-locale", locale, {
     path: "/", maxAge: 31_536_000, sameSite: "lax", secure: process.env.NODE_ENV === "production",

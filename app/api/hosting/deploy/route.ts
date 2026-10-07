@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     if (!isDatabaseConfigured) return NextResponse.json({ error: "Hosting database is not configured." }, { status: 503 });
     const viewer = await requireViewer();
     if (!(await hasHostingSubscription(viewer.id))) return NextResponse.json({ error: "HOSTING_SUBSCRIPTION_REQUIRED" }, { status: 402 });
-    if (!takeRateLimit(`hosting:${viewer.id}`, 2, 60 * 60_000)) return NextResponse.json({ error: "Please wait before starting another deployment." }, { status: 429 });
+    if (!(await takeRateLimit(`hosting:${viewer.id}`, 2, 60 * 60_000))) return NextResponse.json({ error: "Please wait before starting another deployment." }, { status: 429 });
     if (!process.env.VERCEL_TOKEN) return NextResponse.json({ error: "Hosting is being configured. Please contact Blue Sass." }, { status: 503 });
     const form = await readLimitedFormData(request);
     const name = String(form.get("name") || "").trim().slice(0, 80);

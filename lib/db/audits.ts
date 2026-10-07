@@ -1,7 +1,7 @@
 import "server-only";
 import { and, desc, eq, gte, lt, ne, sql } from "drizzle-orm";
 import { db, isDatabaseConfigured } from "./index";
-import { payments, projects, siteAudits, subscriptionOrders, users, platformOwner } from "./schema";
+import { payments, projects, siteAudits, subscriptionOrders, users, platformOwner, toolUsage } from "./schema";
 import { requireViewer } from "./access";
 import { lifecycleState } from "./project-lifecycle";
 import type { AuditReport } from "../audits/types";
@@ -33,11 +33,13 @@ export async function reserveAudit(userId: string, source: "url" | "files", targ
     await tx.execute(sql`select id from ${users} where id = ${userId} for update`);
     const day = new Date(); day.setUTCHours(0, 0, 0, 0);
     const [attempts] = await tx.select({ count: sql<number>`count(*)::integer` }).from(siteAudits).where(and(eq(siteAudits.userId, userId), gte(siteAudits.createdAt, day)));
-    if (attempts.count >= 40) throw new Error("AUDIT_BUSY");
+    if (attempts.count >= Math.min(200, Math.max(40, entitlement.reports))) throw new Error("AUDIT_BUSY");
     await tx.update(siteAudits).set({ status: "failed" }).where(and(eq(siteAudits.userId, userId), eq(siteAudits.status, "pending"), lt(siteAudits.createdAt, new Date(Date.now() - 120_000))));
+    await tx.update(toolUsage).set({ status: "failed" }).where(and(eq(toolUsage.userId,userId),eq(toolUsage.status,"pending"),lt(toolUsage.createdAt,new Date(Date.now()-300_000))));
     const rows = await tx.select({ source: siteAudits.source, target: siteAudits.target, status: siteAudits.status }).from(siteAudits).where(and(eq(siteAudits.userId, userId), ne(siteAudits.status, "failed"), gte(siteAudits.createdAt, entitlement.startsAt)));
     if (rows.some(row => row.status === "pending")) throw new Error("AUDIT_BUSY");
-    if (rows.length >= entitlement.reports) throw new Error("AUDIT_QUOTA");
+    const [ai] = await tx.select({ used: sql<number>`coalesce(sum(credits),0)::integer` }).from(toolUsage).where(and(eq(toolUsage.userId,userId),gte(toolUsage.createdAt,entitlement.startsAt),ne(toolUsage.status,"failed")));
+    if (rows.length + ai.used >= entitlement.reports) throw new Error("AUDIT_QUOTA");
     const targets = new Set(rows.map(row => auditTargetKey(row.source, row.target)));
     if (!targets.has(auditTargetKey(source, target)) && targets.size >= entitlement.sites) throw new Error("SITE_QUOTA");
     const [row] = await tx.insert(siteAudits).values({ userId, source, target }).returning({ id: siteAudits.id });

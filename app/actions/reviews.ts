@@ -31,7 +31,8 @@ export async function moderateReviewAction(formData: FormData) {
   await requirePermission("reviews.manage");
   const id = z.string().uuid().parse(formData.get("id"));
   const status = z.enum(["approved", "rejected"]).parse(formData.get("status"));
-  await db.update(reviews).set({ status, moderatedAt: new Date() }).where(eq(reviews.id, id));
+  const [saved] = await db.update(reviews).set({ status, moderatedAt: new Date() }).where(eq(reviews.id, id)).returning({ id: reviews.id });
+  if (!saved) throw new Error("REVIEW_NOT_FOUND");
   revalidatePath("/[locale]/reviews", "page");
   revalidatePath("/[locale]/admin/reviews", "page");
 }

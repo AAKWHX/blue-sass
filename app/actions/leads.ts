@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { leads, projectMilestones, projects, type ProjectStage } from "@/lib/db/schema";
+import { leads, projectBilling, projectMilestones, projects, type ProjectStage } from "@/lib/db/schema";
 import { getViewer, requirePermission, assertCanWrite } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
 import { takeRateLimit } from "@/lib/rate-limit";
@@ -99,7 +99,7 @@ export async function submitLeadAction(
   // Honeypot + per-process rate limit make automated form spam costly without
   // exposing any customer data to a third-party CAPTCHA provider.
   if (parsed.data.website) return { ok: true, message: "Thank you." };
-  if (!takeRateLimit(`lead:${parsed.data.email}`, 3, 10 * 60_000)) {
+  if (!(await takeRateLimit(`lead:${parsed.data.email}`, 3, 10 * 60_000))) {
     return { ok: false, message: "Too many requests. Please try again later." };
   }
 
@@ -173,6 +173,7 @@ export async function submitLeadAction(
       hoursLogged: 0,
       tech: features,
     }).returning({ id: projects.id });
+    await tx.insert(projectBilling).values({ projectId: project.id });
     await tx.insert(projectMilestones).values(stages.map((stage, index) => ({
       projectId: project.id,
       title: titles[index],
@@ -193,8 +194,10 @@ export async function submitLeadAction(
 /** Admin: move a lead through the sales pipeline. */
 export async function updateLeadStatusAction(formData: FormData) {
   await requirePermission("leads.manage");
-  const id = String(formData.get("id"));
-  const status = String(formData.get("status")) as (typeof leads.$inferSelect)["status"];
-  await db.update(leads).set({ status }).where(eq(leads.id, id));
+  const id = z.string().uuid().parse(formData.get("id"));
+  const status = z.enum(["new", "contacted", "qualified", "won", "lost"]).parse(formData.get("status"));
+  const [saved] = await db.update(leads).set({ status }).where(eq(leads.id, id)).returning({ id: leads.id });
+  if (!saved) throw new Error("LEAD_NOT_FOUND");
   revalidatePath("/[locale]/admin", "page");
+  revalidatePath("/[locale]/admin/quotes", "page");
 }

@@ -11,6 +11,10 @@ import { validateEmail } from "@/lib/validation/contact";
 import { newResetCode, resetDigest, matchesResetCode, RESET_TTL, RESET_MAX_ATTEMPTS } from "@/lib/auth/reset-code";
 import { recoveryEmail } from "@/lib/email/templates";
 import { getSiteUrl } from "@/lib/site-url";
+import { headers } from "next/headers";
+import { requestIdentity, takeRateLimit } from "@/lib/rate-limit";
+import { checkNewPassword, validPasswordLength } from "@/lib/auth/password-policy";
+import { securityCopy } from "@/lib/i18n/security-copy";
 
 export interface RecoveryState { ok: boolean; message: string; email?: string; complete?: boolean }
 function input(data: FormData) {
@@ -24,6 +28,7 @@ function secret() { return process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRE
 export async function requestRecovery(_previous: RecoveryState, data: FormData): Promise<RecoveryState> {
   const { t, email, locale } = input(data);
   if (!validateEmail(email).ok || !isDatabaseConfigured || !isEmailConfigured || !secret()) return { ok: false, message: t.unavailable };
+  if (!(await takeRateLimit(`recovery-ip:${requestIdentity(await headers())}`, 10, 3600_000)) || !(await takeRateLimit("recovery-global", 200, 3600_000))) return { ok: false, message: securityCopy(locale).retry };
   const identifier = `password-reset:${email}`;
   const code = newResetCode();
   // Transaction advisory locks serialize requests across all Vercel workers.
@@ -45,11 +50,14 @@ export async function requestRecovery(_previous: RecoveryState, data: FormData):
 }
 
 export async function completeRecovery(_previous: RecoveryState, data: FormData): Promise<RecoveryState> {
-  const { t, email } = input(data);
+  const { t, email, locale } = input(data);
   const password = String(data.get("password") ?? "");
   const code = String(data.get("code") ?? "").trim();
-  if (password.length < 12 || password.length > 64 || Buffer.byteLength(password, "utf8") > 72 || password !== data.get("confirm")) return { ok: false, message: t.mismatch };
+  if (!validPasswordLength(password) || password !== data.get("confirm")) return { ok: false, message: t.mismatch };
   if (!isDatabaseConfigured || !secret() || !validateEmail(email).ok || !/^\d{8}$/.test(code)) return { ok: false, message: t.invalid };
+  if (!(await takeRateLimit(`recovery-complete:${requestIdentity(await headers())}`, 15, 15 * 60_000))) return { ok: false, message: securityCopy(locale).retry };
+  const check = await checkNewPassword(password);
+  if (check !== "ok") return { ok: false, message: securityCopy(locale)[check] };
   const identifier = `password-reset:${email}`;
   const ok = await db.transaction(async tx => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${identifier}))`);

@@ -20,6 +20,7 @@ import { PhoneField } from "@/components/ui/phone-field";
 import { validateEmail } from "@/lib/validation/contact";
 import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import { recovery } from "@/lib/i18n/recovery";
+import { securityCopy } from "@/lib/i18n/security-copy";
 
 const orLabels = withExtraLocales({ ar: "أو", en: "or", nl: "of", de: "oder", tr: "veya", fr: "ou", es: "o" } as const);
 
@@ -298,12 +299,13 @@ export function RegisterForm() {
           name="password"
           type="password"
           required
-          minLength={8}
+          minLength={12}
+          maxLength={64}
           autoComplete="new-password"
           className="field"
           dir="ltr"
         />
-        <p className="mt-1 text-xs text-ink-low">{t.auth.passwordHint}</p>
+        <p className="mt-1 text-xs text-ink-low">{securityCopy(locale).length}</p>
         <FieldError message={state.fieldErrors?.password} />
       </div>
 

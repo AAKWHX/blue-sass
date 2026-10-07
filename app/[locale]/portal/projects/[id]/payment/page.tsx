@@ -7,7 +7,7 @@ import { PayPalCheckout } from "@/components/portal/paypal-checkout";
 import { PortalNav } from "@/components/portal/portal-nav";
 import { getViewer, hasCapability } from "@/lib/db/access";
 import { PriceApprovalForm } from "@/components/admin/price-approval-form";
-import { getProjectPayment, projectPaymentAmount } from "@/lib/db/payments";
+import { getProjectPayment, payableProjectAmount } from "@/lib/db/payments";
 import { getProjectDetail } from "@/lib/db/queries";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { isLocale } from "@/lib/i18n";
@@ -19,6 +19,7 @@ import { InstallmentSummary } from "@/components/portal/installment-summary";
 import { billingCopy } from "@/lib/i18n/billing-copy";
 import { projectWorkspace } from "@/lib/db/project-workspace";
 import { workspaceCopy } from "@/lib/i18n/workspace-copy";
+import { businessUi } from "@/lib/i18n/business-ui";
 
 function formatMoney(amountCents: number, currency: string, locale: string) {
   return new Intl.NumberFormat(locale, { style: "currency", currency }).format(amountCents / 100);
@@ -42,7 +43,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
 
   let payable: { amountCents: number; currency: string } | null = null;
   try {
-    payable = billing ? billing.next && billing.ready && billing.plan.approvedTotalCents ? { amountCents: billing.next.amountCents, currency: "EUR" } : null : projectPaymentAmount(detail.project);
+    payable = billing ? billing.next && billing.ready && billing.plan.approvedTotalCents ? { amountCents: billing.next.amountCents, currency: "EUR" } : null : await payableProjectAmount(detail.project);
   } catch {
     payable = null;
   }
@@ -59,6 +60,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
         </Button>
 
         <div className="mx-auto mt-8 max-w-5xl">
+          {detail.project.industry === "commerce" && <Button asChild variant="outline" className="mb-6"><Link href={`/${locale}/portal/purchases`}>{businessUi(locale).myFiles}</Link></Button>}
           {!scopeReady && <p className="mb-5 rounded-xl border border-white/25 p-4 text-sm leading-7">{workspaceCopy(locale).scopeRequired}</p>}
           {billing && !billing.plan.approvedTotalCents && hasCapability(viewer, "billing.approve") && <div className="tool-surface tool-card mb-6 rounded-2xl border border-white/20 p-5"><PriceApprovalForm projectId={id} locale={locale} amount={detail.project.budget} locked={lifecycle.cancelled || lifecycle.locked || detail.project.stage !== "planning"}/></div>}
           <div className="mb-8 max-w-2xl">
@@ -99,6 +101,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
                     currency={currency}
                     copy={copy}
                     initialStatus={payment?.status ?? "idle"}
+                    initialOrderId={payment?.providerOrderId ?? undefined}
                   />
                 ) : (
                   <div className="rounded-xl border border-white/25 bg-white/5 p-4 text-sm leading-7 text-white"><p>{billing && !billing.plan.approvedTotalCents ? billingCopy.approval[locale] : !scopeReady ? workspaceCopy(locale).scopeRequired : billing && !billing.ready ? billingCopy.waiting[locale] : copy.unavailable}</p><Button asChild variant="outline" className="mt-4 w-full"><Link href={`/${locale}/portal/projects/${id}`}>{copy.back}</Link></Button></div>

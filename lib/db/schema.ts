@@ -291,6 +291,7 @@ export const payments = pgTable(
     currency: text("currency").notNull().default("EUR"),
     attempt: integer("attempt").notNull().default(1),
     failureCode: text("failure_code"),
+    captureStartedAt: timestamp("capture_started_at", { withTimezone: true }),
     paidAt: timestamp("paid_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -431,6 +432,36 @@ export const siteAudits = pgTable("site_audits", {
   shareExpiresAt: timestamp("share_expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [index("site_audits_user_created_idx").on(table.userId, table.createdAt), uniqueIndex("site_audits_share_token_idx").on(table.shareTokenHash)]).enableRLS();
+
+export const toolUsage = pgTable("tool_usage", {
+ id:uuid("id").defaultRandom().primaryKey(),userId:uuid("user_id").notNull().references(()=>users.id,{onDelete:"cascade"}),
+ tool:text("tool").notNull(),credits:integer("credits").notNull(),status:text("status").notNull().default("pending"),
+ createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+}, table=>[index("tool_usage_user_created_idx").on(table.userId,table.createdAt)]).enableRLS();
+export const platformContent=pgTable("platform_content",{
+ key:text("key").primaryKey(),metrics:jsonb("metrics").$type<{label:string;value:number;suffix:string}[]>().notNull().default([]),
+ updatedBy:uuid("updated_by").references(()=>users.id,{onDelete:"set null"}),updatedAt:timestamp("updated_at",{withTimezone:true}).notNull().defaultNow(),
+}).enableRLS();
+export const marketplaceListings=pgTable("marketplace_listings",{
+ id:uuid("id").defaultRandom().primaryKey(),userId:uuid("user_id").notNull().references(()=>users.id,{onDelete:"restrict"}),
+ kind:text("kind").notNull(),title:text("title").notNull(),description:text("description").notNull(),category:text("category").notNull(),
+ price:integer("price").notNull().default(0),tier:text("tier").notNull().default("basic"),status:text("status").notNull().default("pending"),
+ company:text("company"),location:text("location"),platformProduct:boolean("platform_product").notNull().default(false),
+ assetName:text("asset_name"),assetData:text("asset_data"),assetType:text("asset_type"),
+ moderatedAt:timestamp("moderated_at",{withTimezone:true}),createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[index("marketplace_kind_status_idx").on(table.kind,table.status)]).enableRLS();
+export const marketplaceOffers=pgTable("marketplace_offers",{
+ id:uuid("id").defaultRandom().primaryKey(),listingId:uuid("listing_id").notNull().references(()=>marketplaceListings.id,{onDelete:"cascade"}),
+ userId:uuid("user_id").notNull().references(()=>users.id,{onDelete:"restrict"}),message:text("message").notNull(),
+ amount:integer("amount").notNull().default(0),status:text("status").notNull().default("pending"),
+ createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[uniqueIndex("marketplace_offer_user_idx").on(table.listingId,table.userId)]).enableRLS();
+export const marketplaceOrders=pgTable("marketplace_orders",{
+ projectId:uuid("project_id").primaryKey().references(()=>projects.id,{onDelete:"cascade"}),
+ listingId:uuid("listing_id").notNull().references(()=>marketplaceListings.id,{onDelete:"restrict"}),
+ kind:text("kind").notNull(),snapshot:jsonb("snapshot").$type<{title:string;price:number;tier:string}>().notNull(),
+ createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+}).enableRLS();
 export const projectAgreements = pgTable("project_agreements", {
   projectId: uuid("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
   agreement: jsonb("agreement").$type<import("../project-agreement").ProjectAgreement>().notNull(),
@@ -448,6 +479,12 @@ export const projectDecisions = pgTable("project_decisions", {
   answeredAt: timestamp("answered_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [index("project_decisions_project_idx").on(table.projectId)]).enableRLS();
+
+export const securityRateLimits = pgTable("security_rate_limits", {
+  keyHash: text("key_hash").primaryKey(),
+  hits: integer("hits").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+}, table => [index("security_rate_limits_expiry_idx").on(table.expiresAt)]).enableRLS();
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

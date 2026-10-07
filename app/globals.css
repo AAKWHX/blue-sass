@@ -1,10 +1,14 @@
-@import "@fontsource-variable/cairo";
+@import "@fontsource-variable/noto-sans-arabic";
 @import "@fontsource-variable/jetbrains-mono";
 
 /* Tailwind v4: a single @import replaces the three @tailwind directives. */
 @import "tailwindcss";
 
 .tool-surface { background:#050608; color:#f5f5f5; }
+.gold-product-card { background:#101216; color:#e6c988; border-color:#8d743f; box-shadow:inset 0 1px 0 rgb(230 201 136 / .14); }
+.gold-product-card h1,.gold-product-card h2,.gold-product-card h3 { color:#f3deb2; }
+.gold-product-card:hover { border-color:#e6c988; }
+.home-floating-nav-page { position:sticky; background:rgb(8 9 8 / .96); border-bottom:1px solid rgb(255 255 255 / .12); }
 .tool-surface h1, .tool-surface h2, .tool-surface h3 { color:inherit; }
 .tool-surface [data-slot=label] { color:#e8ecf0; }
 .site-action[data-slot=button] {
@@ -213,10 +217,10 @@
   --card-p: clamp(1.25rem, 2vw, 1.75rem);
 }
 
-/* Arabic switches the sans stack to Cairo (it carries Latin glyphs too).
-   Cairo needs more vertical room than Geist, so leading is opened up. */
+/* Arabic uses locally hosted Noto Sans Arabic.
+   Arabic needs more vertical room than Latin UI text. */
 [dir="rtl"] {
-  --font-sans: "Cairo Variable", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Noto Sans Arabic Variable", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --leading-tight: 1.32;
   --leading-body: 1.82;
   font-kerning: normal;
@@ -230,9 +234,9 @@
 [dir="rtl"] li,
 [dir="rtl"] blockquote { line-height: var(--leading-body); }
 
-/* Cairo renders visually heavier and its terminals collide at small sizes,
+/* Arabic headings use balanced weights and extra line spacing,
    so weights step down one notch and body text gets a touch more room.
-   `font-synthesis: none` stops the browser from faking bold Cairo, which
+   `font-synthesis: none` avoids artificial bold weights, which
    looked smeared on Android. */
 [dir="rtl"] .font-black { font-weight: 800; }
 [dir="rtl"] .font-extrabold { font-weight: 700; }
@@ -240,7 +244,7 @@
 [dir="rtl"] .font-semibold { font-weight: 600; }
 [dir="rtl"] body { font-synthesis: none; }
 
-/* Cairo's natively tight tracking reads cramped below ~14px (chips, meta
+/* Small Arabic UI labels need comfortable spacing (chips, meta
    labels, table cells); a hair of letter-spacing restores legibility.
    Headings keep letter-spacing 0 — set in @layer base below. */
 [dir="rtl"] .chip,

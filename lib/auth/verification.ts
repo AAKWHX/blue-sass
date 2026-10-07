@@ -26,7 +26,7 @@ export function hashToken(raw: string): string {
 }
 
 function safeEqualHex(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
+  if (!/^[a-f0-9]{64}$/i.test(a) || !/^[a-f0-9]{64}$/i.test(b)) return false;
   return timingSafeEqual(Buffer.from(a, "hex"), Buffer.from(b, "hex"));
 }
 
@@ -37,13 +37,16 @@ function safeEqualHex(a: string, b: string): boolean {
  */
 export async function issueVerificationToken(email: string): Promise<string> {
   const identifier = identifierFor(email);
-  await db.delete(verificationTokens).where(eq(verificationTokens.identifier, identifier));
-
   const raw = randomBytes(32).toString("base64url"); // 256 bits of entropy
-  await db.insert(verificationTokens).values({
+  await db.transaction(async tx => {
+  const [user] = await tx.select({id:users.id}).from(users).where(eq(users.email,email.toLowerCase())).for("update").limit(1);
+  if (!user) throw new Error("ACCOUNT_NOT_FOUND");
+  await tx.delete(verificationTokens).where(eq(verificationTokens.identifier, identifier));
+  await tx.insert(verificationTokens).values({
     identifier,
     token: hashToken(raw),
     expires: new Date(Date.now() + TOKEN_TTL_MS),
+  });
   });
   return raw;
 }
@@ -62,17 +65,20 @@ export async function consumeVerificationToken(
 ): Promise<ConsumeResult> {
   const identifier = identifierFor(email);
   const digest = hashToken(rawToken);
-
-  const [row] = await db
+  return db.transaction(async (tx): Promise<ConsumeResult> => {
+  const [user] = await tx.select({ id: users.id, emailVerified: users.emailVerified }).from(users).where(eq(users.email, email.toLowerCase())).for("update").limit(1);
+  if (!user) return { ok: false, reason: "invalid" };
+  const [row] = await tx
     .select()
     .from(verificationTokens)
     .where(eq(verificationTokens.identifier, identifier))
+    .for("update")
     .limit(1);
 
   if (!row || !safeEqualHex(row.token, digest)) return { ok: false, reason: "invalid" };
 
   if (row.expires.getTime() < Date.now()) {
-    await db
+    await tx
       .delete(verificationTokens)
       .where(
         and(
@@ -83,25 +89,19 @@ export async function consumeVerificationToken(
     return { ok: false, reason: "expired" };
   }
 
-  const [user] = await db
-    .select({ id: users.id, emailVerified: users.emailVerified })
-    .from(users)
-    .where(eq(users.email, email.toLowerCase()))
-    .limit(1);
-  if (!user) return { ok: false, reason: "invalid" };
-
   const alreadyVerified = Boolean(user.emailVerified);
   if (!alreadyVerified) {
-    await db.update(users).set({ emailVerified: new Date() }).where(eq(users.id, user.id));
+    await tx.update(users).set({ emailVerified: new Date() }).where(eq(users.id, user.id));
   }
 
-  await db
+  await tx
     .delete(verificationTokens)
     .where(
       and(eq(verificationTokens.identifier, identifier), eq(verificationTokens.token, row.token)),
     );
 
   return { ok: true, email: email.toLowerCase(), alreadyVerified };
+  });
 }
 
 /** Housekeeping — safe to call opportunistically. */

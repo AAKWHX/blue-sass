@@ -28,7 +28,7 @@ export async function saveConfiguredProject(_prev: ConfigurationState, form: For
   const viewer = await getViewer();
   if (!viewer || !isDatabaseConfigured) return fail;
   assertCanWrite(viewer);
-  if (!takeRateLimit(`configure:${viewer.id}`, 20, 10 * 60_000)) return fail;
+  if (!(await takeRateLimit(`configure:${viewer.id}`, 20, 10 * 60_000))) return fail;
   const raw = form.get("configuration");
   if (typeof raw !== "string" || raw.length > 16000) return fail;
   let input: unknown;
@@ -49,6 +49,7 @@ export async function saveConfiguredProject(_prev: ConfigurationState, form: For
     savedId = await db.transaction(async tx => {
       if (projectIdValue) {
         const project = await lockProject(tx, projectIdValue);
+        if(!project||["commerce","subscription"].includes(project.industry))return null;
         const state = await lifecycleState(projectIdValue, tx);
         if (!canChangeRequest(project, viewer.id, state)) return null;
         // Same row lock as Checkout: configuration and payment cannot race.

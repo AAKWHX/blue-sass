@@ -1,0 +1,26 @@
+"use client";
+import {useState} from "react";
+import Link from "next/link";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {serviceCatalog} from "@/lib/service-catalog";
+import {serviceTemplates} from "@/lib/service-templates";
+import {toolsUi} from "@/lib/i18n/tools-ui";
+import {experience} from "@/lib/i18n/experience";
+import type {Locale} from "@/lib/i18n/config";
+export function InteractiveTemplate({locale,id}:{locale:Locale;id:string}){const item=serviceTemplates(locale).find(row=>row.id===id)!;const c=toolsUi(locale);const e=experience(locale);const service=serviceCatalog(locale).find(row=>row.slug===item.service)!;
+ const [tab,setTab]=useState(0);const [cart,setCart]=useState<string[]>([]);const [query,setQuery]=useState("");const [submitted,setSubmitted]=useState(false);
+ const isStore=item.service==="store";const isDashboard=["erp","windows"].includes(item.service);const isPhone=["android","ios"].includes(item.service);const isAI=item.service==="ai";
+ const products=item.variant?[{name:"Studio desk",price:249},{name:"Focus chair",price:179},{name:"Task lamp",price:59}]:[{name:"Canvas bag",price:39},{name:"Ceramic cup",price:24},{name:"Notebook",price:18}];
+ return <div className="tool-surface min-h-screen pb-14"><div className="container-x py-6"><div className="flex flex-wrap justify-between gap-3 rounded-xl border border-white/15 p-4"><Link href={`/${locale}/services#templates`} className="text-sm underline">{c.back}</Link><p className="text-sm">{e.templateNote}</p><Button asChild variant="neon" size="sm"><Link href={`/${locale}/quote?service=${item.service}&template=${id}`}>{e.startTemplate}</Link></Button></div></div>
+ <div className={`mx-auto ${isPhone?"max-w-lg":"max-w-6xl"} overflow-hidden rounded-3xl border border-white/20 bg-[#101216]`}>
+ <nav className="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 p-6"><strong className="text-xl">{item.variant?"NORTH STUDIO":"ATELIER"}</strong><div className="flex gap-2">{[service.title,c.details,c.data].map((name,i)=><Button key={i} variant={tab===i?"neon":"outline"} size="sm" onClick={()=>setTab(i)} aria-pressed={tab===i}>{name}</Button>)}</div>{isStore&&<span className="text-sm">{cart.length} · €{cart.reduce((sum,name)=>sum+(products.find(p=>p.name===name)?.price??0),0)}</span>}</nav>
+ <div className="p-6 sm:p-12"><h1 className="max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl">{item.name}</h1><p className="mt-6 max-w-2xl text-lg leading-8 text-white/70">{service.description}</p>
+ {tab===0&&isStore?<><Input aria-label={c.search} className="my-7" value={query} onChange={ev=>setQuery(ev.target.value)} placeholder={c.search}/><div className="grid gap-5 sm:grid-cols-3">{products.filter(p=>p.name.toLowerCase().includes(query.toLowerCase())).map((product,i)=><article key={product.name} className="rounded-xl border border-white/15 p-5"><div className="mb-5 grid aspect-square place-items-center rounded-xl bg-white/10"><div className={`h-28 w-24 ${i===0?"rounded-lg":"rounded-full"} border-[6px] border-white/50 bg-white/5`}/></div><h2 className="text-xl">{product.name}</h2><p className="my-4">€{product.price}</p><Button variant="neon" onClick={()=>setCart([...cart,product.name])}>+ {c.generate}</Button></article>)}</div>{cart.length>0&&<Button className="mt-5" variant="outline" onClick={()=>setCart([])}>{c.back} · {cart.length} ×</Button>}</>:
+ tab===0&&isDashboard?<><div className="my-8 grid gap-4 sm:grid-cols-3">{[24,8,6].map((n,i)=><div key={i} className="rounded-xl border border-white/15 p-5"><p>{[c.data,c.status,c.report][i]}</p><p className="mt-4 text-4xl">{n}</p></div>)}</div><Input aria-label={c.search} placeholder={c.search} value={query} onChange={ev=>setQuery(ev.target.value)}/><div className="mt-5 space-y-3">{["Project Alpha","Project Studio","Project North"].filter(value=>value.toLowerCase().includes(query.toLowerCase())).map((value,i)=><div key={value} className="flex justify-between rounded-lg bg-white/5 p-4"><span>{value}</span><Button size="sm" variant="outline" onClick={()=>setTab(1)}>{c.details} {i+1}</Button></div>)}</div></>:
+ tab===0?<div className="my-9 grid gap-5 sm:grid-cols-2">{service.features.map((feature,i)=><article key={feature} className="rounded-2xl border border-white/15 p-6"><p className="mb-6 text-3xl text-white/40">0{i+1}</p><h2 className="text-xl font-semibold">{feature}</h2><Button className="mt-5" variant="outline" onClick={()=>setTab(1)}>{c.details}</Button></article>)}</div>:null}
+ {tab===1&&<div className="my-8 space-y-4">{item.features.map(feature=><div key={feature} className="rounded-xl border border-white/15 p-5"><h2 className="text-xl">{feature}</h2><p className="mt-3 text-white/70">{service.description}</p></div>)}</div>}
+ {tab===2&&<form className="mt-8 space-y-4" onSubmit={ev=>{ev.preventDefault();setSubmitted(true);}}><Label htmlFor="demo-input">{isAI?c.data:c.title}</Label><Input id="demo-input" required minLength={2} maxLength={100}/><Button type="submit" variant="neon" disabled={submitted}>{submitted?`${c.submit} ✓`:c.submit}</Button>{submitted&&<p>{e.templateNote}</p>}</form>}
+ </div></div></div>;
+}

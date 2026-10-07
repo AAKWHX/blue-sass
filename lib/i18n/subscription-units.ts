@@ -1,0 +1,6 @@
+import type {Locale} from "./config";
+const rows:Record<Locale,{units:string;hosting:string}>={
+ ar:{units:"رصيد استخدام / 30 يومًا",hosting:"استضافة المواقع"},en:{units:"usage credits / 30 days",hosting:"Website hosting"},nl:{units:"gebruikscredits / 30 dagen",hosting:"Websitehosting"},de:{units:"Nutzungspunkte / 30 Tage",hosting:"Websitehosting"},tr:{units:"kullanım kredisi / 30 gün",hosting:"Site barındırma"},fr:{units:"crédits / 30 jours",hosting:"Hébergement web"},es:{units:"créditos / 30 días",hosting:"Alojamiento web"},it:{units:"crediti / 30 giorni",hosting:"Hosting web"},pt:{units:"créditos / 30 dias",hosting:"Alojamento web"},pl:{units:"kredytów / 30 dni",hosting:"Hosting stron"},uk:{units:"кредитів / 30 днів",hosting:"Хостинг сайтів"},ru:{units:"кредитов / 30 дней",hosting:"Хостинг сайтов"},zh:{units:"积分 / 30天",hosting:"网站托管"},ja:{units:"クレジット / 30日",hosting:"サイトホスティング"},ko:{units:"크레딧 / 30일",hosting:"웹사이트 호스팅"},
+};
+export function subscriptionUnits(locale:Locale){return rows[locale];}
+export function subscriptionHeading(locale:Locale){return {ar:"الاشتراكات",en:"Subscriptions",nl:"Abonnementen",de:"Abonnements",tr:"Abonelikler",fr:"Abonnements",es:"Suscripciones",it:"Abbonamenti",pt:"Subscrições",pl:"Subskrypcje",uk:"Підписки",ru:"Подписки",zh:"订阅",ja:"サブスクリプション",ko:"구독"}[locale];}

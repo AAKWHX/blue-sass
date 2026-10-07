@@ -48,6 +48,7 @@ export async function readPublicPage(input: string, method: "GET" | "HEAD" = "GE
       const status = response.statusCode ?? 0;
       if (response.headers["content-encoding"] && response.headers["content-encoding"] !== "identity") { req.destroy(new Error("URL_UNAVAILABLE")); return; }
       const headers: Record<string, string> = {};
+      headers["response-cookie-count"] = String(response.headers["set-cookie"]?.length ?? 0);
       // Never retain cookies, authorization headers or arbitrary response data.
       for (const name of ["content-type", "location", "content-security-policy", "strict-transport-security", "x-frame-options", "x-content-type-options", "referrer-policy"]) {
         const value = response.headers[name]; if (typeof value === "string") headers[name] = value.slice(0, 2000);

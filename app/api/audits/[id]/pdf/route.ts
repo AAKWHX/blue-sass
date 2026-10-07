@@ -11,7 +11,7 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   try{
     const viewer=await requireViewer();const {id}=await params;
     if(!z.string().uuid().safeParse(id).success)return NextResponse.json({error:"NOT_FOUND"},{status:404});
-    if(!takeRateLimit(`audit-pdf:${viewer.id}`,3,60_000))return NextResponse.json({error:"AUDIT_BUSY"},{status:429});
+    if(!(await takeRateLimit(`audit-pdf:${viewer.id}`,3,60_000)))return NextResponse.json({error:"AUDIT_BUSY"},{status:429});
     const row=await ownedReport(id);if(!row?.report || row.status!=="completed")return NextResponse.json({error:"NOT_FOUND"},{status:404});
     const requested=new URL(request.url).searchParams.get("locale");const locale=isLocale(requested??"")?requested as import("@/lib/i18n/config").Locale:"ar";
     const buffer=await renderAuditPdf(id,row.report,locale);

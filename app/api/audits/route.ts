@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     assertSameOrigin(request);
     const viewer = await requireViewer(); assertCanWrite(viewer); userId = viewer.id;
     if (!isDatabaseConfigured) return NextResponse.json({ error: "UNAVAILABLE" }, { status: 503 });
-    if (!takeRateLimit(`audit:${viewer.id}`, 6, 60_000)) return NextResponse.json({ error: "AUDIT_BUSY" }, { status: 429 });
+    if (!(await takeRateLimit(`audit:${viewer.id}`, 6, 60_000))) return NextResponse.json({ error: "AUDIT_BUSY" }, { status: 429 });
     const contentLength = Number(request.headers.get("content-length"));
     if (contentLength > 4_000_000) return NextResponse.json({ error: "UPLOAD_LIMIT" }, { status: 413 });
     const reader = request.body?.getReader();

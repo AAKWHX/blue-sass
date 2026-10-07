@@ -2,6 +2,7 @@ import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import type { Locale } from "@/lib/i18n";
 import { platformCopy } from "@/lib/i18n/platform-tools";
 import { subscriptionToolLimits } from "@/lib/subscription-tools";
+import { subscriptionUnits } from "@/lib/i18n/subscription-units";
 
 export const subscriptionIds = ["launch", "growth", "scale"] as const;
 export type SubscriptionId = (typeof subscriptionIds)[number];
@@ -59,8 +60,8 @@ export function subscriptionPlans(locale: Locale) {
   const c = platformCopy(locale);
   return subscriptionIds.map((id, index) => {
     const limits = subscriptionToolLimits[id];
-    return { id, name: rows[locale][index].split("|")[0], description: c.siteLimit.replace("{count}", String(limits.sites)), price: limits.price, limits,
-      features: [...c.toolFeatures, c.reportLimit.replace("{count}", String(limits.reports)), c.siteLimit.replace("{count}", String(limits.sites)), ...(limits.compare ? [c.comparisonFeature] : []), ...(limits.jsonExport ? [c.jsonFeature] : [])],
+    return { id, name: ["Pro", "Business", "Agency"][index], description: c.siteLimit.replace("{count}", String(limits.sites)), price: limits.price, limits,
+      features: [...c.toolFeatures, `${limits.reports} ${subscriptionUnits(locale).units}`, c.siteLimit.replace("{count}", String(limits.sites)), ...(limits.compare ? [c.comparisonFeature] : []), ...(limits.jsonExport ? [c.jsonFeature] : [])],
     };
   });
 }

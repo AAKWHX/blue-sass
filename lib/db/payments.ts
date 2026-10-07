@@ -1,14 +1,13 @@
 import "server-only";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull, inArray } from "drizzle-orm";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { payments, projectMilestones, projectRequests, projects, projectAgreements, type Payment, type Project } from "@/lib/db/schema";
+import { payments, projectMilestones, projectRequests, projects, projectAgreements, marketplaceOrders, marketplaceListings, subscriptionOrders, type Payment, type Project } from "@/lib/db/schema";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
-import { reservationDeposit, type ProjectType } from "@/lib/pricing";
 import { getPayPalEnvironment } from "@/lib/paypal";
 import { billingState } from "@/lib/db/billing";
 import { lockProject } from "@/lib/db/project-lifecycle";
+import { commerceOrderPrice } from "@/lib/marketplace";
 
-const projectTypes = new Set<ProjectType>(["web", "mobile", "ai", "ecommerce", "erp", "brand"]);
 
 export class PaymentAccessError extends Error {
   constructor(message = "Payment is not available for this project.") {
@@ -28,17 +27,22 @@ export function projectPaymentAmount(project: Project) {
   if (project.currency.toUpperCase() !== "EUR") {
     throw new PaymentAccessError("This project does not have a supported payment currency.");
   }
-  if (project.industry === "subscription") {
+  if (project.industry === "subscription" || project.industry === "commerce") {
     if (project.budget <= 0) throw new PaymentAccessError();
     return { amountCents: project.budget * 100, currency: "EUR" };
   }
-  if (!projectTypes.has(project.industry as ProjectType)) {
-    throw new PaymentAccessError("A payment amount has not been approved for this project.");
-  }
-  return {
-    amountCents: reservationDeposit[project.industry as ProjectType] * 100,
-    currency: "EUR",
-  };
+  throw new PaymentAccessError("An approved installment plan is required before payment.");
+}
+export async function payableProjectAmount(project:Project,tx:Parameters<typeof lockProject>[0]|typeof db=db,lock=false){
+ if(project.currency.toUpperCase()!=="EUR")throw new PaymentAccessError();
+ if(project.industry==="commerce"){
+  const query=tx.select({snapshot:marketplaceOrders.snapshot,kind:marketplaceOrders.kind,status:marketplaceListings.status,listingKind:marketplaceListings.kind,platform:marketplaceListings.platformProduct,asset:marketplaceListings.assetName}).from(marketplaceOrders).innerJoin(marketplaceListings,eq(marketplaceListings.id,marketplaceOrders.listingId)).where(eq(marketplaceOrders.projectId,project.id));
+  const [order]=await (lock?query.for("update"):query).limit(1);
+  if(!order||order.status!=="approved"||order.kind!==order.listingKind||project.currency!=="EUR"||(order.kind==="product"&&(!order.platform||!order.asset)))throw new PaymentAccessError("The listing must be approved before payment.");
+  return {amountCents:commerceOrderPrice(order.kind,order.snapshot),currency:"EUR"};
+ }
+ if(project.industry==="subscription"){const [order]=await tx.select({snapshot:subscriptionOrders.snapshot}).from(subscriptionOrders).where(eq(subscriptionOrders.projectId,project.id));if(order){if(!Number.isInteger(order.snapshot.price)||order.snapshot.price<=0)throw new PaymentAccessError();return {amountCents:order.snapshot.price*100,currency:"EUR"};}}
+ return projectPaymentAmount(project);
 }
 
 export async function getProjectPayment(projectId: string, userId: string) {
@@ -82,7 +86,7 @@ export async function preparePayPalPayment(projectId: string, userId: string) {
     const [scope] = await tx.select().from(projectAgreements).where(eq(projectAgreements.projectId, projectId)).limit(1);
     if (scope && (!scope.agreement.acceptedAt || scope.agreement.acceptedBy !== userId || scope.agreement.priceCents !== billing?.plan.approvedTotalCents)) throw new PaymentAccessError("Project scope approval is required before payment.");
     if (billing && (!billing.plan.approvedTotalCents || !billing.next || !billing.ready)) throw new PaymentAccessError("The approved stage is not ready for payment.");
-    const amount = billing?.next ? { amountCents: billing.next.amountCents, currency: "EUR" } : projectPaymentAmount(project);
+    const amount = billing?.next ? { amountCents: billing.next.amountCents, currency: "EUR" } : await payableProjectAmount(project,tx,true);
     const billingStage = billing?.next?.stage ?? "legacy";
     const environment = getPayPalEnvironment();
     const [existing] = await tx
@@ -95,6 +99,7 @@ export async function preparePayPalPayment(projectId: string, userId: string) {
     if (existing?.status === "paid") {
       throw new PaymentConflictError("This project has already been paid.");
     }
+    if (existing?.captureStartedAt && existing.status !== "pending") throw new PaymentConflictError("A previous capture requires reconciliation.");
     if (existing?.status === "pending" && existing.providerOrderId) {
       return { payment: existing, needsProviderOrder: false };
     }
@@ -117,6 +122,7 @@ export async function preparePayPalPayment(projectId: string, userId: string) {
           currency: amount.currency,
           attempt: existing.attempt + 1,
           failureCode: null,
+          captureStartedAt: null,
           paidAt: null,
           updatedAt: new Date(),
         })
@@ -165,7 +171,7 @@ export async function markPaymentPaid(payment: Payment, captureId: string) {
     const now = new Date();
     const project = await lockProject(tx, payment.projectId);
     if (!project) throw new PaymentAccessError();
-    const [paid] = await tx.update(payments).set({ status: "paid", providerCaptureId: captureId, failureCode: null, paidAt: now, updatedAt: now }).where(and(eq(payments.id, payment.id), eq(payments.status, "pending"))).returning();
+    const [paid] = await tx.update(payments).set({ status: "paid", providerCaptureId: captureId, failureCode: null, paidAt: now, updatedAt: now }).where(and(eq(payments.id, payment.id), eq(payments.attempt, payment.attempt), eq(payments.providerOrderId, payment.providerOrderId!), inArray(payments.status, ["pending", "failed"]))).returning();
     if (!paid) return null;
     if ((await lifecycleState(project.id, tx)).cancelled) return paid;
     const [request] = await tx.select({ configuration: projectRequests.configuration }).from(projectRequests).where(eq(projectRequests.projectId, paid.projectId)).limit(1);
@@ -183,15 +189,15 @@ export async function markPaymentPaid(payment: Payment, captureId: string) {
   });
   if (updated) return updated;
   const [current] = await db.select().from(payments).where(eq(payments.id, payment.id)).limit(1);
-  if (current?.status === "paid") return current;
+  if (current?.status === "paid" && current.providerCaptureId === captureId && current.attempt === payment.attempt) return current;
   throw new PaymentConflictError("The payment state changed before it could be recorded.");
 }
 
-export async function markPaymentFailed(paymentId: string, code: string) {
+export async function markPaymentFailed(paymentId: string, code: string, attempt: number) {
   await db
     .update(payments)
     .set({ status: "failed", failureCode: code.slice(0, 120), updatedAt: new Date() })
-    .where(and(eq(payments.id, paymentId), eq(payments.status, "pending")));
+    .where(and(eq(payments.id, paymentId), eq(payments.attempt, attempt), eq(payments.status, "pending"), isNull(payments.captureStartedAt)));
 }
 
 export async function markPaymentPending(paymentId: string, code?: string) {
@@ -203,7 +209,27 @@ export async function markPaymentPending(paymentId: string, code?: string) {
 
 export async function cancelPayPalPayment(orderId: string, userId: string) {
   const { payment } = await getOwnedPayPalPayment(orderId, userId);
-  if (payment.status === "paid") throw new PaymentConflictError("A completed payment cannot be cancelled.");
-  await markPaymentFailed(payment.id, "BUYER_CANCELLED");
+  await db.transaction(async tx => {
+    await lockProject(tx, payment.projectId);
+    const [current] = await tx.select().from(payments).where(eq(payments.id, payment.id)).for("update");
+    if (!current || current.providerOrderId !== orderId || current.status === "paid" || current.captureStartedAt) throw new PaymentConflictError("Payment confirmation is in progress or completed.");
+    await tx.update(payments).set({ status: "failed", failureCode: "BUYER_CANCELLED", updatedAt: new Date() }).where(and(eq(payments.id, current.id), eq(payments.attempt, current.attempt)));
+  });
   return payment;
+}
+
+/** Claim before contacting PayPal; cancellation and a new attempt cannot pass this lock. */
+export async function beginPaymentCapture(payment: Payment) {
+  return db.transaction(async tx => {
+    const project = await lockProject(tx, payment.projectId);
+    const [current] = await tx.select().from(payments).where(eq(payments.id, payment.id)).for("update");
+    if (!project || !current || current.attempt !== payment.attempt || current.providerOrderId !== payment.providerOrderId || current.status !== "pending") throw new PaymentConflictError("Payment changed before confirmation.");
+    if ((await lifecycleState(project.id, tx)).cancelled) throw new PaymentAccessError();
+    if(["subscription","commerce"].includes(project.industry)){const expected=await payableProjectAmount(project,tx,true);if(expected.amountCents!==current.amountCents||expected.currency!==current.currency)throw new PaymentAccessError();}
+    const billing = await billingState(project, tx);
+    if (!["subscription", "commerce"].includes(project.industry) && (!billing?.ready || billing.next?.stage !== current.billingStage || billing.next.amountCents !== current.amountCents)) throw new PaymentAccessError();
+    if (current.captureStartedAt && Date.now() - current.captureStartedAt.getTime() < 90_000) throw new PaymentConflictError("Confirmation is already in progress.");
+    await tx.update(payments).set({ captureStartedAt: new Date(), updatedAt: new Date() }).where(eq(payments.id, current.id));
+    return current;
+  });
 }

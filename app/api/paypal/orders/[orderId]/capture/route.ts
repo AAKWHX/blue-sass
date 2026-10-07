@@ -4,7 +4,7 @@ import { assertSameOrigin } from "@/lib/api-security";
 import { assertCanWrite, AuthorisationError, requireViewer } from "@/lib/db/access";
 import {
   getOwnedPayPalPayment,
-  markPaymentFailed,
+  beginPaymentCapture,
   markPaymentPaid,
   markPaymentPending,
   PaymentAccessError,
@@ -19,6 +19,7 @@ import {
 import { purchaseConfirmationEmail } from "@/lib/email/templates";
 import { sendEmail } from "@/lib/email/resend";
 import { getSiteUrl } from "@/lib/site-url";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 const orderIdSchema = z.string().min(6).max(64).regex(/^[A-Za-z0-9_-]+$/);
 
@@ -28,6 +29,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
     assertSameOrigin(request, true);
     const viewer = await requireViewer();
     assertCanWrite(viewer);
+    if (!(await takeRateLimit(`paypal-capture:${viewer.id}`, 10, 60_000))) return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429 });
     const orderId = orderIdSchema.parse((await params).orderId);
     const { payment, project } = await getOwnedPayPalPayment(orderId, viewer.id);
     paymentId = payment.id;
@@ -39,6 +41,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
       return NextResponse.json({ error: "PAYMENT_FAILED" }, { status: 409 });
     }
 
+    await beginPaymentCapture(payment);
     const order = await capturePayPalOrder(orderId, payment.id, payment.attempt);
     const capture = verifiedCompletedCapture(order, {
       orderId,
@@ -63,7 +66,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
 
     const captures = order.purchase_units?.flatMap((unit) => unit.payments?.captures ?? []) ?? [];
     if (order.status === "COMPLETED" || captures.some((item) => item.status === "DECLINED" || item.status === "FAILED")) {
-      await markPaymentFailed(payment.id, order.status === "COMPLETED" ? "VERIFICATION_FAILED" : "PAYPAL_DECLINED");
+      await markPaymentPending(payment.id, order.status === "COMPLETED" ? "VERIFICATION_FAILED" : "PAYPAL_DECLINED");
       return NextResponse.json({ error: "PAYMENT_NOT_COMPLETED" }, { status: 422 });
     }
 
@@ -71,7 +74,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
     return NextResponse.json({ status: "pending" }, { status: 202 });
   } catch (error) {
     if (paymentId && error instanceof PayPalApiError && error.status >= 400 && error.status < 500) {
-      await markPaymentFailed(paymentId, error.issue ?? "PAYPAL_CAPTURE_REJECTED").catch(() => undefined);
+      await markPaymentPending(paymentId, error.issue ?? "PAYPAL_CAPTURE_REJECTED").catch(() => undefined);
     }
     if (error instanceof z.ZodError) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
     if (error instanceof AuthorisationError) return NextResponse.json({ error: "AUTH_REQUIRED" }, { status: 401 });

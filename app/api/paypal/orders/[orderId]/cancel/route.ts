@@ -3,6 +3,7 @@ import { z } from "zod";
 import { assertSameOrigin } from "@/lib/api-security";
 import { assertCanWrite, AuthorisationError, requireViewer } from "@/lib/db/access";
 import { cancelPayPalPayment, PaymentAccessError, PaymentConflictError } from "@/lib/db/payments";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 const orderIdSchema = z.string().min(6).max(64).regex(/^[A-Za-z0-9_-]+$/);
 
@@ -11,6 +12,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
     assertSameOrigin(request, true);
     const viewer = await requireViewer();
     assertCanWrite(viewer);
+    if (!(await takeRateLimit(`paypal-cancel:${viewer.id}`, 10, 60_000))) return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429 });
     const orderId = orderIdSchema.parse((await params).orderId);
     await cancelPayPalPayment(orderId, viewer.id);
     return NextResponse.json({ status: "failed", reason: "cancelled" });

@@ -15,6 +15,7 @@ async function vercelFetch(path: string, init: RequestInit) {
     ...init,
     headers: { Authorization: `Bearer ${token}`, ...(init.headers || {}) },
     cache: "no-store",
+    signal: AbortSignal.timeout(20_000),
   });
   if (!response.ok) {
     const payload = await response.json().catch(() => ({})) as { error?: { message?: string } };

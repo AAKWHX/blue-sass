@@ -30,5 +30,15 @@ export async function analyzeWebsite(input: string): Promise<AuditReport> {
   }
   checks.push({ code: "sample_links", category: "links", status: unavailable ? "warning" : tested ? "pass" : "not_tested", count: unavailable });
   checks.push({ code: "full_crawl", category: "links", status: "not_tested" }, { code: "runtime_database", category: "security", status: "not_tested" });
-  return { version: 1, source: "url", target: page.url.origin, pageUrl: page.url.href, pages, checks: checks as AuditCheck[], scannedFiles: 0, skippedFiles: 0, bytes: page.bytes, fetchedPages: 1, generatedAt: new Date().toISOString(), pageKey: createHash("sha256").update(page.url.pathname).digest("hex") };
+  const scripts=page.html.match(/<script\b[^>]*src\s*=\s*["'][^"']+["'][^>]*>/gi)??[];
+  const observations={
+    analyticsScripts:scripts.filter(tag=>/google-analytics|googletagmanager|plausible|matomo|clarity\.ms/i.test(tag)).length,
+    marketingScripts:scripts.filter(tag=>/googlesyndication|doubleclick|connect\.facebook|tiktok|hotjar/i.test(tag)).length,
+    consentMarkup:/__tcfapi|cookiebot|onetrust|consent-manager|cookie-consent|cookieconsent/i.test(page.html),
+    responseCookies:Number(page.headers["response-cookie-count"]??0),
+    robots:/<meta\b[^>]*name\s*=\s*["']robots["']/i.test(page.html),
+    openGraph:/<meta\b[^>]*property\s*=\s*["']og:/i.test(page.html),
+    structuredData:/<script\b[^>]*type\s*=\s*["']application\/ld\+json["']/i.test(page.html),
+  };
+  return { version: 1, source: "url", target: page.url.origin, pageUrl: page.url.href, pages, observations, checks: checks as AuditCheck[], scannedFiles: 0, skippedFiles: 0, bytes: page.bytes, fetchedPages: 1, generatedAt: new Date().toISOString(), pageKey: createHash("sha256").update(page.url.pathname).digest("hex") };
 }

@@ -4,7 +4,7 @@
  * Supports email/password and Google OAuth. Existing accounts are not linked
  * automatically by matching email addresses; Auth.js requires authentication.
  */
-import NextAuth, { type DefaultSession } from "next-auth";
+import NextAuth, { CredentialsSignin, type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
@@ -16,7 +16,8 @@ import { accounts, sessions, users, verificationTokens } from "@/lib/db/schema";
 import type { AppRole } from "@/lib/db/schema";
 import { requireEmailVerification } from "@/lib/auth/policy";
 import { createHash } from "node:crypto";
-import { takeRateLimit } from "@/lib/rate-limit";
+import { takeRateLimit, requestIdentity } from "@/lib/rate-limit";
+import { validPasswordLength } from "@/lib/auth/password-policy";
 import { isLocale } from "@/lib/i18n/config";
 import { credentialRevision } from "@/lib/auth/credential-revision";
 import { compactSessionToken } from "@/lib/auth/compact-token";
@@ -42,8 +43,10 @@ declare module "next-auth" {
 
 const credentialsSchema = z.object({
   email: z.string().trim().email().max(254),
-  password: z.string().min(8).max(128),
+  password: z.string().refine(value => validPasswordLength(value, true)),
 });
+
+class UnverifiedCredentials extends CredentialsSignin { code = "email_unverified"; }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: isDatabaseConfigured
@@ -69,12 +72,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(raw) {
+      async authorize(raw, request) {
         if (!isDatabaseConfigured) return null;
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
+        if (!(await takeRateLimit(`login-ip:${requestIdentity(request.headers)}`, 30, 15 * 60_000))) return null;
         const loginKey = createHash("sha256").update(parsed.data.email.toLowerCase()).digest("hex");
-        if (!takeRateLimit(`credentials:${loginKey}`, 10, 15 * 60_000)) return null;
+        if (!(await takeRateLimit(`credentials:${loginKey}`, 10, 15 * 60_000))) return null;
 
         const [record] = await db
           .select()
@@ -85,10 +89,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!record?.passwordHash || record.disabledAt) return null;
         const ok = await bcrypt.compare(parsed.data.password, record.passwordHash);
         if (!ok) return null;
-        // Second gate: `loginAction` already reports this with a resend button,
-        // but the provider must refuse on its own so no other entry point can
-        // mint a session for an unconfirmed address.
-        if (requireEmailVerification && !record.emailVerified) return null;
+        // The provider gates every credential entry point and returns a code
+        // that loginAction can display with the resend-verification option.
+        if (requireEmailVerification && !record.emailVerified) throw new UnverifiedCredentials();
 
         return {
           id: record.id,

@@ -4,6 +4,8 @@ import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { platformCopy } from "@/lib/i18n/platform-tools";
+import { businessUi } from "@/lib/i18n/business-ui";
+import { messageToolCopy } from "@/lib/i18n/message-tool";
 import { useState, useSyncExternalStore } from "react";
 import { ArrowUpLeft, ChevronDown, FolderKanban, LogIn, LogOut, Menu, Settings, UserRound } from "lucide-react";
 import { signOutAction } from "@/app/actions/auth";
@@ -50,38 +52,39 @@ export function SiteHeader({ signedIn = false, userName, userImage, canAdmin = f
     { href: `${base}/about`, label: c.about },
     { href: `${base}/services`, label: c.services },
     { href: `${base}/subscriptions`, label: c.subscriptions },
+    { href: `${base}/tools`, label: messageToolCopy(locale).tools },
     { href: `${base}/hosting`, label: c.hosting },
     { href: `${base}/projects`, label: c.projects },
     { href: `${base}/reviews`, label: c.reviews },
+    { href: `${base}/jobs`, label: businessUi(locale).jobs },
+    { href: `${base}/marketplace`, label: businessUi(locale).freelance },
+    { href: `${base}/products`, label: businessUi(locale).products },
     { href: `${base}/contact`, label: c.contact },
   ];
-  const heroLinks = [
-    { href: `${base}#services`, label: c.services },
-    { href: `${base}#about`, label: c.about },
-    { href: `${base}/projects`, label: c.projects },
-    { href: `${base}/contact#team`, label: c.team },
-    { href: `${base}/contact#contact`, label: c.contact },
-  ];
+  const primaryPaths = ["/services", "/tools", "/subscriptions", "/jobs", "/products"];
+  const primaryLinks = links.filter(link=>primaryPaths.some(path=>link.href===`${base}${path}`));
+  const moreLinks = links.filter(link=>!primaryLinks.includes(link));
 
   return (
-    <header className={isHome ? `home-floating-nav text-white ${scrolled ? "home-floating-nav-scrolled" : ""}` : "sticky top-0 z-50 border-b border-black/10 bg-black text-white"}>
-      <div className={`container-x flex min-h-[82px] items-center gap-4 py-2 ${isHome ? "home-floating-nav-inner" : ""}`}>
+    <header className={`home-floating-nav text-white ${scrolled ? "home-floating-nav-scrolled" : ""} ${isHome ? "" : "home-floating-nav-page"}`}>
+      <div className="container-x home-floating-nav-inner flex items-center gap-4 py-2">
         <Link href={base} className="shrink-0 [&_svg]:h-12 [&_svg]:w-12 [&>span>span]:!text-white"><BrandLogo /></Link>
-        <nav className={`mx-auto hidden items-center gap-8 ${isHome ? "home-floating-nav-links xl:flex" : "2xl:flex"}`}>
-          {(isHome ? heroLinks : links).map((link) => { const active = link.href === base ? pathname === base : pathname.startsWith(link.href); return <Link key={link.href} href={link.href} className={`${isHome ? "home-floating-nav-link" : `rounded-xl px-3 py-2.5 text-sm font-semibold transition ${active ? "bg-white/10 text-neon-cyan" : "text-white/80 hover:bg-white/10 hover:text-white"}`}`}>{link.label}</Link>; })}
+        <nav className="mx-auto hidden items-center home-floating-nav-links xl:flex">
+          {primaryLinks.map(link=><Link key={link.href} href={link.href} className="home-floating-nav-link" aria-current={pathname.startsWith(link.href)?"page":undefined}>{link.label}</Link>)}
+          <DropdownMenu modal={false}><DropdownMenuTrigger asChild><Button variant="unstyled" size="auto" className="home-floating-nav-link">{t.nav.menu}<ChevronDown className="size-3"/></Button></DropdownMenuTrigger><DropdownMenuContent className="border-white/20 bg-[#101216] text-white">{moreLinks.map(link=><DropdownMenuItem key={link.href} asChild><Link href={link.href}>{link.label}</Link></DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
         </nav>
         <div className="ms-auto flex items-center gap-2 2xl:ms-0">
           <LanguageSwitcher />
           {signedIn ? (
             <DropdownMenu modal={false} dir={locale === "ar" ? "rtl" : "ltr"}>
               <DropdownMenuTrigger asChild><Button variant="unstyled" size="auto" aria-label={c.account} className="rounded-full border border-white/20 p-1 text-white"><Avatar className="size-9 border border-white/15"><AvatarImage src={userImage} alt={userName || c.account}/><AvatarFallback className="bg-white text-black">{userName?.trim().charAt(0).toUpperCase() || <UserRound className="size-4"/>}</AvatarFallback></Avatar><ChevronDown className="me-1 size-3"/></Button></DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-56 border-white/20 bg-[#101216] text-white"><div className="px-3 py-2"><p className="font-bold text-white">{userName || c.account}</p><p className="text-xs text-white/55">{c.account}</p></div><DropdownMenuItem asChild><Link href={`${base}/portal/profile`}><UserRound className="size-4"/>{c.account}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal`}><FolderKanban className="size-4"/>{c.allProjects}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/audit`}><FolderKanban className="size-4"/>{tools.history}</Link></DropdownMenuItem>{canAdmin && <DropdownMenuItem asChild><Link href={`${base}/admin`}><Settings className="size-4"/>{tools.admin}</Link></DropdownMenuItem>}<DropdownMenuItem asChild><Link href={`${base}/portal/profile#settings`}><Settings className="size-4"/>{c.settings}</Link></DropdownMenuItem><form action={signOutAction}><Input type="hidden" name="locale" value={locale}/><Button type="submit" variant="ghost" className="w-full justify-start text-white hover:bg-white/10 hover:text-white"><LogOut className="size-4"/>{t.auth.signOut}</Button></form></DropdownMenuContent>
+              <DropdownMenuContent align="end" className="min-w-56 border-white/20 bg-[#101216] text-white"><div className="px-3 py-2"><p className="font-bold text-white">{userName || c.account}</p><p className="text-xs text-white/55">{c.account}</p></div><DropdownMenuItem asChild><Link href={`${base}/portal/profile`}><UserRound className="size-4"/>{c.account}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal`}><FolderKanban className="size-4"/>{c.allProjects}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal/tools`}><FolderKanban className="size-4"/>{tools.history}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal/listings`}>{businessUi(locale).myListings}</Link></DropdownMenuItem><DropdownMenuItem asChild><Link href={`${base}/portal/purchases`}>{businessUi(locale).myFiles}</Link></DropdownMenuItem>{canAdmin && <DropdownMenuItem asChild><Link href={`${base}/admin`}><Settings className="size-4"/>{tools.admin}</Link></DropdownMenuItem>}<DropdownMenuItem asChild><Link href={`${base}/portal/profile#settings`}><Settings className="size-4"/>{c.settings}</Link></DropdownMenuItem><form action={signOutAction}><Input type="hidden" name="locale" value={locale}/><Button type="submit" variant="ghost" className="w-full justify-start text-white hover:bg-white/10 hover:text-white"><LogOut className="size-4"/>{t.auth.signOut}</Button></form></DropdownMenuContent>
             </DropdownMenu>
-          ) : <><Button asChild variant="unstyled" size="auto" className={`hidden rounded-xl border border-white/20 px-3 py-2.5 font-semibold text-white transition hover:bg-white/10 ${isHome ? "xl:inline-flex" : "2xl:inline-flex"}`}><Link href={`${base}/login`}><LogIn className="size-4"/>{t.auth.signIn}</Link></Button>{!isHome && <Button asChild variant="unstyled" size="auto" className="hidden rounded-xl bg-neon-cyan px-5 py-3 font-bold text-black transition hover:bg-white sm:inline-flex"><Link href={`${base}/create-project`}>{c.start}<ArrowUpLeft className="size-4 flip-x"/></Link></Button>}</>}
+          ) : <><Button asChild variant="unstyled" size="auto" className={`hidden rounded-xl border border-white/20 px-3 py-2.5 font-semibold text-white transition hover:bg-white/10 xl:inline-flex`}><Link href={`${base}/login`}><LogIn className="size-4"/>{t.auth.signIn}</Link></Button>{!isHome && <Button asChild variant="unstyled" size="auto" className="hidden rounded-xl bg-neon-cyan px-5 py-3 font-bold text-black transition hover:bg-white sm:inline-flex"><Link href={`${base}/create-project`}>{c.start}<ArrowUpLeft className="size-4 flip-x"/></Link></Button>}</>}
           {isHome && <Button asChild variant="neon" size="sm" className="hidden md:inline-flex"><Link href={`${base}/create-project`}>{c.start}<ArrowUpLeft className="size-4 flip-x"/></Link></Button>}
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild><Button variant="unstyled" size="auto" aria-label={t.nav.menu} className={`rounded-xl border border-white/20 p-2.5 text-white ${isHome ? "xl:hidden" : "2xl:hidden"}`}><Menu className="size-5"/></Button></SheetTrigger>
-            <SheetContent side="end" className="bg-[#f7f3ee] text-black 2xl:hidden"><SheetHeader><SheetTitle><BrandLogo /></SheetTitle></SheetHeader><nav className="mt-8 flex flex-col gap-2">{links.map((link) => <SheetClose asChild key={link.href}><Link href={link.href} className="rounded-xl border border-black/10 bg-white px-4 py-3 font-semibold">{link.label}</Link></SheetClose>)}</nav><Button asChild variant="neon" className="mt-6 w-full"><Link href={`${base}/create-project`}>{c.start}</Link></Button>{!signedIn && <Button asChild variant="ghostNeon" className="mt-2 w-full"><Link href={`${base}/login`}><LogIn className="size-4"/>{t.auth.signIn}</Link></Button>}</SheetContent>
+            <SheetTrigger asChild><Button variant="unstyled" size="auto" aria-label={t.nav.menu} className={`rounded-xl border border-white/20 p-2.5 text-white xl:hidden`}><Menu className="size-5"/></Button></SheetTrigger>
+            <SheetContent side="end" className="bg-[#101216] text-white xl:hidden"><SheetHeader><SheetTitle className="text-white"><BrandLogo className="[&>span]:!text-white"/></SheetTitle></SheetHeader><nav className="mt-8 flex flex-col gap-2">{links.map((link) => <SheetClose asChild key={link.href}><Link href={link.href} className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 font-semibold">{link.label}</Link></SheetClose>)}</nav><Button asChild variant="neon" className="mt-6 w-full"><Link href={`${base}/create-project`}>{c.start}</Link></Button>{!signedIn && <Button asChild variant="ghostNeon" className="mt-2 w-full"><Link href={`${base}/login`}><LogIn className="size-4"/>{t.auth.signIn}</Link></Button>}</SheetContent>
           </Sheet>
         </div>
       </div>

@@ -1,7 +1,7 @@
 export const capabilityKeys = [
   "leads.read", "leads.manage", "projects.read_assigned", "projects.read_all", "projects.edit_all", "projects.edit_assigned",
   "projects.assign", "projects.stage", "billing.approve", "portfolio.manage", "reviews.manage",
-  "announcements.send", "cms.manage",
+  "announcements.send", "cms.manage", "marketplace.manage",
 ] as const;
 export type Capability = typeof capabilityKeys[number];
 export type PermissionSubject = { isOwner: boolean; permissions: readonly string[] };

@@ -5,11 +5,13 @@ import { hostedSites } from "@/lib/db/schema";
 import { AuthorisationError, requireViewer } from "@/lib/db/access";
 import { getVercelDeployment } from "@/lib/hosting/vercel";
 import { assertSameOrigin } from "@/lib/api-security";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     assertSameOrigin(request, true);
     const viewer = await requireViewer();
+    if (!(await takeRateLimit(`hosting-refresh:${viewer.id}`, 20, 60_000))) return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429 });
     const { id } = await params;
     const [site] = await db.select().from(hostedSites).where(and(eq(hostedSites.id, id), eq(hostedSites.userId, viewer.id))).limit(1);
     if (!site?.deploymentId) return NextResponse.json({ error: "Deployment not found." }, { status: 404 });

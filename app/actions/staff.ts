@@ -44,7 +44,7 @@ export async function setStaffEnabled(_previous: StaffState, form: FormData): Pr
 }
 export async function inviteStaff(_previous: StaffState, form: FormData): Promise<StaffState> {
   const actor = await requireOwner();
-  if (!isEmailConfigured || !takeRateLimit(`staff-invite:${actor.id}`, 5, 600_000)) return { ok: false, code: "DELIVERY_UNAVAILABLE" };
+  if (!isEmailConfigured || !(await takeRateLimit(`staff-invite:${actor.id}`, 5, 600_000))) return { ok: false, code: "DELIVERY_UNAVAILABLE" };
   const email = z.string().trim().email().max(254).parse(form.get("email")).toLowerCase();
   const permissions = permissionsFrom(form);
   if (email === actor.email.toLowerCase()) return { ok: false, code: "OWNER_PROTECTED" };
@@ -75,7 +75,7 @@ export async function revokeInvitation(_previous: StaffState, form: FormData): P
 export async function acceptStaffInvitation(_previous: StaffState, form: FormData): Promise<StaffState> {
   const viewer = await requireViewer();
   const token = z.string().regex(/^[a-f0-9]{64}$/).safeParse(form.get("token"));
-  if (!token.success || !takeRateLimit(`staff-accept:${viewer.id}`, 6, 60_000)) return { ok: false, code: "INVITATION_INVALID" };
+  if (!token.success || !(await takeRateLimit(`staff-accept:${viewer.id}`, 6, 60_000))) return { ok: false, code: "INVITATION_INVALID" };
   const ok = await db.transaction(async tx => {
     const hash = createHash("sha256").update(token.data).digest("hex");
     await tx.execute(sql`select id from ${staffInvitations} where token_hash = ${hash} for update`);

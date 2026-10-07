@@ -51,7 +51,7 @@ export async function requestProjectDecision(_state: WorkspaceState, form: FormD
   const price = input.data.price?.trim() || ""; const days = input.data.extraDays?.trim() || "";
   if ((price || days) && !hasCapability(viewer, "billing.approve")) return { ok: false, code: "INVALID_INPUT" };
   if ((price && !/^\d{1,6}(\.\d{1,2})?$/.test(price)) || (days && !/^\d{1,3}$/.test(days))) return { ok: false, code: "INVALID_INPUT" };
-  if (!takeRateLimit(`decision:${viewer.id}`, 10, 60_000)) return { ok: false, code: "AUDIT_BUSY" };
+  if (!(await takeRateLimit(`decision:${viewer.id}`, 10, 60_000))) return { ok: false, code: "AUDIT_BUSY" };
   const ok = await db.transaction(async tx => {
     const project = await lockProject(tx, input.data.projectId);
     if (!project || (await lifecycleState(project.id, tx)).cancelled || project.industry === "subscription") return false;

@@ -18,7 +18,7 @@ export async function requestSubscription(_prev: SubscriptionState, form: FormDa
  const viewer = await requireViewer(); assertCanWrite(viewer);
  const parsed = schema.safeParse(Object.fromEntries(form));
  const rawLocale = String(form.get("locale")); const locale = isLocale(rawLocale) ? rawLocale : "en"; const c = experience(locale);
- if (!parsed.success || !isDatabaseConfigured || !takeRateLimit(`subscription:${viewer.id}`, 3, 600000)) return { ok: false, message: c.error };
+ if (!parsed.success || !isDatabaseConfigured || !(await takeRateLimit(`subscription:${viewer.id}`, 3, 600000))) return { ok: false, message: c.error };
  const plan = subscriptionPlans(locale).find(plan => plan.id === parsed.data.plan)!;
  const summary = `${plan.name} · €${plan.price}/30 days\n${plan.features.join("\n")}\n${platformCopy(locale).planNote}\n${subscriptionPurchaseNote[locale]}\n${parsed.data.message}`;
  const projectId = await db.transaction(async tx => {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useI18n } from "@/components/providers";
 import { platformCopy } from "@/lib/i18n/platform-tools";
 import { capabilityKeys } from "@/lib/capabilities";
+import { businessUi } from "@/lib/i18n/business-ui";
 import { inviteStaff, updateStaffAccess, setStaffEnabled, revokeInvitation, acceptStaffInvitation, assignStaffProject } from "@/app/actions/staff";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,7 @@ function Status({ code }: { code: string }) {
 }
 function PermissionList({ prefix, selected = [], readOnly = false }: { prefix: string; selected?: string[]; readOnly?: boolean }) {
   const { locale } = useI18n(); const c = platformCopy(locale);
-  return <fieldset className="mt-5"><legend className="text-sm font-semibold">{c.permissions}</legend><div className="mt-3 grid gap-2 sm:grid-cols-2">{capabilityKeys.map(key => <Label key={key} htmlFor={`${prefix}-${key}`} className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl border border-white/15 p-3 text-sm font-normal leading-6"><Checkbox id={`${prefix}-${key}`} name="permission" value={key} defaultChecked={selected.includes(key)} disabled={readOnly && !["leads.read", "projects.read_all", "projects.read_assigned"].includes(key)} className="mt-1 border-white/35 data-[state=checked]:bg-white data-[state=checked]:text-black"/>{c.capabilities[key]}</Label>)}</div></fieldset>;
+  return <fieldset className="mt-5"><legend className="text-sm font-semibold">{c.permissions}</legend><div className="mt-3 grid gap-2 sm:grid-cols-2">{capabilityKeys.map(key => <Label key={key} htmlFor={`${prefix}-${key}`} className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl border border-white/15 p-3 text-sm font-normal leading-6"><Checkbox id={`${prefix}-${key}`} name="permission" value={key} defaultChecked={selected.includes(key)} disabled={readOnly && !["leads.read", "projects.read_all", "projects.read_assigned"].includes(key)} className="mt-1 border-white/35 data-[state=checked]:bg-white data-[state=checked]:text-black"/>{key==='marketplace.manage'?businessUi(locale).moderate:c.capabilities[key]}</Label>)}</div></fieldset>;
 }
 export function StaffInvitationForm() {
   const { locale } = useI18n(); const c = platformCopy(locale);

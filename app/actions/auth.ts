@@ -5,7 +5,11 @@ import { quoteReturnPath } from "@/lib/auth/return-path";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { AuthError } from "next-auth";
+import { AuthError, CredentialsSignin } from "next-auth";
+import { headers } from "next/headers";
+import { takeRateLimit, requestIdentity } from "@/lib/rate-limit";
+import { checkNewPassword, validPasswordLength } from "@/lib/auth/password-policy";
+import { securityCopy } from "@/lib/i18n/security-copy";
 import { redirect } from "next/navigation";
 import { signIn, signOut } from "@/lib/auth";
 import { db, isDatabaseConfigured } from "@/lib/db";
@@ -75,9 +79,9 @@ function phoneError(locale: string, code: string | undefined, min: number, max: 
 }
 
 const baseRegisterSchema = z.object({
-  name: z.string().trim().min(2, "Please enter your full name."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
-  company: z.string().trim().optional(),
+  name: z.string().trim().min(2, "Please enter your full name.").max(80),
+  password: z.string().min(1).max(128),
+  company: z.string().trim().max(120).optional(),
   phone: z.string().trim().optional(),
   phoneCountry: z.string().trim().optional(),
   locale: z.string().default("ar"),
@@ -112,8 +116,13 @@ export async function registerAction(
     return { ok: false, message: "Please correct the highlighted fields.", fieldErrors };
   }
 
-  const { name, password, company, locale: loc } = parsed.data;
+  const { name, password, company } = parsed.data;
+  const loc = isLocale(parsed.data.locale) ? parsed.data.locale : "en";
   const email = normaliseEmail(parsed.data.email);
+  const security = securityCopy(loc);
+  if (!(await takeRateLimit(`signup-ip:${requestIdentity(await headers())}`, 5, 3600_000)) || !(await takeRateLimit("signup-global", 200, 3600_000))) return { ok: false, message: security.retry };
+  const passwordCheck = await checkNewPassword(password);
+  if (passwordCheck !== "ok") return { ok: false, message: security[passwordCheck], fieldErrors: { password: security[passwordCheck] } };
 
   // Phone: optional, but when present it must pass the same per-country check
   // the widget applies — the client only ever submits an E.164 string.
@@ -156,11 +165,7 @@ export async function registerAction(
       const sent = await dispatchVerification(email, loc);
       return { ok: true, message: sent ? "" : t.emailNotSent, pendingEmail: email };
     }
-    return {
-      ok: false,
-      message: "An account with this email already exists. Try signing in.",
-      fieldErrors: { email: "Already registered." },
-    };
+    return { ok: true, message: t.resendDone, pendingEmail: email };
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
@@ -203,6 +208,7 @@ export async function registerAction(
 
 /** Issues a token and mails the link. Returns false when the provider errored. */
 async function dispatchVerification(email: string, locale: string): Promise<boolean> {
+  if (!(await takeRateLimit(`verify-email:${email}`, 1, 60_000))) return true;
   const token = await issueVerificationToken(email);
   const origin = await getSiteUrl();
   const link = `${origin}/${locale}/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
@@ -245,34 +251,15 @@ export async function loginAction(
     return { ok: false, message: parsed.error.issues[0].message };
   }
 
-  const { password, locale: loc } = parsed.data;
+  const { password } = parsed.data;
+  const loc = isLocale(parsed.data.locale) ? parsed.data.locale : "en";
   const email = normaliseEmail(parsed.data.email);
-
-  // Check the confirmation state before signing in, so an unverified account
-  // never receives a session cookie.
-  const [record] = await db
-    .select({ passwordHash: users.passwordHash, emailVerified: users.emailVerified })
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
-
-  if (record?.passwordHash) {
-    const correct = await bcrypt.compare(password, record.passwordHash);
-    if (correct && !record.emailVerified) {
-      if (requireEmailVerification) {
-        return { ok: false, message: t.verifyPending, unverifiedEmail: email };
-      }
-      // Confirmation is off: adopt the legacy account instead of locking it out.
-      await db
-        .update(users)
-        .set({ emailVerified: new Date() })
-        .where(eq(users.email, email));
-    }
-  }
+  if (!validPasswordLength(password, true)) return { ok: false, message: "Incorrect email or password." };
 
   try {
     await signIn("credentials", { email, password, redirect: false });
   } catch (error) {
+    if (error instanceof CredentialsSignin && error.code === "email_unverified") return { ok: false, message: t.verifyPending, unverifiedEmail: email };
     if (error instanceof AuthError) {
       return { ok: false, message: "Incorrect email or password." };
     }
@@ -285,10 +272,6 @@ export async function loginAction(
 /* ------------------------------------------------------------------ *
  * Resend
  * ------------------------------------------------------------------ */
-
-/** Per-address cooldown, so the button cannot be used to spam an inbox. */
-const RESEND_COOLDOWN_MS = 60_000;
-const lastSentAt = new Map<string, number>();
 
 export async function resendVerificationAction(
   _prev: ActionState,
@@ -304,8 +287,7 @@ export async function resendVerificationAction(
   const email = normaliseEmail(String(formData.get("email") ?? ""));
   if (!validateEmail(email).ok) return { ok: false, message: t.errEmailFormat };
 
-  const previous = lastSentAt.get(email);
-  if (previous && Date.now() - previous < RESEND_COOLDOWN_MS) {
+  if (!(await takeRateLimit(`verify-ip:${requestIdentity(await headers())}`, 10, 3600_000))) {
     return { ok: false, message: t.resendThrottled };
   }
 
@@ -317,7 +299,6 @@ export async function resendVerificationAction(
 
   // Always answer the same way: whether the address exists must not leak.
   if (record && !record.emailVerified) {
-    lastSentAt.set(email, Date.now());
       const sent = await dispatchVerification(email, record.locale || locale);
       if (!sent) return { ok: false, message: t.emailNotSent };
   }
@@ -325,6 +306,7 @@ export async function resendVerificationAction(
 }
 
 export async function signOutAction(formData: FormData) {
-  const locale = String(formData.get("locale") ?? "ar");
+  const raw = String(formData.get("locale") ?? "ar");
+  const locale = isLocale(raw) ? raw : "ar";
   await signOut({ redirectTo: `/${locale}` });
 }

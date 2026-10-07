@@ -7,4 +7,5 @@ export type AuditReport = {
   pageKey?: string;
   pageUrl?: string;
   pages?: { url: string; method: "GET" | "HEAD"; status: number | null }[];
+  observations?: { analyticsScripts:number; marketingScripts:number; consentMarkup:boolean; responseCookies:number; robots:boolean; openGraph:boolean; structuredData:boolean };
 };

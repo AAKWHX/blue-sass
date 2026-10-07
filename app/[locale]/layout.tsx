@@ -9,6 +9,8 @@ import { ScrollProgress } from "@/components/ui/chrome";
 import { getDir, isLocale, locales } from "@/lib/i18n";
 import { getViewer } from "@/lib/db/access";
 import { isDatabaseConfigured } from "@/lib/db";
+import { AdSense } from "@/components/adsense";
+import { adsensePublisher } from "@/lib/advertising";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -134,7 +136,9 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={getDir(locale)} className={fontVariables} suppressHydrationWarning>
+      <head><meta name="google-adsense-account" content={adsensePublisher}/></head>
       <body className="bg-base text-ink-mid">
+        <AdSense signedIn={Boolean(viewer)} publisher={adsensePublisher} enabled={process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ADSENSE_ENABLED !== "false"}/>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}

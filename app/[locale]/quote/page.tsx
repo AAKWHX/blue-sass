@@ -8,17 +8,18 @@ export const metadata = { title: "Project details | Blue Sass" };
 
 export default async function QuotePage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ type?: string; service?: string; template?: string; kind?: string }> }) {
   const { locale } = await params;
-  const { type, service, template, kind } = await searchParams;
+  const { type, service, template, kind, features, modules, languages } = await searchParams as {type?:string;service?:string;template?:string;kind?:string;features?:string;modules?:string;languages?:string};
   const viewer = await getViewer();
   const query = new URLSearchParams();
   if (type) query.set("type", type);
   if (service) query.set("service", service);
   if (template) query.set("template", template);
   if (kind) query.set("kind", kind);
+  if(features&&features.length<=300)query.set("features",features);if(modules&&modules.length<=300)query.set("modules",modules);if(languages)query.set("languages",languages);
   if (!viewer) redirect(`/${locale}/login?next=${encodeURIComponent(`/${locale}/quote?${query}`)}`);
   const plan = service?.replace(/^subscription-/, "") as SubscriptionId;
   if (service?.startsWith("subscription-") && subscriptionIds.includes(plan)) return <SubscriptionRequest id={plan}/>;
-  return <QuoteWizard initialType={type} initialService={service} initialTemplate={template} initialKind={kind} initialEmail={viewer.email} payments={{
+  return <QuoteWizard initialType={type} initialService={service} initialTemplate={template} initialKind={kind} initialFeatures={features} initialModules={modules} initialLanguageCount={languages} initialEmail={viewer.email} payments={{
     paypal: Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
   }} />;
 }

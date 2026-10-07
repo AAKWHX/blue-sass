@@ -13,9 +13,7 @@ test("payment requests reject missing, foreign and cross-site origins", () => {
   }
 });
 
-test("attempt limiter blocks excess attempts independently for each identity", () => {
-  assert.equal(takeRateLimit("security-test:first", 2, 60_000), true);
-  assert.equal(takeRateLimit("security-test:first", 2, 60_000), true);
-  assert.equal(takeRateLimit("security-test:first", 2, 60_000), false);
-  assert.equal(takeRateLimit("security-test:second", 2, 60_000), true);
+test("shared limiter fails closed when its store or signing secret is not configured", async () => {
+  assert.equal(await takeRateLimit("security-test:first", 2, 60_000), false);
+  assert.equal(await takeRateLimit("security-test:invalid", 0, 60_000), false);
 });

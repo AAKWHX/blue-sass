@@ -1,6 +1,6 @@
 import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import { translated } from "./i18n/project-builder";
-import { locales, type Locale } from "./i18n/config";
+import { locales, localeMeta, type Locale } from "./i18n/config";
 import { estimate, featureCost, implementationPrice, speedModifier, type FeatureKey, type ProjectType, type Speed } from "./pricing";
 import { websitePackages, websitePackage, websitePackageName } from "./website-packages";
 
@@ -53,6 +53,7 @@ export const providerOptions = [
   ...[["google", "Google", 25], ["apple", "Apple", 35], ["microsoft", "Microsoft", 25], ["github", "GitHub", 20], ["facebook", "Facebook", 30], ["linkedin", "LinkedIn", 30]].map(([id, name, price]) => priced(String(id), Number(price), "once", software, translated(String(name), String(name), String(name), String(name), String(name), String(name), String(name)))),
 ];
 export const moduleOptions = [
+  priced("whatsapp", 55, "once", software, translated("ربط التواصل عبر واتساب", "WhatsApp contact integration", "WhatsApp-contactkoppeling", "WhatsApp-Kontaktintegration", "WhatsApp iletişim bağlantısı", "Intégration de contact WhatsApp", "Integración de contacto WhatsApp")),
   priced("search", 75, "once", software, translated("بحث وتصفية المحتوى", "Search and content filters", "Zoeken en inhoudsfilters", "Suche und Inhaltsfilter", "Arama ve içerik filtreleri", "Recherche et filtres", "Búsqueda y filtros")),
   priced("notifications", 95, "once", software, translated("إشعارات البريد والتنبيهات", "Email notifications and alerts", "E-mailmeldingen en waarschuwingen", "E-Mail-Benachrichtigungen", "E-posta bildirimleri", "Notifications e-mail et alertes", "Notificaciones por correo y alertas")),
   priced("booking", 150, "once", ["web", "mobile", "erp"], translated("مواعيد وتقويم للحجوزات", "Appointments and booking calendar", "Afspraken en boekingskalender", "Termine und Buchungskalender", "Randevu ve rezervasyon takvimi", "Rendez-vous et calendrier", "Citas y calendario de reservas")),
@@ -73,8 +74,8 @@ export const performanceOptions = [
   priced("cloud", 75, "once", software, translated("ربط التخزين السحابي للملفات", "Cloud file storage integration", "Koppeling met cloudopslag", "Cloud-Dateispeicher anbinden", "Bulut dosya depolama entegrasyonu", "Intégration du stockage cloud", "Integración de almacenamiento en nube")),
   priced("performance-audit", 125, "once", software, translated("تدقيق الأداء وتحسين مسار التحميل", "Performance audit and loading optimization", "Prestatie-audit en laadoptimalisatie", "Leistungsprüfung und Ladeoptimierung", "Performans denetimi ve yükleme iyileştirme", "Audit performance et optimisation", "Auditoría de rendimiento y optimización")),
 ];
-export const projectLanguages = ["ar", "en", "nl", "de", "tr", "fr", "es", "it", "pt", "zh", "ja", "ru"];
-export const languageNames: Record<string, string> = withExtraLocales({ ar: "العربية", en: "English", nl: "Nederlands", de: "Deutsch", tr: "Türkçe", fr: "Français", es: "Español", it: "Italiano", pt: "Português", zh: "中文", ja: "日本語", ru: "Русский" });
+export const projectLanguages = ["ar", "en", "nl", "de", "tr", "fr", "es", "it", "pt", "zh", "ja", "ru", "pl", "uk", "ko"];
+export const languageNames: Record<string, string> = Object.fromEntries(locales.map(locale=>[locale,localeMeta[locale].native]));
 export type ProjectConfiguration = {
   priceVersion?: 1 | 2;
   promotionPercent?: number;
