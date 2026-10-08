@@ -87,7 +87,7 @@ export function AdminView({ demoMode = true }: { demoMode?: boolean }) {
         </header>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[220px_1fr]">
-          <nav className="glass-card sticky top-20 h-fit p-3">
+          <nav className="admin-module-nav glass-card h-fit p-3">
             <ul className="space-y-1">
               {modules.filter(({ key }) => demoMode || key === "cmsStats").map(({ key, icon: Icon }) => {
                 const can = canAccess(role, key);

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Providers } from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { fontVariables } from "@/lib/fonts";
+import { arabicFont, fontVariables } from "@/lib/fonts";
 import { ScrollProgress } from "@/components/ui/chrome";
 import { getDir, isLocale, locales } from "@/lib/i18n";
 import { getViewer } from "@/lib/db/access";
@@ -135,7 +135,7 @@ export default async function LocaleLayout({
    const viewer = isDatabaseConfigured ? await getViewer() : null;
 
   return (
-    <html lang={locale} dir={getDir(locale)} className={fontVariables} suppressHydrationWarning>
+    <html lang={locale} dir={getDir(locale)} className={`${fontVariables}${locale === "ar" ? ` ${arabicFont.variable}` : ""}`} suppressHydrationWarning>
       <head><meta name="google-adsense-account" content={adsensePublisher}/></head>
       <body className="bg-base text-ink-mid">
         <AdSense signedIn={Boolean(viewer)} publisher={adsensePublisher} enabled={process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ADSENSE_ENABLED !== "false"}/>
