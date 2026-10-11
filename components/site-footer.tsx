@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowUpLeft, Mail, Phone } from "lucide-react";
 import { useI18n } from "@/components/providers";
 import { BrandLogo } from "@/components/brand-logo";
+import { StudioAtmosphere } from "@/components/ui/studio-atmosphere";
 
 const copy = withExtraLocales({
   ar: { pages: "صفحات الموقع", about: "من نحن", services: "الخدمات", subscriptions: "الاشتراكات", hosting: "استضافة المواقع", work: "أعمالنا", reviews: "آراء العملاء", contact: "اتصل بنا", start: "ابدأ مشروعك" },
@@ -21,7 +22,7 @@ export function SiteFooter() {
   const { locale, t } = useI18n();
   const c = copy[locale];
   const base = `/${locale}`;
-  return <footer className="border-t border-white/10 bg-black text-white"><div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.3fr_.7fr_.7fr] lg:py-20">
+  return <footer className="studio-footer border-t border-white/10 text-white"><StudioAtmosphere variant="footer"/><div className="container-x pt-14"><p className="studio-footer-title">{c.start}<span className="text-neon-cyan">.</span></p></div><div className="container-x grid gap-12 pb-16 md:grid-cols-2 lg:grid-cols-[1.3fr_.7fr_.7fr] lg:pb-20">
     <div><BrandLogo className="[&>span]:!text-white"/><p className="mt-5 max-w-md text-base leading-8 text-white/60">{t.hero.subtitle}</p><Link href={`${base}/create-project`} className="mt-7 inline-flex items-center gap-2 rounded-xl bg-neon-cyan px-5 py-3 font-bold text-black">{c.start}<ArrowUpLeft className="size-4 flip-x"/></Link></div>
     <div><h3 className="text-lg font-bold text-white">{c.pages}</h3><ul className="mt-5 space-y-3 text-sm text-white/60"><li><Link href={`${base}/about`} className="hover:text-neon-cyan">{c.about}</Link></li><li><Link href={`${base}/services`} className="hover:text-neon-cyan">{c.services}</Link></li><li><Link href={`${base}/services#pricing`} className="hover:text-neon-cyan">{t.pricing.nav}</Link></li><li><Link href={`${base}/services#templates`} className="hover:text-neon-cyan">{t.experience.templates}</Link></li><li><Link href={`${base}/subscriptions`} className="hover:text-neon-cyan">{c.subscriptions}</Link></li><li><Link href={`${base}/hosting`} className="hover:text-neon-cyan">{c.hosting}</Link></li><li><Link href={`${base}/projects`} className="hover:text-neon-cyan">{c.work}</Link></li><li><Link href={`${base}/reviews`} className="hover:text-neon-cyan">{c.reviews}</Link></li><li><Link href={`${base}/contact`} className="hover:text-neon-cyan">{c.contact}</Link></li></ul></div>
     <div><h3 className="text-lg font-bold text-white">{c.contact}</h3><ul className="mt-5 space-y-4 text-sm text-white/60"><li><a href="mailto:help@bluesass.nl" className="flex items-center gap-2 hover:text-neon-cyan"><Mail className="size-4"/>help@bluesass.nl</a></li><li><a href="tel:+31634543374" dir="ltr" className="flex items-center gap-2 hover:text-neon-cyan"><Phone className="size-4"/>+31 6 3454 3374</a></li></ul></div>

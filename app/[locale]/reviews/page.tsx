@@ -15,5 +15,5 @@ export default async function ReviewsPage({ params }: { params: Promise<{ locale
     isDatabaseConfigured ? getViewer() : null,
     isDatabaseConfigured ? db.select().from(reviews).where(eq(reviews.status, "approved")).orderBy(desc(reviews.createdAt)).limit(60).catch(() => []) : [],
   ]);
-  return <ReviewsBoard locale={locale} reviews={published} signedIn={Boolean(viewer)} />;
+  return <div className="studio-reviews"><ReviewsBoard locale={locale} reviews={published} signedIn={Boolean(viewer)} /></div>;
 }

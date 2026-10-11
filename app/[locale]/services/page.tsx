@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Services } from "@/components/public/service-cards";
+import { StudioServices } from "@/components/public/studio-sections";
 import { CallToAction } from "@/components/public/process";
 import { isLocale } from "@/lib/i18n";
 import { PromotionBanner } from "@/components/public/website-pricing";
@@ -10,7 +10,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   return <div className="public-flow service-page-flow">
-    <Services />
+    <StudioServices all />
     <TemplateGallery embedded />
     <PromotionBanner/>
     <WebsitePricing embedded />

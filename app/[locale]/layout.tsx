@@ -11,6 +11,7 @@ import { getViewer } from "@/lib/db/access";
 import { isDatabaseConfigured } from "@/lib/db";
 import { AdSense } from "@/components/adsense";
 import { adsensePublisher } from "@/lib/advertising";
+import { PublicSurface } from "@/components/public/public-surface";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -136,9 +137,8 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={getDir(locale)} className={`${fontVariables}${locale === "ar" ? ` ${arabicFont.variable}` : ""}`} suppressHydrationWarning>
-      <head><meta name="google-adsense-account" content={adsensePublisher}/></head>
+      <head><meta name="google-adsense-account" content={adsensePublisher}/><AdSense signedIn={Boolean(viewer)} publisher={adsensePublisher} enabled={process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ADSENSE_ENABLED !== "false"}/></head>
       <body className="bg-base text-ink-mid">
-        <AdSense signedIn={Boolean(viewer)} publisher={adsensePublisher} enabled={process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ADSENSE_ENABLED !== "false"}/>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
@@ -149,7 +149,7 @@ export default async function LocaleLayout({
           {/* relative + z-content keeps every page above the fixed 3D field. */}
           <div className="relative z-content flex min-h-screen flex-col">
             <SiteHeader signedIn={Boolean(viewer)} userName={viewer?.name ?? undefined} userImage={viewer?.image ?? undefined} canAdmin={Boolean(viewer?.isOwner || viewer?.permissions.length)} />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1"><PublicSurface>{children}</PublicSurface></main>
             <SiteFooter />
           </div>
         </Providers>

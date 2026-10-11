@@ -7,6 +7,7 @@ import { websiteNames, websitePackages } from "@/lib/website-packages";
 import { websiteWorkflows } from "@/lib/i18n/website-workflows";
 import { applyImplementationDiscount, formatEUR } from "@/lib/pricing";
 import { serviceTemplates } from "@/lib/service-templates";
+import { StudioAtmosphere } from "@/components/ui/studio-atmosphere";
 
 const featuredTypes = [
   { id: "landing", icon: Globe },
@@ -39,7 +40,7 @@ export function HomeSelections({ locale }: { locale: Locale }) {
   const templates = serviceTemplates(locale).filter((item) => featuredTemplateIds.includes(item.id));
 
   return <>
-    <section id="home-pricing" className="section-y" aria-labelledby="home-pricing-title">
+    <section id="home-pricing" className="studio-section" aria-labelledby="home-pricing-title"><StudioAtmosphere variant="services"/>
       <div className="container-x">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-5">
           <h2 id="home-pricing-title" className="text-3xl font-bold text-white sm:text-4xl">{c.nav}</h2>
@@ -69,7 +70,7 @@ export function HomeSelections({ locale }: { locale: Locale }) {
         <p className="mt-6 max-w-4xl text-xs leading-6 text-white/60">{c.tax}</p>
       </div>
     </section>
-    <section id="home-templates" className="section-y" aria-labelledby="home-templates-title">
+    <section id="home-templates" className="studio-section" aria-labelledby="home-templates-title"><StudioAtmosphere variant="work"/>
       <div className="container-x">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-5">
           <h2 id="home-templates-title" className="text-3xl font-bold text-white sm:text-4xl">{t.experience.templates}</h2>

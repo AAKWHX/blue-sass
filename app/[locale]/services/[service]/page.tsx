@@ -73,6 +73,6 @@ export default async function ServicePage({ params }: { params: Promise<{ locale
           <Button asChild variant="neon" className="mt-8"><Link href={`/${locale}/quote?type=${item.quoteType}&service=${item.slug}`}>{c.estimate}<ArrowRight className="h-4 w-4 flip-x" /></Link></Button>
         </section>
       </div>
-    </div><TemplateGallery service={item.slug}/></div>
+    </div><TemplateGallery service={item.slug} embedded/></div>
   );
 }

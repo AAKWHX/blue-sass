@@ -18,5 +18,5 @@ const heroLabels = withExtraLocales({
 export function Hero() {
   const { locale, t } = useI18n();
   const labels = heroLabels[locale];
-  return <AnimatedShaderHero locale={locale} headline={{ line1: labels.line1, line2: labels.line2 }} subtitle={solutionCopy(locale).audience} primary={t.hero.ctaPrimary} secondary={labels.secondary} trustLine={labels.trustLine}/>;
+  return <AnimatedShaderHero locale={locale} headline={{ line1: labels.line1, line2: labels.line2 }} subtitle={solutionCopy(locale).audience} primary={t.hero.ctaPrimary} secondary={labels.secondary} trustLine={labels.trustLine} scrollLabel={t.nav.services}/>;
 }

@@ -61,16 +61,16 @@ export function SiteHeader({ signedIn = false, userName, userImage, canAdmin = f
     { href: `${base}/products`, label: businessUi(locale).products },
     { href: `${base}/contact`, label: c.contact },
   ];
-  const primaryPaths = ["/services", "/tools", "/subscriptions", "/jobs", "/products"];
+  const primaryPaths = ["", "/services", "/projects", "/about", "/contact"];
   const primaryLinks = links.filter(link=>primaryPaths.some(path=>link.href===`${base}${path}`));
   const moreLinks = links.filter(link=>!primaryLinks.includes(link));
 
   return (
-    <header className={`home-floating-nav text-white ${scrolled ? "home-floating-nav-scrolled" : ""} ${isHome ? "" : "home-floating-nav-page"}`}>
+    <header className={`home-floating-nav studio-nav text-white ${scrolled ? "home-floating-nav-scrolled" : ""} ${isHome ? "" : "home-floating-nav-page"}`}>
       <div className="container-x home-floating-nav-inner flex items-center gap-2 py-2 sm:gap-4">
         <Link href={base} className="shrink-0 [&_svg]:h-10 [&_svg]:w-10 sm:[&_svg]:h-12 sm:[&_svg]:w-12 [&>span>span]:hidden sm:[&>span>span]:inline [&>span>span]:!text-white"><BrandLogo /></Link>
         <nav className="mx-auto hidden items-center home-floating-nav-links xl:flex">
-          {primaryLinks.map(link=><Link key={link.href} href={link.href} className="home-floating-nav-link" aria-current={pathname.startsWith(link.href)?"page":undefined}>{link.label}</Link>)}
+          {primaryLinks.map(link=><Link key={link.href} href={link.href} className="home-floating-nav-link" aria-current={(link.href===base?pathname===base:pathname.startsWith(link.href))?"page":undefined}>{link.label}</Link>)}
           <DropdownMenu modal={false}><DropdownMenuTrigger asChild><Button variant="unstyled" size="auto" className="home-floating-nav-link">{t.nav.menu}<ChevronDown className="size-3"/></Button></DropdownMenuTrigger><DropdownMenuContent className="border-white/20 bg-[#101216] text-white">{moreLinks.map(link=><DropdownMenuItem key={link.href} asChild><Link href={link.href}>{link.label}</Link></DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
         </nav>
         <div className="ms-auto flex shrink-0 items-center gap-2 2xl:ms-0">

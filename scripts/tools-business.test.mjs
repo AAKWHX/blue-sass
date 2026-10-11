@@ -24,5 +24,5 @@ test("paid job exposure needs approval, payment, and an unexpired 30-day window"
 });
 test("ad eligibility excludes authentication, payments and sensitive tool inputs in every locale",()=>{
  const {locales}=load("lib/i18n/config.ts");
- for(const locale of locales){for(const path of ["login","register","portal","admin","quote","tools/invoice-generator","tools/message-checker","tools/ai-content-generator","tools/qr-code-generator","tools/website-audit"])assert.equal(adEligiblePath(`/${locale}/${path}`),false);assert.equal(adEligiblePath(`/${locale}/tools`),true);}
+  for(const locale of locales){for(const path of ["login","register","portal","admin","quote","contact","create-project","audit","tools/invoice-generator","tools/message-checker","tools/ai-content-generator","tools/qr-code-generator","tools/website-audit"])assert.equal(adEligiblePath(`/${locale}/${path}`),false);for(const path of ["","services","services/web","about","projects","pricing","templates","tools"])assert.equal(adEligiblePath(`/${locale}${path?`/${path}`:""}`),true);}
 });
