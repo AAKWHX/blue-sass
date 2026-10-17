@@ -43,7 +43,7 @@ export function ProfileForm({ locale, user }: { locale: Locale; user: { name: st
         <div><Label htmlFor="profile-company">{c.company}</Label><Input id="profile-company" name="company" defaultValue={user.company || ""}/></div>
         <div><Label htmlFor="profile-title">{c.title}</Label><Input id="profile-title" name="title" defaultValue={user.title || ""}/></div>
         <div><Label htmlFor="profile-phone">{c.phone}</Label><Input id="profile-phone" name="phone" type="tel" defaultValue={user.phone || ""} dir="ltr"/></div>
-        <div><Label>{c.language}</Label><Select name="locale" defaultValue={locales.includes(user.locale as Locale) ? user.locale : locale}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent>{locales.map(code=><SelectItem key={code} value={code}>{localeMeta[code].flag} {localeMeta[code].native}</SelectItem>)}</SelectContent></Select></div>
+        <div><Label>{c.language}</Label><Select name="locale" defaultValue={(locales as readonly string[]).includes(user.locale) ? user.locale : locale}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent>{locales.map(code=><SelectItem key={code} value={code}>{localeMeta[code].flag} {localeMeta[code].native}</SelectItem>)}</SelectContent></Select></div>
       </div>
       <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-black/10 bg-base p-4">
         <Checkbox name="marketingOptIn" defaultChecked={user.marketingOptIn} className="mt-1" />

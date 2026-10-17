@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/page-metadata";
 import type {Metadata} from "next";
 import Link from "next/link";
 import {notFound} from "next/navigation";
@@ -12,7 +13,7 @@ import {AiTool} from "@/components/public/ai-tool";
 import {getViewer} from "@/lib/db/access";
 import {aiAvailable} from "@/lib/tools/ai-config";
 export function generateStaticParams(){return locales.flatMap(locale=>toolIds.filter(id=>id!=="message-checker").map(tool=>({locale,tool})));}
-export async function generateMetadata({params}:{params:Promise<{locale:string;tool:string}>}):Promise<Metadata>{const {locale,tool}=await params;if(!isLocale(locale)||!isToolId(tool))return{};const c=toolCatalog(locale).find(row=>row.id===tool)!;const path=`/${locale}/tools/${tool}`;return {title:`${c.title} | Blue Sass`,description:`${toolsUi(locale).heading}: ${c.title}`,alternates:{canonical:path,languages:Object.fromEntries(locales.map(value=>[value,`/${value}/tools/${tool}`]))},openGraph:{title:c.title,url:path}};}
+export async function generateMetadata({params}:{params:Promise<{locale:string;tool:string}>}):Promise<Metadata>{const {locale,tool}=await params;if(!isLocale(locale)||!isToolId(tool))return{};const c=toolCatalog(locale).find(row=>row.id===tool)!;return pageMetadata(locale,`/tools/${tool}`,`${c.title} | Blue Sass`,`${toolsUi(locale).heading}: ${c.title}`);}
 export default async function ToolPage({params}:{params:Promise<{locale:string;tool:string}>}){
  const {locale,tool}=await params;if(!isLocale(locale)||!isToolId(tool))notFound();const c=toolCatalog(locale).find(row=>row.id===tool)!;
  let content;if(tool==="qr-code-generator")content=<QrTool locale={locale}/>;else if(tool==="invoice-generator")content=<InvoiceTool locale={locale}/>;else if(tool==="website-cost-calculator")content=<CostTool/>;else if(c.ai)content=<AiTool locale={locale} tool={tool} available={aiAvailable()} signedIn={Boolean(await getViewer())}/>;else content=<PublicScanTool locale={locale} tool={tool}/>;

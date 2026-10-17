@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import { writeFile } from "node:fs/promises";
+const response = await fetch(`${process.env.QA_ORIGIN ?? "http://localhost:3000"}/en/tools/invoice-generator`, { signal: AbortSignal.timeout(60_000) });
+assert.equal(response.status, 200);
+const html = await response.text();
+const tag = html.match(/<input[^>]*id="quantity-0"[^>]*>/)?.[0];
+assert.ok(tag, "quantity input is server rendered");
+const attr = name => tag.match(new RegExp(`${name}="([^"]+)"`))?.[1];
+const value = Number(attr("value")); const min = Number(attr("min")); const step = Number(attr("step"));
+const aligned = Math.abs((value - min) / step - Math.round((value - min) / step)) < 1e-8;
+assert.ok(aligned, "the default invoice quantity must satisfy native step validation");
+assert.equal(step, .01, "fractional quantities remain directly editable");
+const result = { value, min, step, defaultStepValid: aligned };
+await writeFile("artifacts/redesign/invoice-native-constraints.json", JSON.stringify(result, null, 2));
+console.log(result);

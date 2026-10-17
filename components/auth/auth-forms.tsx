@@ -191,7 +191,7 @@ export function LoginForm({ googleEnabled = false, returnTo }: { googleEnabled?:
 
       <p className="text-center text-sm text-ink-low">
         {t.auth.noAccount}{" "}
-        <Link href={`/${locale}/register`} className="font-semibold text-neon-cyan hover:underline">
+        <Link href={`/${locale}/register`} className="font-semibold text-ink-hi underline underline-offset-4 hover:no-underline">
           {t.auth.signUp}
         </Link>
       </p>
@@ -220,7 +220,7 @@ export function RegisterForm() {
         <VerifyNotice email={state.pendingEmail} deliveryFailed={Boolean(state.message)} />
         <p className="text-center text-sm text-ink-low">
           {t.auth.haveAccount}{" "}
-          <Link href={`/${locale}/login`} className="font-semibold text-neon-cyan hover:underline">
+          <Link href={`/${locale}/login`} className="font-semibold text-ink-hi underline underline-offset-4 hover:no-underline">
             {t.auth.signIn}
           </Link>
         </p>
@@ -316,7 +316,7 @@ export function RegisterForm() {
 
       <p className="text-center text-sm text-ink-low">
         {t.auth.haveAccount}{" "}
-        <Link href={`/${locale}/login`} className="font-semibold text-neon-cyan hover:underline">
+        <Link href={`/${locale}/login`} className="font-semibold text-ink-hi underline underline-offset-4 hover:no-underline">
           {t.auth.signIn}
         </Link>
       </p>

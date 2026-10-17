@@ -1,3 +1,5 @@
+import { publicPageMetadata } from "@/lib/i18n/seo";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return publicPageMetadata((await params).locale, "hosting", "/hosting"); }
 import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";

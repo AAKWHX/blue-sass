@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
-    "prebuild": "node --test scripts/server-table-security.test.mjs && node scripts/apply-hosting-migration.mjs && node scripts/apply-project-request-migration.mjs && node scripts/apply-platform-tools-migration.mjs && node scripts/apply-security-migration.mjs && node scripts/apply-business-migration.mjs && node scripts/configure-paypal-webhook.mjs && node scripts/verify-ai-gateway.mjs",
+    "prebuild": "node --test scripts/server-table-security.test.mjs",
     "build": "node scripts/next-with-dist.mjs build",
     "start": "node scripts/next-with-dist.mjs start",
     "lint": "eslint .",
@@ -11,7 +11,10 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "node --experimental-strip-types scripts/seed.ts"
+    "db:seed": "node --experimental-strip-types scripts/seed.ts",
+    "db:migrate": "node scripts/apply-hosting-migration.mjs && node scripts/apply-project-request-migration.mjs && node scripts/apply-platform-tools-migration.mjs && node scripts/apply-security-migration.mjs && node scripts/apply-business-migration.mjs",
+    "paypal:setup": "node scripts/configure-paypal-webhook.mjs",
+    "ai:verify": "node scripts/verify-ai-gateway.mjs"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",
@@ -37,6 +40,7 @@
     "drizzle-orm": "^0.45.2",
     "framer-motion": "13.2.0",
     "geist": "1.7.2",
+    "gsap": "3.13.0",
     "lucide-react": "1.41.0",
     "next": "16.3.8",
     "next-auth": "^5.0.0-beta.32",

@@ -1,16 +1,15 @@
+import { pageMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MessageChecker } from "@/components/public/message-checker";
 import { messageToolCopy } from "@/lib/i18n/message-tool";
-import { isLocale, locales } from "@/lib/i18n/config";
+import { isLocale } from "@/lib/i18n/config";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params; if (!isLocale(locale)) return {};
-  const c = messageToolCopy(locale); const path = `/${locale}/tools/message-checker`;
-  return { title: `${c.title} | Blue Sass`, description: c.privacy,
-    alternates: { canonical: path, languages: Object.fromEntries(locales.map(value => [value, `/${value}/tools/message-checker`])) },
-    openGraph: { title: c.title, description: c.privacy, url: path } };
+  const c = messageToolCopy(locale);
+  return pageMetadata(locale, "/tools/message-checker", `${c.title} | Blue Sass`, c.privacy);
 }
 export default async function MessageToolPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params; if (!isLocale(locale)) notFound();

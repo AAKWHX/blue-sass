@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
+import { publicPageMetadata } from "@/lib/i18n/seo";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return publicPageMetadata((await params).locale, "terms", "/terms"); }
 import { LegalPage } from "@/components/public/legal-page";
 import { localizeForLocale } from "@/lib/i18n/extra-locales";
-
-export const metadata: Metadata = { title: "شروط الاستخدام — بلو ساس", description: "الشروط المنظمة لاستخدام موقع بلو ساس وبوابة العملاء." };
 
 const sections = [
   { title: "Using the website", paragraphs: ["You may use this website and its client portal only for lawful purposes. You must not attempt to disrupt the service, access another user's account, bypass security controls, introduce malicious code, or use automated systems in a way that harms the service or other users."] },

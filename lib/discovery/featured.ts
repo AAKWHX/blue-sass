@@ -1,0 +1,11 @@
+import {text} from './types';
+export const featuredSites=[
+ {id:'components',name:'Figma',url:'https://www.figma.com/',description:text('صمّم الواجهات ونظّم مكوّناتها وشارك النماذج مع فريقك.','Design interfaces, organise components and share prototypes with your team.','Ontwerp interfaces, orden componenten en deel prototypes met je team.')},
+ {id:'brand',name:'Penpot',url:'https://penpot.app/',description:text('مساحة تصميم مفتوحة المصدر للنماذج والمكونات والتعاون.','An open-source design workspace for prototypes, components and collaboration.','Een open-source ontwerpomgeving voor prototypes, componenten en samenwerking.')},
+ {id:'workflow',name:'Webflow',url:'https://webflow.com/',description:text('صمّم موقعك بصريًا وأدر محتواه وانشره عبر منصة واحدة.','Design visually, manage content and publish from one platform.','Ontwerp visueel, beheer content en publiceer vanuit één platform.')},
+ {id:'neal',name:'Neal.fun',url:'https://neal.fun/',description:text('أفكار كبيرة تتحول إلى ألعاب وتجارب تفاعلية صغيرة.','Big ideas become small interactive games and experiments.','Grote ideeën als kleine interactieve spellen en experimenten.')},
+ {id:'radio',name:'Radio Garden',url:'https://radio.garden/',description:text('تنقل على الكرة الأرضية واستمع لمحطات إذاعية من مدن مختلفة.','Travel around a globe and listen to radio stations in different cities.','Reis over de wereldbol en luister naar radio uit verschillende steden.')},
+ {id:'space',name:'NASA Eyes',url:'https://eyes.nasa.gov/',description:text('استكشف المهمات والأجرام السماوية عبر تجارب NASA المرئية.','Explore missions and celestial bodies through NASA’s visual experiences.','Verken missies en hemellichamen met de visuele ervaringen van NASA.')},
+ {id:'arts',name:'Google Arts & Culture',url:'https://artsandculture.google.com/',description:text('مجموعات فنية وقصص ثقافية وجولات من مؤسسات حول العالم.','Art collections, cultural stories and tours from institutions worldwide.','Kunstcollecties, cultuurverhalen en rondleidingen van instellingen wereldwijd.')},
+ {id:'sketch',name:'Excalidraw',url:'https://excalidraw.com/',description:text('حوّل الفكرة إلى مخطط مرسوم ببساطة وشاركه مع فريقك.','Turn an idea into a simple hand-drawn diagram and share it with your team.','Maak van een idee een eenvoudige getekende schets en deel die met je team.')},
+];

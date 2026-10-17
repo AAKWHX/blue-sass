@@ -1,15 +1,15 @@
+import { pageMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { ToolsDirectory } from "@/components/public/tools-directory";
 import { toolsUi } from "@/lib/i18n/tools-ui";
 import { notFound } from "next/navigation";
 import { messageToolCopy } from "@/lib/i18n/message-tool";
-import { isLocale, locales } from "@/lib/i18n/config";
+import { isLocale } from "@/lib/i18n/config";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params; if (!isLocale(locale)) return {};
   const c = messageToolCopy(locale);
-  return { title: `${c.tools} | Blue Sass`, description: `${c.audit} · ${c.title} · ${c.quote}`,
-    alternates: { canonical: `/${locale}/tools`, languages: Object.fromEntries(locales.map(value => [value, `/${value}/tools`])) } };
+  return pageMetadata(locale, "/tools", `${c.tools} | Blue Sass`, `${c.audit} · ${c.title} · ${c.quote}`);
 }
 export default async function ToolsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params; if (!isLocale(locale)) notFound();

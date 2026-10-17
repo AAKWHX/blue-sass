@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { hostedSites } from "@/lib/db/schema";
-import { AuthorisationError, requireViewer } from "@/lib/db/access";
+import { AuthorisationError, requireViewer, assertCanWrite } from "@/lib/db/access";
 import { getVercelDeployment } from "@/lib/hosting/vercel";
 import { assertSameOrigin } from "@/lib/api-security";
 import { takeRateLimit } from "@/lib/rate-limit";
@@ -11,6 +11,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   try {
     assertSameOrigin(request, true);
     const viewer = await requireViewer();
+    assertCanWrite(viewer);
     if (!(await takeRateLimit(`hosting-refresh:${viewer.id}`, 20, 60_000))) return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429 });
     const { id } = await params;
     const [site] = await db.select().from(hostedSites).where(and(eq(hostedSites.id, id), eq(hostedSites.userId, viewer.id))).limit(1);

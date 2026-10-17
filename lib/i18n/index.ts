@@ -2,13 +2,9 @@ import type { Locale } from "./config";
 import en, { type Dictionary } from "./dictionaries/en";
 import ar from "./dictionaries/ar";
 import nl from "./dictionaries/nl";
-import de from "./dictionaries/de";
-import tr from "./dictionaries/tr";
-import fr from "./dictionaries/fr";
-import es from "./dictionaries/es";
-import { withExtraLocales } from "./extra-locales";
+import { retiredLocales } from "./config";
 
-export const dictionaries: Record<Locale, Dictionary> = withExtraLocales({ en, ar, nl, de, tr, fr, es });
+export const dictionaries = { en, ar, nl, ...Object.fromEntries(retiredLocales.map(locale => [locale, en])) } as Record<Locale, Dictionary>;
 
 export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale] ?? en;

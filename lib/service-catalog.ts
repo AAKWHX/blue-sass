@@ -1,3 +1,4 @@
+import { creationService } from "./i18n/creation";
 import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import type { Locale } from "@/lib/i18n";
 
@@ -15,7 +16,7 @@ const rows: Record<Locale, string[]> = withExtraLocales({
 });
 export function serviceCatalog(locale: Locale) {
   return rows[locale].map((row, i) => {
-    const [title, description, features] = row.split("|");
-    return { slug: serviceSlugs[i], title, description, features: features.split(/[,،、，]/), quoteType: serviceQuoteTypes[i] };
+    const [, description, features] = row.split("|");
+    return { slug: serviceSlugs[i], title: creationService(locale, i).title, description, features: features.split(/[,،、，]/), quoteType: serviceQuoteTypes[i] };
   });
 }

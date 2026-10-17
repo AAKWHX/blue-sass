@@ -38,11 +38,11 @@ test("34 unique project types have valid scope, price and translations", () => {
     const result = configuredEstimate(c);
     assert.ok(result.totalLow > 0 && result.totalHigh >= result.totalLow);
     assert.ok(result.minimumDays >= 3);
-    assert.equal(Object.values(p.names).filter(Boolean).length, 15);
+    for (const locale of ["ar", "en", "nl"]) assert.ok(p.names[locale], `${p.id}/${locale}`);
   }
 });
-test("all fifteen locales contain all UI and option labels", () => {
-  for (const names of [...Object.values(builderCopy), ...[...extraOptions, ...providerOptions, ...moduleOptions, ...performanceOptions].map(p => p.names)]) assert.equal(Object.values(names).filter(Boolean).length, 15);
+test("all active locales contain all UI and option labels", () => {
+  for (const names of [...Object.values(builderCopy), ...[...extraOptions, ...providerOptions, ...moduleOptions, ...performanceOptions].map(p => p.names)]) for (const locale of ["ar", "en", "nl"]) assert.ok(names[locale]);
 });
 test("monthly and yearly services never inflate implementation cost", () => {
   const c = valid(); const base = configuredEstimate(c);

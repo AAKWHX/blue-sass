@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { defaultLocale, locales } from "./lib/i18n/config";
+import { defaultLocale, locales, retiredLocales } from "./lib/i18n/config";
 
 const PUBLIC_FILE = /\.(.*)$/;
 
@@ -20,6 +20,12 @@ function detectLocale(req: NextRequest): string {
 
 export default function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const first = pathname.split("/")[1];
+  if ((retiredLocales as readonly string[]).includes(first)) {
+    const url = req.nextUrl.clone();
+    url.pathname = `/en${pathname.slice(first.length + 1)}`;
+    return NextResponse.redirect(url, 308);
+  }
 
   if (pathname.startsWith("/_next") || pathname.startsWith("/api") || PUBLIC_FILE.test(pathname)) {
     return NextResponse.next();

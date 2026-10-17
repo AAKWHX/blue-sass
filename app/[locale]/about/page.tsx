@@ -1,3 +1,5 @@
+import { publicPageMetadata } from "@/lib/i18n/seo";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return publicPageMetadata((await params).locale, "about", "/about"); }
 import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -21,7 +23,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   if (!isLocale(locale)) notFound();
   const c = copy[locale];
   return <>
-    <section className="studio-section"><StudioAtmosphere variant="about"/><div className="container-x grid items-center gap-12 lg:grid-cols-[.9fr_1.1fr]"><div><h1 className="studio-heading">{c.title}</h1><p className="studio-deck mt-6">{c.intro}</p></div><figure className="studio-card overflow-hidden"><Image src="/media/about-studio-v2.png" alt={c.caption} width={1536} height={1024} sizes="(min-width:1024px) 55vw, 100vw" className="aspect-[4/3] w-full object-cover" preload/><figcaption className="px-5 py-4 text-sm text-white/70">{c.caption}</figcaption></figure></div></section>
+    <section className="studio-section"><StudioAtmosphere variant="about"/><div className="container-x grid items-center gap-12 lg:grid-cols-[.9fr_1.1fr]"><div><h1 className="studio-heading">{c.title}</h1><p className="studio-deck mt-6">{c.intro}</p></div><figure className="studio-card overflow-hidden"><Image src="/media/about-studio-v2.png" alt={c.caption} width={1536} height={1024} sizes="(min-width:1024px) 55vw, 100vw" className="aspect-[4/3] w-full object-cover" preload/></figure></div></section>
     <section className="studio-section"><StudioAtmosphere variant="services"/><div className="container-x"><div className="studio-value-grid">{c.values.map(([title,body], index)=><article key={title} className="studio-card"><span className="font-mono text-xs text-neon-cyan">0{index+1}</span><h2 className="mt-8 text-2xl font-semibold">{title}</h2><p className="mt-3 leading-7 text-white/75">{body}</p></article>)}</div><div className="studio-card mt-14 grid gap-6 p-7 text-white md:grid-cols-[.7fr_1fr] md:p-10"><h2 className="text-3xl font-semibold">{c.promise}</h2><ul className="space-y-4">{c.points.map(point=><li key={point} className="flex gap-3 text-white/75"><CheckCircle2 className="mt-0.5 size-5 shrink-0 text-neon-cyan"/>{point}</li>)}</ul></div></div></section>
     <CallToAction />
   </>;

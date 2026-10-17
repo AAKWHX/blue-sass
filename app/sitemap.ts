@@ -1,16 +1,16 @@
 import type { MetadataRoute } from "next";
-import { locales } from "@/lib/i18n";
-import { serviceSlugs } from "@/lib/service-catalog";
-import { toolIds } from "@/lib/tools/catalog";
+import { locales } from "@/lib/i18n/config";
+import { localeAlternates } from "@/lib/page-metadata";
+import { indexablePublicPaths } from "@/lib/seo-public-paths";
 
 const origin = "https://www.bluesass.nl";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const paths = ["", "/about", "/services", "/subscriptions", "/hosting", "/projects", "/reviews", "/contact", "/create-project", "/privacy", "/terms", "/tools", "/jobs", "/products", "/marketplace", ...toolIds.map(id=>`/tools/${id}`), ...serviceSlugs.map(slug => `/services/${slug}`)];
+  const paths = [...new Set(indexablePublicPaths)];
   return locales.flatMap((locale) => paths.map((path) => ({
     url: `${origin}/${locale}${path}`,
-    lastModified: new Date(),
-    changeFrequency: path ? "monthly" : "weekly",
-    priority: path ? 0.7 : 1,
+    // No reliable content modification date exists for these directory pages.
+    // Omit lastModified instead of reporting the build/request time as an edit.
+    alternates: { languages: Object.fromEntries(Object.entries(localeAlternates(locale, path)?.languages ?? {}).map(([language, url]) => [language, `${origin}${url}`])) },
   })));
 }

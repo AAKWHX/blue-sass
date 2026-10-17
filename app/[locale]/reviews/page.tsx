@@ -1,3 +1,5 @@
+import { publicPageMetadata } from "@/lib/i18n/seo";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return publicPageMetadata((await params).locale, "reviews", "/reviews"); }
 import { desc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { ReviewsBoard } from "@/components/public/reviews-board";
@@ -5,8 +7,6 @@ import { getViewer } from "@/lib/db/access";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { reviews } from "@/lib/db/schema";
 import { isLocale } from "@/lib/i18n";
-
-export const metadata = { title: "آراء عملاء Blue Sass" };
 
 export default async function ReviewsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

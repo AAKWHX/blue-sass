@@ -17,3 +17,17 @@ test("shared limiter fails closed when its store or signing secret is not config
   assert.equal(await takeRateLimit("security-test:first", 2, 60_000), false);
   assert.equal(await takeRateLimit("security-test:invalid", 0, 60_000), false);
 });
+
+test("self-hosted origin uses actual Host authority without trusting forwarded hosts", () => {
+  const request = headers => new Request("http://localhost:3021/api/tools/scan", { method: "POST", headers });
+  assert.doesNotThrow(() => assertSameOrigin(request({ host: "127.0.0.1:3021", origin: "http://127.0.0.1:3021", "sec-fetch-site": "same-origin" })));
+  for (const headers of [
+    { host: "127.0.0.1:3021", origin: "https://attacker.example" },
+    { host: "127.0.0.1:3021", origin: "https://127.0.0.1:3021" },
+    { host: "127.0.0.1:3021", origin: "http://127.0.0.1:3022" },
+    { host: "127.0.0.1:3021", origin: "http://127.0.0.1:3021", "sec-fetch-site": "cross-site" },
+    { host: "localhost:3021", origin: "https://attacker.example", "x-forwarded-host": "attacker.example" },
+    { host: "attacker.example/path", origin: "http://attacker.example" },
+    { host: "public.example", origin: "http://localhost:3021" },
+  ]) assert.throws(() => assertSameOrigin(request(headers)), /UNTRUSTED_ORIGIN/);
+});

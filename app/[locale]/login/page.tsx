@@ -6,7 +6,7 @@ import { isDatabaseConfigured } from "@/lib/db";
 import { BrandLogo } from "@/components/brand-logo";
 import { quoteReturnPath } from "@/lib/auth/return-path";
 
-export const metadata = { title: "Sign in — Blue Sass" };
+export const metadata = { robots: { index: false, follow: false }, title: "Sign in — Blue Sass" };
 
 export default async function LoginPage({
   params,

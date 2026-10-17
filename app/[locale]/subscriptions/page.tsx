@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { publicPageMetadata } from "@/lib/i18n/seo";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return publicPageMetadata((await params).locale, "subscriptions", "/subscriptions"); }
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Check, FileSearch, Layers, ShieldCheck } from "lucide-react";
@@ -7,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isLocale } from "@/lib/i18n/config";
 import { platformCopy } from "@/lib/i18n/platform-tools";
 import { subscriptionPlans, subscriptionPurchaseNote } from "@/lib/subscriptions";
-export const metadata: Metadata = { title: "Blue Sass — Digital project tools", description: "Website and source review, private reports and comparison tools." };
 export default async function SubscriptionsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params; if (!isLocale(locale)) notFound();
   const c = platformCopy(locale); const plans = subscriptionPlans(locale);

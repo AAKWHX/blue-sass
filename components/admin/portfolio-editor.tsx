@@ -1,4 +1,6 @@
 "use client";
+import { redesignCopy } from "@/lib/i18n/redesign";
+import { businessUi } from "@/lib/i18n/business-ui";
 import { useActionState, useState } from "react";
 import { useI18n } from "@/components/providers";
 import { savePortfolio } from "@/app/actions/portfolio";
@@ -12,12 +14,14 @@ function Editor({ entry }: { entry?: PortfolioEntry }) {
  const { locale, t } = useI18n(); const c = t.experience;
  const [state, action, pending] = useActionState(savePortfolio, { ok: false, message: "" });
  const [visibility, setVisibility] = useState(entry?.visibility ?? "private");
- return <form action={action} className="mt-5 grid gap-4"><input type="hidden" name="id" value={entry?.id ?? ""}/><input type="hidden" name="locale" value={locale}/><input type="hidden" name="visibility" value={visibility}/>
+ return <form action={action} className="mt-5 grid gap-4"><Input type="hidden" name="id" value={entry?.id ?? ""}/><Input type="hidden" name="locale" value={locale}/><Input type="hidden" name="visibility" value={visibility}/>
   <Label htmlFor="work-name">{c.name}</Label><Input id="work-name" name="name" defaultValue={entry?.name} required maxLength={120}/>
+  <Label htmlFor="work-category">{businessUi(locale).category}</Label><Input id="work-category" name="industry" defaultValue={entry?.industry ?? ""} required maxLength={80}/>
   <Label htmlFor="work-summary">{c.summary}</Label><Textarea id="work-summary" name="summary" defaultValue={entry?.summary} required maxLength={4000} rows={5}/>
   <Label htmlFor="work-cover">{c.cover} · HTTPS</Label><Input id="work-cover" type="url" name="cover" defaultValue={entry?.cover ?? ""} required/>
   <Label htmlFor="work-gallery">{c.gallery} · HTTPS</Label><Textarea id="work-gallery" name="images" defaultValue={entry?.images.join("\n")} rows={3}/>
-  <Label htmlFor="work-url">{c.url} · HTTPS</Label><Input id="work-url" type="url" name="url" defaultValue={entry?.url}/>
+  <Label htmlFor="work-url">{redesignCopy(locale).preview} · HTTPS</Label><Input id="work-url" type="url" name="url" defaultValue={entry?.url}/>
+  <Label htmlFor="work-live-url">{redesignCopy(locale).published} · {c.url} · HTTPS</Label><Input id="work-live-url" type="url" name="liveUrl" defaultValue={entry?.liveUrl}/>
   <Label htmlFor="work-features">{c.features}</Label><Textarea id="work-features" name="features" defaultValue={entry?.features.join("\n")} rows={4}/>
   <Label htmlFor="work-visibility">{c.visibility}</Label><Select value={visibility} onValueChange={value => setVisibility(value as "public" | "private")}><SelectTrigger id="work-visibility"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="private">{c.private}</SelectItem><SelectItem value="public">{c.public}</SelectItem></SelectContent></Select>
   <Button type="submit" variant="neon" disabled={pending}>{c.publish}</Button><p role="status">{state.message}</p>

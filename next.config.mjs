@@ -11,6 +11,16 @@ const nextConfig = {
   serverExternalPackages: ["@react-pdf/renderer"],
   outputFileTracingIncludes: { "/api/audits/*/pdf": ["./public/report-fonts/*.ttf"], "/api/tools/invoice": ["./public/report-fonts/*.ttf"] },
   images: { qualities: [75, 92] },
+  // Resolve legacy service aliases before rendering/metadata streaming.
+  redirects() {
+    const locale = ":locale(ar|en|nl|de|tr|fr|es|it|pt|pl|uk|ru|zh|ja|ko)";
+    const retired = ["templates", "previews/:path*", "pricing"].map(path => ({ source: `/${locale}/${path}`, destination: "/:locale/services", permanent: true }));
+    return [{ source: "/:locale(de|tr|fr|es|it|pt|pl|uk|ru|zh|ja|ko)/:path*", destination: "/en/:path*", permanent: true }, ...retired, ...Object.entries({ mobile: "android", cloud: "erp", security: "web" }).map(([alias, service]) => ({
+      source: `/${locale}/services/${alias}`,
+      destination: `/:locale/services/${service}`,
+      permanent: true,
+    }))];
+  },
   async headers() {
     return [{
       source: "/(.*)",

@@ -1,17 +1,18 @@
 "use server";
+import { safePortfolioUrl } from "@/lib/portfolio-presentation";
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { projects, projectFiles } from "@/lib/db/schema";
+import { projects, projectFiles, adminAudit } from "@/lib/db/schema";
 import { requirePermission, assertCanViewProject } from "@/lib/db/access";
 import { portfolioMediaName } from "@/lib/db/portfolio";
 import { lifecycleState, lockProject } from "@/lib/db/project-lifecycle";
 import { experience } from "@/lib/i18n/experience";
 import { isLocale } from "@/lib/i18n/config";
-const https = z.string().url().refine(value => value.startsWith("https://"));
-const schema = z.object({ id: z.union([z.string().uuid(), z.literal("")]), name: z.string().trim().min(2).max(120), summary: z.string().trim().min(3).max(4000), cover: https, url: z.union([https, z.literal("")]), visibility: z.enum(["public", "private"]), features: z.string().max(2000), images: z.string().max(6000) });
+const https = z.string().max(2048).url().refine(safePortfolioUrl);
+const schema = z.object({ id: z.union([z.string().uuid(), z.literal("")]), name: z.string().trim().min(2).max(120), industry: z.string().trim().min(2).max(80), summary: z.string().trim().min(3).max(4000), cover: https, url: z.union([https, z.literal("")]), liveUrl: z.union([https, z.literal("")]), visibility: z.enum(["public", "private"]), features: z.string().max(2000), images: z.string().max(6000) });
 export async function savePortfolio(_prev: { ok: boolean; message: string }, form: FormData) {
  const viewer = await requirePermission("portfolio.manage");
  const locale = String(form.get("locale")); const c = experience(isLocale(locale) ? locale : "en");
@@ -25,14 +26,15 @@ export async function savePortfolio(_prev: { ok: boolean; message: string }, for
   let id = data.id;
   if (id) {
    const project = await lockProject(tx, id); if (!project || (await lifecycleState(id, tx)).cancelled) return false;
-   await tx.update(projects).set({ name: data.name, summary: data.summary, cover: data.cover, visibility: data.visibility, tech: data.features.split(/\r?\n/).map(s => s.trim()).filter(Boolean).slice(0, 30), updatedAt: new Date() }).where(eq(projects.id, id));
+   await tx.update(projects).set({ name: data.name, industry: data.industry, summary: data.summary, cover: data.cover, visibility: data.visibility, tech: data.features.split(/\r?\n/).map(s => s.trim()).filter(Boolean).slice(0, 30), updatedAt: new Date() }).where(eq(projects.id, id));
   } else {
-   const [project] = await tx.insert(projects).values({ slug: `portfolio-${randomUUID()}`, name: data.name, summary: data.summary, cover: data.cover, visibility: data.visibility, tech: data.features.split(/\r?\n/).map(s => s.trim()).filter(Boolean).slice(0, 30), stage: "planning" }).returning({ id: projects.id }); id = project.id;
+   const [project] = await tx.insert(projects).values({ slug: `portfolio-${randomUUID()}`, name: data.name, industry: data.industry, summary: data.summary, cover: data.cover, visibility: data.visibility, tech: data.features.split(/\r?\n/).map(s => s.trim()).filter(Boolean).slice(0, 30), stage: "planning" }).returning({ id: projects.id }); id = project.id;
   }
   // Replace only editorial media, leaving all client deliverables untouched.
   await tx.delete(projectFiles).where(and(eq(projectFiles.projectId, id), eq(projectFiles.name, portfolioMediaName)));
-  const media = [...images.map(url => ({ url, kind: "image" as const })), ...(data.url ? [{ url: data.url, kind: "demo" as const }] : [])];
+  const media = [...images.map(url => ({ url, kind: "image" as const })), ...(data.url ? [{ url: data.url, kind: "demo" as const, version: "v1" }] : []), ...(data.liveUrl ? [{ url: data.liveUrl, kind: "demo" as const, version: "portfolio-live" }] : [])];
   if (media.length) await tx.insert(projectFiles).values(media.map(item => ({ ...item, projectId: id, name: portfolioMediaName, category: "media" as const, visibleToClient: true, uploadedBy: viewer.id })));
+  await tx.insert(adminAudit).values({ actorId: viewer.id, action: "portfolio.saved", details: { projectId: id, visibility: data.visibility } });
   return true;
  });
  if (!ok) return fail;

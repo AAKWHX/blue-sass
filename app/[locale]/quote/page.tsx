@@ -4,7 +4,7 @@ import { getViewer } from "@/lib/db/access";
 import { SubscriptionRequest } from "@/components/public/subscription-request";
 import { subscriptionIds, type SubscriptionId } from "@/lib/subscriptions";
 
-export const metadata = { title: "Project details | Blue Sass" };
+export const metadata = { robots: { index: false, follow: false }, title: "Project details | Blue Sass" };
 
 export default async function QuotePage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ type?: string; service?: string; template?: string; kind?: string }> }) {
   const { locale } = await params;
@@ -19,7 +19,7 @@ export default async function QuotePage({ params, searchParams }: { params: Prom
   if (!viewer) redirect(`/${locale}/login?next=${encodeURIComponent(`/${locale}/quote?${query}`)}`);
   const plan = service?.replace(/^subscription-/, "") as SubscriptionId;
   if (service?.startsWith("subscription-") && subscriptionIds.includes(plan)) return <SubscriptionRequest id={plan}/>;
-  return <QuoteWizard initialType={type} initialService={service} initialTemplate={template} initialKind={kind} initialFeatures={features} initialModules={modules} initialLanguageCount={languages} initialEmail={viewer.email} payments={{
+  return <QuoteWizard initialType={type} initialService={service} initialKind={kind} initialFeatures={features} initialModules={modules} initialLanguageCount={languages} initialEmail={viewer.email} payments={{
     paypal: Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
   }} />;
 }

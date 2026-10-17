@@ -80,7 +80,7 @@ export function CallToAction() {
   const ar = locale === "ar";
 
   return (
-    <section className="section-y bg-base">
+    <section className="public-project-cta section-y bg-base">
       <div className="container-x">
         <Reveal>
           <div className="home-cta-panel relative overflow-hidden rounded-[2rem] border border-black bg-neon-cyan p-8 sm:p-12 lg:p-16">
@@ -105,3 +105,4 @@ export function CallToAction() {
     </section>
   );
 }
+

@@ -1,8 +1,11 @@
 export const baseLocales = ["ar", "en", "nl", "de", "tr", "fr", "es"] as const;
 export const extraLocales = ["it", "pt", "pl", "uk", "ru", "zh", "ja", "ko"] as const;
 export type ExtraLocale = typeof extraLocales[number];
-export const locales = [...baseLocales, ...extraLocales] as const;
-export type Locale = (typeof locales)[number];
+// Stored customer language preferences retain their type; public routes use only these three.
+export const locales = ["ar", "en", "nl"] as const;
+export type ActiveLocale = (typeof locales)[number];
+export const retiredLocales = ["de", "tr", "fr", "es", ...extraLocales] as const;
+export type Locale = (typeof baseLocales)[number] | ExtraLocale;
 export const defaultLocale: Locale = "en";
 
 export const localeMeta: Record<Locale, { name: string; native: string; flag: string; dir: "rtl" | "ltr" }> = {
@@ -23,7 +26,7 @@ export const localeMeta: Record<Locale, { name: string; native: string; flag: st
   ko: { name: "Korean", native: "한국어", flag: "🇰🇷", dir: "ltr" },
 };
 
-export function isLocale(value: string): value is Locale {
+export function isLocale(value: string): value is ActiveLocale {
   return (locales as readonly string[]).includes(value);
 }
 

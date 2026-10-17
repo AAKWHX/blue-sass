@@ -1,4 +1,4 @@
-import { withExtraLocales } from "@/lib/i18n/extra-locales";
+import { publicPageCopy } from "@/lib/i18n/seo";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Providers } from "@/components/providers";
@@ -18,76 +18,14 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-const seo = withExtraLocales({
-  ar: {
-    title: "بلو ساس — تصميم مواقع وتطبيقات ومنتجات رقمية",
-    description: "بلو ساس شركة متخصصة في تصميم وتطوير المواقع والتطبيقات والأنظمة الذكية. نحوّل فكرتك إلى منتج رقمي واضح، سريع وجاهز للنمو.",
-    keywords: ["بلو ساس", "Blue Sass", "تصميم مواقع", "برمجة تطبيقات", "شركة برمجيات في هولندا", "تطوير أنظمة ذكية"],
-  },
-  en: {
-    title: "Blue Sass — Websites, apps and digital products",
-    description: "Blue Sass designs and builds websites, mobile apps and intelligent digital systems from idea to launch.",
-    keywords: ["Blue Sass", "web development", "mobile apps", "digital product studio", "software agency Netherlands"],
-  },
-  nl: {
-    title: "Blue Sass — Websites, apps en digitale producten",
-    description: "Blue Sass ontwerpt en bouwt websites, mobiele apps en slimme digitale systemen van idee tot lancering.",
-    keywords: ["Blue Sass", "website laten maken", "app ontwikkeling", "software bureau Nederland"],
-  },
-  de: {
-    title: "Blue Sass — Websites, Apps und digitale Produkte",
-    description: "Blue Sass konzipiert und entwickelt Websites, Apps und intelligente digitale Systeme von der Idee bis zum Launch.",
-    keywords: ["Blue Sass", "Webentwicklung", "App Entwicklung", "Software Agentur"],
-  },
-  tr: {
-    title: "Blue Sass — Web siteleri, uygulamalar ve dijital ürünler",
-    description: "Blue Sass fikirden lansmana kadar web siteleri, mobil uygulamalar ve akıllı dijital sistemler tasarlar ve geliştirir.",
-    keywords: ["Blue Sass", "web sitesi geliştirme", "mobil uygulama", "yazılım ajansı"],
-  },
-  fr: {
-    title: "Blue Sass — Sites web, applications et produits numériques",
-    description: "Blue Sass conçoit et développe des sites web, des applications et des systèmes numériques intelligents, de l’idée au lancement.",
-    keywords: ["Blue Sass", "développement web", "application mobile", "agence logicielle"],
-  },
-  es: {
-    title: "Blue Sass — Sitios web, aplicaciones y productos digitales",
-    description: "Blue Sass diseña y desarrolla sitios web, aplicaciones y sistemas digitales inteligentes desde la idea hasta el lanzamiento.",
-    keywords: ["Blue Sass", "desarrollo web", "aplicaciones móviles", "agencia de software"],
-  },
-} as const);
-
+// Page-specific canonicals belong to pages, never to this shared layout.
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  const { locale } = await params;
-  if (!isLocale(locale)) return {};
-  // Brand search results intentionally use the Arabic brand title and
-  // description across every locale, as requested. Locale-specific terms are
-  // still included as keywords and hreflang keeps each language discoverable.
-  const copy = seo.ar;
-  const localeKeywords = seo[locale].keywords;
-  const languages = Object.fromEntries(locales.map((language) => [language, `/${language}`]));
-
-  return {
-    title: copy.title,
-    description: copy.description,
-    keywords: [...copy.keywords, ...localeKeywords],
-    alternates: {
-      canonical: `/${locale}`,
-      languages: { ...languages, "x-default": "/en" },
-    },
-    openGraph: {
-      type: "website",
-      url: `/${locale}`,
-      siteName: "Blue Sass | بلو ساس",
-      locale,
-      title: copy.title,
-      description: copy.description,
-    },
-    twitter: {
-      card: "summary",
-      title: copy.title,
-      description: copy.description,
-    },
-  };
+ const { locale } = await params;
+ if (!isLocale(locale)) return {};
+ const copy = publicPageCopy(locale, "home");
+ return { title: copy.title, description: copy.description, keywords: [copy.title, "Blue Sass"],
+  openGraph: { type: "website", siteName: "Blue Sass", locale, title: copy.title, description: copy.description },
+  twitter: { card: "summary", title: copy.title, description: copy.description } };
 }
 
 /**

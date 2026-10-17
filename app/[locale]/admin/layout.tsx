@@ -1,4 +1,5 @@
 import Link from "next/link";
+export const metadata = { robots: { index: false, follow: false } };
 import {redirect,notFound} from "next/navigation";
 import {getViewer,canOpenAdmin,hasCapability} from "@/lib/db/access";
 import {isLocale} from "@/lib/i18n/config";

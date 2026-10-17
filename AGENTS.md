@@ -148,9 +148,12 @@ The token NAMES keep their old roles — never introduce new RGB accents.
 
 ## i18n
 
-7 locales in `lib/i18n/`: `ar` (full RTL), `en`, `nl`, `de`, `tr`, `fr`, `es`.
+3 active public locales in `lib/i18n/`: `ar` (full RTL), `en`, `nl`.
+Retired locale URLs permanently redirect to English while preserving the path/query.
+Historical locale types and translation archives remain for existing stored records;
+do not restore them to the public switcher or load archived lexicons into public bundles.
 Arabic has dedicated typography overrides (looser line-height, zero letter-spacing,
-stepped-down weights). When adding UI copy, add the key to **all seven** locale files.
+stepped-down weights). When adding UI copy, cover **all three active** locales.
 
 ## Structure
 
@@ -174,3 +177,13 @@ classes/keyframes you expect — silent non-emission is a real failure mode here
 (see rules 5 and 6).
 
 Do not leave placeholder comments such as `// سنكمل لاحقاً` in core sections.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

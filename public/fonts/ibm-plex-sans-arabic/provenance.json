@@ -1,0 +1,118 @@
+{
+  "source": "Existing Next.js IBM Plex Sans Arabic build assets; copied byte-for-byte without font modification",
+  "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexsansarabic/OFL.txt",
+  "files": [
+    {
+      "file": "c9a0d344f313d307-s.3ik2qu-u9tgho.woff2",
+      "weight": 400,
+      "family": "IBM Plex Sans Arabic",
+      "sha256": "4ed189e8653e9303ec1e1448a6025f838ecd19fe4a5f4f7889b8394b3c5378fb",
+      "bytes": 33512
+    },
+    {
+      "file": "aa914dbbd9a27e94-s.0n4hkusom70ae.woff2",
+      "weight": 400,
+      "family": "IBM Plex Sans Arabic",
+      "sha256": "5c9741e33dad3a2ea5ca6394b2a47183912d9fd935551c7be41025359ff29173",
+      "bytes": 732
+    },
+    {
+      "file": "5a1ede1938590d51-s.19gzon4xl8qiz.woff2",
+      "weight": 400,
+      "family": "IBM Plex Sans Arabic",
+      "sha256": "1943ec196b3bc10d7fbba7a7ddf64377dc83ea09185094ee1e7cc323d051c5cb",
+      "bytes": 3908
+    },
+    {
+      "file": "5d6231e6818a3930-s.2vs72h_x6qrve.woff2",
+      "weight": 400,
+      "family": "IBM Plex Sans Arabic",
+      "sha256": "4a917a99a5b6acbe3b56887d1a8396fcd7d2112e0e4796f252c0859106679153",
+      "bytes": 13944
+    },
+    {
+      "file": "280fac012b00b901-s.3ihiqn4pviisd.woff2",
+      "weight": 500,
+      "family": "IBM Plex Sans Arabic Medium",
+      "sha256": "bf2b68e78ca6e9c6e560634ecc33c1f11947b9ffaff1b6d9b42730ce85f696da",
+      "bytes": 35884
+    },
+    {
+      "file": "65b08f011bd29e21-s.00vfn3_g-ftpg.woff2",
+      "weight": 500,
+      "family": "IBM Plex Sans Arabic Medium",
+      "sha256": "3c3024097d27c555437a0954ed7362b878c72555cf28cf8d881bb882bd0f86f4",
+      "bytes": 748
+    },
+    {
+      "file": "a1b65e215f8df202-s.3w3hylgez90of.woff2",
+      "weight": 500,
+      "family": "IBM Plex Sans Arabic Medium",
+      "sha256": "905c105b50a9d28a33fcf7e612058bfc7696364ff2b72b577f02e06a39ac7203",
+      "bytes": 3940
+    },
+    {
+      "file": "3347fc7792f0b5ea-s.0c7ha31nuacbu.woff2",
+      "weight": 500,
+      "family": "IBM Plex Sans Arabic Medium",
+      "sha256": "2c348d103970c93c7b817a5bee77406a5861200390df6bd751d2d1bd7071e1af",
+      "bytes": 14792
+    },
+    {
+      "file": "ceec3e50f42c26e3-s.0da8nscnv1nkd.woff2",
+      "weight": 600,
+      "family": "IBM Plex Sans Arabic SemiBold",
+      "sha256": "0ccee44455f545eb6b4083f77e5d15e7c9cd514007870167c8c69d1ba7631e26",
+      "bytes": 35884
+    },
+    {
+      "file": "b140408e2d7eae5d-s.2x1j3gzzngp4x.woff2",
+      "weight": 600,
+      "family": "IBM Plex Sans Arabic SemiBold",
+      "sha256": "d02babf28f675a50e4e2392119095a157a59d59b116384ecc4c8fd9cf949ebd0",
+      "bytes": 712
+    },
+    {
+      "file": "d3af3242084a193c-s.1jr_z050he_qo.woff2",
+      "weight": 600,
+      "family": "IBM Plex Sans Arabic SemiBold",
+      "sha256": "d5cc998662aa00718e478fa5dde0a21f8382b46dd2d9bd5ccc6767c4daf33182",
+      "bytes": 3908
+    },
+    {
+      "file": "441492499fc86682-s.1fbvi_fot8u4l.woff2",
+      "weight": 600,
+      "family": "IBM Plex Sans Arabic SemiBold",
+      "sha256": "08b108227ae9cd53d2b8e9fc442e06a1f4884e5cf2d26c9216ec386227de74fd",
+      "bytes": 15092
+    },
+    {
+      "file": "5ad8fdb5805e9b4a-s.0-uv4l43gdmt7.woff2",
+      "weight": 700,
+      "family": "IBM Plex Sans Arabic",
+      "sha256": "c6e0419cba62fba9e573686eaa1b503cae2f332e4ab1b0acff5cde599dee5d7a",
+      "bytes": 33628
+    },
+    {
+      "file": "bb8a9270184a3556-s.0phk7_etl12r4.woff2",
+      "weight": 700,
+      "family": "IBM Plex Sans Arabic",
+      "sha256": "8927966971938a5d3b82ae78df9f48ef092b9cbc4592340aa690da071860c81d",
+      "bytes": 736
+    },
+    {
+      "file": "b3f2ed44161db83e-s.3c64at4xi6rda.woff2",
+      "weight": 700,
+      "family": "IBM Plex Sans Arabic",
+      "sha256": "503aac7b4b3319c1fbd73b2092104af7356eedac3e60383a38682709d82665fa",
+      "bytes": 3848
+    },
+    {
+      "file": "84cd8d504984ae62-s.0iritm8hg8q1a.woff2",
+      "weight": 700,
+      "family": "IBM Plex Sans Arabic",
+      "sha256": "1b848320d4a6ae56cec60b521703b649a677d9ab70be2dfa0fe43088efa50073",
+      "bytes": 14208
+    }
+  ]
+}

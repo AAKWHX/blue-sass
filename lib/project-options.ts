@@ -75,7 +75,7 @@ export const performanceOptions = [
   priced("performance-audit", 125, "once", software, translated("تدقيق الأداء وتحسين مسار التحميل", "Performance audit and loading optimization", "Prestatie-audit en laadoptimalisatie", "Leistungsprüfung und Ladeoptimierung", "Performans denetimi ve yükleme iyileştirme", "Audit performance et optimisation", "Auditoría de rendimiento y optimización")),
 ];
 export const projectLanguages = ["ar", "en", "nl", "de", "tr", "fr", "es", "it", "pt", "zh", "ja", "ru", "pl", "uk", "ko"];
-export const languageNames: Record<string, string> = Object.fromEntries(locales.map(locale=>[locale,localeMeta[locale].native]));
+export const languageNames: Record<string, string> = Object.fromEntries(Object.entries(localeMeta).map(([locale, meta])=>[locale,meta.native]));
 export type ProjectConfiguration = {
   priceVersion?: 1 | 2;
   promotionPercent?: number;

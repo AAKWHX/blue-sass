@@ -1,0 +1,11 @@
+.blue-sass-signature { display:inline-flex; align-items:center; gap:8px; width:fit-content; max-width:100%; min-height:44px; padding:2px 4px; border-radius:6px; color:#cbd5e1; font:500 12px/1.5 system-ui,sans-serif; text-decoration:none; isolation:isolate; }
+.blue-sass-signature[data-theme=light] { color:#334155; }
+.blue-sass-signature strong { color:#f8fafc; font-weight:650; }
+.blue-sass-signature[data-theme=light] strong { color:#0f172a; }
+.blue-sass-signature img { display:block; flex:none; width:24px; height:24px; transition:transform .18s ease; }
+.blue-sass-signature[data-size=ultra-compact] { font-size:11px; gap:6px; }
+.blue-sass-signature[data-size=ultra-compact] img { width:20px; height:20px; }
+.blue-sass-signature small { display:block; font-size:10px; color:inherit; }
+.blue-sass-signature:focus-visible { outline:2px solid currentColor; outline-offset:4px; }
+@media (hover:hover) and (prefers-reduced-motion:no-preference) { .blue-sass-signature:hover img { transform:translateY(-2px); } }
+@media (prefers-reduced-motion:reduce) { .blue-sass-signature img { transition:none; } }

@@ -4,6 +4,13 @@
 /* Tailwind v4: a single @import replaces the three @tailwind directives. */
 @import "tailwindcss";
 
+/* Opt in before page-specific CSS arrives, so native project transitions survive navigation. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
 .tool-surface { background:#050608; color:#f5f5f5; }
 .gold-product-card { background:#101216; color:#e6c988; border-color:#8d743f; box-shadow:inset 0 1px 0 rgb(230 201 136 / .14); }
 .gold-product-card h1,.gold-product-card h2,.gold-product-card h3 { color:#f3deb2; }
@@ -1598,3 +1605,20 @@ html { scroll-padding-block-start:7rem; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Shared numeric/date controls retain native keyboard validation and calendars. */
+[data-slot=input]:is([type=number],[type=date],[type=time],[type=datetime-local]) { min-height:44px; font-size:16px; font-variant-numeric:tabular-nums; }
+[data-slot=input][type=number] { appearance:textfield; -moz-appearance:textfield; }
+[data-slot=input][type=number]::-webkit-inner-spin-button,[data-slot=input][type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+.tool-surface [data-slot=input]:is([type=date],[type=time],[type=datetime-local]) { color-scheme:dark; }
+.number-control { display:flex; align-items:stretch; gap:6px; min-width:0; direction:ltr; }
+.number-control input { min-width:0; text-align:center; }
+.number-control > button { min-width:44px; min-height:44px; border:1px solid #718096; border-radius:10px; }
+.number-control > button:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+.number-control > button:disabled { opacity:.5; cursor:not-allowed; }
+:where(a,button,input,textarea,[role=combobox]):focus-visible { outline:2px solid #79cbea; outline-offset:3px; }
+@media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto !important; } *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
+
+/* Public interaction keyframes are explicit: raw CSS names must survive Tailwind emission. */
+@keyframes bs-button-sweep{from{transform:translateX(-160%) rotate(12deg)}to{transform:translateX(440%) rotate(12deg)}}
+@keyframes bs-menu-link{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}

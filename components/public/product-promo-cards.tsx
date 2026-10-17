@@ -1,13 +1,35 @@
 import Link from "next/link";
-import {Cloud,FileSearch,Layers3,Briefcase,ShoppingBag,Users} from "lucide-react";
-import {toolsUi} from "@/lib/i18n/tools-ui";
-import {messageToolCopy} from "@/lib/i18n/message-tool";
-import {platformCopy} from "@/lib/i18n/platform-tools";
-import {businessUi} from "@/lib/i18n/business-ui";
-import {subscriptionUnits,subscriptionHeading} from "@/lib/i18n/subscription-units";
+import { Cloud, FileSearch, Layers3, Briefcase, ShoppingBag, Users, ArrowUpRight } from "lucide-react";
+import { messageToolCopy } from "@/lib/i18n/message-tool";
+import { businessUi } from "@/lib/i18n/business-ui";
+import { subscriptionUnits, subscriptionHeading } from "@/lib/i18n/subscription-units";
+import { PlatformCard } from "./platform-card";
+import type { Locale } from "@/lib/i18n/config";
+import { creationCopy } from "@/lib/i18n/creation";
+import { homePlatformCopy } from "@/lib/i18n/home-platform";
+import { Button } from "@/components/ui/button";
 
-import type {Locale} from "@/lib/i18n/config";
-export function ProductPromoCards({locale}:{locale:Locale}){const c=toolsUi(locale);const p=platformCopy(locale);const b=businessUi(locale);
- const cards=[{path:"subscriptions",title:subscriptionHeading(locale),detail:p.plansIntro,icon:Layers3},{path:"hosting",title:subscriptionUnits(locale).hosting,detail:"Static · Next.js",icon:Cloud},{path:"tools",title:messageToolCopy(locale).tools,detail:c.heading,icon:FileSearch}];
- return <section className="section-y"><div className="container-x"><div className="grid gap-5 lg:grid-cols-3">{cards.map(card=><Link key={card.path} href={`/${locale}/${card.path}`} className="gold-product-card group rounded-3xl border p-7 sm:p-9"><card.icon className="size-8"/><h2 className="mt-7 text-2xl font-semibold leading-9">{card.title}</h2><p className="mt-4 text-sm leading-7 text-white/75">{card.detail}</p><span className="mt-7 inline-block border-b border-current/40 pb-1 text-sm">{c.open}</span></Link>)}</div><div className="mt-5 grid gap-3 sm:grid-cols-3">{[{path:"jobs",title:b.jobs,icon:Briefcase},{path:"marketplace",title:b.freelance,icon:Users},{path:"products",title:b.products,icon:ShoppingBag}].map(card=><Link key={card.path} href={`/${locale}/${card.path}`} className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/[0.03] p-5 text-white transition-colors hover:border-white/40"><card.icon className="size-5 shrink-0"/><h2 className="text-base font-semibold">{card.title}</h2></Link>)}</div></div></section>;
+export function ProductPromoCards({ locale }: { locale: Locale }) {
+  const b = businessUi(locale);
+  const labels = creationCopy(locale); const content = homePlatformCopy(locale);
+  const toolPaths = ["qr-code-generator", "invoice-generator", "seo-checker", "message-checker"];
+  const cards = [
+    { path: "subscriptions", title: subscriptionHeading(locale), icon: Layers3 },
+    { path: "hosting", title: subscriptionUnits(locale).hosting, icon: Cloud },
+    { path: "tools", title: messageToolCopy(locale).tools, icon: FileSearch },
+    { path: "products", title: b.products, icon: ShoppingBag },
+    { path: "marketplace", title: b.freelance, icon: Users },
+    { path: "jobs", title: b.jobs, icon: Briefcase },
+  ];
+  return <div className="platform-section container-x"><div className="creation-section-heading"><div><h2>{labels.platform}</h2><p>{labels.platformIntro}</p></div></div><div className="platform-grid">
+    {cards.map((card, index) => <PlatformCard key={card.path} index={index}>
+      <section id={`home-${card.path}`} className={`platform-card platform-card-${card.path}`} aria-labelledby={`platform-${card.path}`}>
+        <div className="platform-card-top"><span className="platform-icon"><card.icon aria-hidden="true" size={24}/></span><span className="platform-number" aria-hidden="true">0{index + 1}</span></div>
+        <h3 id={`platform-${card.path}`}><Link href={`/${locale}/${card.path}`} className="platform-link">{card.title}<ArrowUpRight aria-hidden="true" size={22}/></Link></h3>
+        <p>{content.details[index]}</p>
+        {card.path === "tools" ? <><div className="platform-tool-grid">{content.tools.map((text, toolIndex) => { const [title, benefit] = text.split("|"); return <Link key={toolPaths[toolIndex]} href={`/${locale}/tools/${toolPaths[toolIndex]}`} className="platform-tool"><span className="platform-tool-title">{title}<ArrowUpRight aria-hidden size={17}/></span><span>{benefit}</span><span className="platform-tool-cta">{labels.openTool}</span></Link>; })}</div><p className="platform-tool-note">{content.note}</p></> : <><ul className="platform-benefit-list">{content.features[index].map(feature => <li key={feature}><span aria-hidden>✓</span>{feature}</li>)}</ul><Button asChild variant="ghostNeon" className="mt-7"><Link href={`/${locale}/${card.path}`}>{labels.explore}<ArrowUpRight aria-hidden size={17}/></Link></Button></>}
+        <div className="platform-decoration" aria-hidden="true"><i/><i/><i/></div>
+      </section>
+    </PlatformCard>)}
+  </div></div>;
 }

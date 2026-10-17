@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (paymentId) await markPaymentFailed(paymentId, error instanceof PayPalApiError ? error.issue ?? "PAYPAL_CREATE_FAILED" : "CREATE_FAILED", attempt).catch(() => undefined);
     if (error instanceof Error && error.message === "BODY_TOO_LARGE") return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 413 });
-    if (error instanceof z.ZodError) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
+    if (error instanceof SyntaxError || error instanceof z.ZodError || (error instanceof Error && error.message === "INVALID_BODY")) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
     if (error instanceof AuthorisationError) return NextResponse.json({ error: "AUTH_REQUIRED" }, { status: 401 });
     if (error instanceof PaymentAccessError) return NextResponse.json({ error: "PAYMENT_UNAVAILABLE" }, { status: 403 });
     if (error instanceof PaymentConflictError) return NextResponse.json({ error: "PAYMENT_CONFLICT" }, { status: 409 });

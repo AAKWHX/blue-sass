@@ -1,10 +1,9 @@
-import type { Metadata } from "next";
+import { publicPageMetadata } from "@/lib/i18n/seo";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return publicPageMetadata((await params).locale, "privacy", "/privacy"); }
 import { LegalPage } from "@/components/public/legal-page";
 import { localizeForLocale } from "@/lib/i18n/extra-locales";
 import { advertisingPrivacy } from "@/lib/i18n/advertising-privacy";
 import { isLocale } from "@/lib/i18n/config";
-
-export const metadata: Metadata = { title: "سياسة الخصوصية — بلو ساس", description: "كيف تجمع بلو ساس البيانات الشخصية وتستخدمها وتحميها." };
 
 const sections = [
   { title: "Information we collect", paragraphs: ["When you request a quote, create an account, or contact us, we may collect your name, email address, company details, project requirements, and the content of your message.", "If you choose Sign in with Google, Google provides us with your verified email address, name, profile image, and a provider-specific account identifier. We do not receive your Google password and we do not request access to your Google Drive, contacts, or other Google services."] },

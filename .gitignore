@@ -9,3 +9,7 @@ next-env.d.ts
 .next-build
 downloads/
 /tmp/pdfs/
+
+artifacts/
+tmp/
+.vercel/

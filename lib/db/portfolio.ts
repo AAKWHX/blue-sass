@@ -7,10 +7,10 @@ export const portfolioMediaName = "Portfolio: published media";
 export async function portfolioEntries(admin = false) {
  const viewer = admin ? await requirePermission("portfolio.manage") : null;
  if (!isDatabaseConfigured) return [];
- // Explicit projection: never serialize client IDs, budgets, messages or dates.
- const rows = await db.select({ id: projects.id, name: projects.name, summary: projects.summary, cover: projects.cover, industry: projects.industry, stage: projects.stage, progress: projects.progress, visibility: projects.visibility, features: projects.tech }).from(projects).where(admin ? visibleProjectsFilter(viewer) : eq(projects.visibility, "public")).orderBy(desc(projects.updatedAt));
+ // Explicit projection: never serialize client IDs, budgets, messages or private dates.
+ const rows = await db.select({ id: projects.id, name: projects.name, summary: projects.summary, cover: projects.cover, industry: projects.industry, updatedAt: projects.updatedAt, stage: projects.stage, progress: projects.progress, visibility: projects.visibility, features: projects.tech }).from(projects).where(admin ? visibleProjectsFilter(viewer) : eq(projects.visibility, "public")).orderBy(desc(projects.updatedAt));
  if (!rows.length) return [];
- const media = await db.select({ projectId: projectFiles.projectId, kind: projectFiles.kind, url: projectFiles.url }).from(projectFiles).where(and(inArray(projectFiles.projectId, rows.map(p => p.id)), eq(projectFiles.name, portfolioMediaName), eq(projectFiles.visibleToClient, true)));
- return rows.map(row => ({ ...row, images: media.filter(m => m.projectId === row.id && m.kind === "image").map(m => m.url), url: media.find(m => m.projectId === row.id && m.kind === "demo")?.url ?? "" }));
+ const media = await db.select({ projectId: projectFiles.projectId, kind: projectFiles.kind, version: projectFiles.version, url: projectFiles.url }).from(projectFiles).where(and(inArray(projectFiles.projectId, rows.map(p => p.id)), eq(projectFiles.name, portfolioMediaName), eq(projectFiles.visibleToClient, true)));
+ return rows.map(row => ({ ...row, images: media.filter(m => m.projectId === row.id && m.kind === "image").map(m => m.url), url: media.find(m => m.projectId === row.id && m.kind === "demo" && m.version !== "portfolio-live")?.url ?? "", liveUrl: media.find(m => m.projectId === row.id && m.kind === "demo" && m.version === "portfolio-live")?.url ?? "" }));
 }
 export type PortfolioEntry = Awaited<ReturnType<typeof portfolioEntries>>[number];

@@ -1,0 +1,62 @@
+import type { Locale } from './config';
+
+const copy = {
+  ar: {
+    label: 'استوديو رقمي. من الفكرة إلى الإطلاق.', title: ['فكرتك تستحق', 'تجربة استثنائية.'],
+    intro: 'نصمّم ونطوّر المواقع والتطبيقات والأنظمة الذكية. نربط التفاصيل برؤية واحدة، ونحوّلها إلى منتج يمكنك استخدامه وإدارته.',
+    start: 'لنبدأ مشروعك', explore: 'اكتشف التجربة', pause: 'إيقاف الحركة', resume: 'تشغيل الحركة', skip: 'تخطي إلى الخدمات',
+    services: 'ما الذي تريد أن تصنعه؟', serviceIntro: 'من حضورك الأول على الويب إلى نظام يتطور مع أعمالك. اختر المسار، ثم نحدد التفاصيل والنطاق والتكلفة معك.', details: 'اكتشف التفاصيل', all: 'جميع الخدمات',
+    story: 'فكرة واحدة. رحلة متكاملة.', storyIntro: 'نربط التصميم بالتنفيذ، دون أن تضيع الفكرة بين المراحل.',
+    steps: [
+      { title: 'نفهم، ثم نصمّم.', text: 'نحدد الهدف والمسارات ونختبر شكل التجربة قبل كتابة الكود.', tag: '01 / DISCOVER & DESIGN' },
+      { title: 'نبني ما تحتاجه.', text: 'واجهات واضحة، بيانات مترابطة، وتفاصيل تخدم طريقة عملك.', tag: '02 / BUILD & CONNECT' },
+      { title: 'نرافقك إلى الإطلاق.', text: 'اختبار وتسليم ودعم ضمن النطاق المتفق عليه. منتج يمكنك إدارته بعد التسليم.', tag: '03 / LAUNCH & EVOLVE' },
+    ],
+    work: 'أعمال تُرى. وتُستخدم.', workIntro: 'مساحة للمشاريع المنشورة وتفاصيل رحلتها، من الفكرة إلى التجربة.', empty: 'لا توجد أعمال منشورة بعد.', emptyText: 'كل مشروع له قصته. ستظهر هنا الأعمال المعتمدة للنشر؛ المشهد الحالي توضيح لخدمة تطوير المواقع، وليس مشروع عميل.', illustration: 'دراسة بصرية لخدمة Blue Sass · ليست عملاً لعميل', projects: 'استعرض الأعمال', open: 'افتح المشروع', back: 'العودة إلى الأعمال', updated: 'آخر تحديث', features: 'تفاصيل التنفيذ', visit: 'زيارة الموقع', preview: 'معاينة',
+    tools: 'مساحة أصغر. أثر يومي.', toolsIntro: 'أدوات عملية، جاهزة لمهامك المتكررة. اختر الأداة المناسبة، وانتقل مباشرة إلى العمل.', try: 'افتح الأداة',
+    products: 'قوالب لخطوتك التالية.', productIntro: 'قوالب Blue Sass للمواقع والتطبيقات والأنظمة. استعرض التصميم واختر نقطة البداية؛ نخصص المحتوى والوظائف لاحقًا حسب تفاصيل مشروعك.', productCta: 'استعرض الخدمات',
+    subscriptions: 'العلاقة لا تنتهي بالإطلاق.', subIntro: 'تابع موقعك بفحوص وتقارير دورية، واختر الخطة الملائمة لاستخدامك. الحدود والمزايا موضحة في صفحة كل خطة.', plans: 'استعرض الاشتراكات',
+    hosting: 'من مشروعك، إلى العالم.', hostIntro: 'ارفع موقع Static أو مشروع Next.js. تابع حالة النشر وأدر مواقعك من حسابك.', hostCta: 'استكشف الاستضافة', hostSteps: ['ارفع ملفاتك', 'تابع حالة النشر', 'أدر موقعك'],
+    people: 'المشاريع تنمو بالأشخاص.', jobs: 'فرص العمل', freelance: 'المستقلون', jobText: 'ابحث عن خطوتك المهنية التالية، أو انشر المهارات التي يحتاجها فريقك.', freelanceText: 'اعرض متطلبات مشروعك، وناقش النطاق والعروض مع المستقلين.',
+    closing: 'لنصنع ما يأتي بعد.', next: 'خطوتك القادمة تبدأ بمحادثة.', process: 'رحلة العمل', demo: 'مختبر حركة محلي · مثال داخلي وليس مشروع عميل',
+  },
+  en: {
+    label: 'A digital studio. From idea to launch.', title: ['Your ambition.', 'An exceptional experience.'],
+    intro: 'We design and develop websites, apps and intelligent systems. One connected vision, crafted into a product you can use and manage.',
+    start: 'Let’s build your project', explore: 'Explore the experience', pause: 'Pause motion', resume: 'Resume motion', skip: 'Skip to services',
+    services: 'What will you create?', serviceIntro: 'From your first presence online to a system that grows with your business. Choose a direction; we define scope and cost together.', details: 'Explore the details', all: 'All services',
+    story: 'One idea. A connected journey.', storyIntro: 'Design and engineering, connected from the start.',
+    steps: [
+      { title: 'Understand. Then design.', text: 'Define the goal, map the journeys and test the experience before development.', tag: '01 / DISCOVER & DESIGN' },
+      { title: 'Build what matters.', text: 'Clear interfaces, connected data and details shaped around the way you work.', tag: '02 / BUILD & CONNECT' },
+      { title: 'Launch. And move forward.', text: 'Testing, handover and support within the agreed scope. A product you can manage.', tag: '03 / LAUNCH & EVOLVE' },
+    ],
+    work: 'Work to see. And use.', workIntro: 'Published projects and the story behind their experiences.', empty: 'No published projects yet.', emptyText: 'Every project has a story. Approved public projects will appear here. The current artwork illustrates our web service; it is not client work.', illustration: 'Blue Sass service study · not client work', projects: 'Explore our work', open: 'Open project', back: 'Back to work', updated: 'Last updated', features: 'Project details', visit: 'Visit website', preview: 'Preview',
+    tools: 'Small tools. Daily impact.', toolsIntro: 'Practical tools for recurring tasks. Find what you need and get straight to work.', try: 'Open tool',
+    products: 'Templates for your next move.', productIntro: 'Blue Sass templates for websites, apps and systems. Explore a starting design; we refine content and features around your project details.', productCta: 'Explore services',
+    subscriptions: 'Beyond the launch.', subIntro: 'Recurring website checks and reports. Choose a plan for your usage; features and limits are listed with each plan.', plans: 'Explore subscriptions',
+    hosting: 'From your project to the world.', hostIntro: 'Upload a static site or Next.js project. Follow deployment status and manage your sites from your account.', hostCta: 'Explore hosting', hostSteps: ['Upload your files', 'Follow deployment', 'Manage your site'],
+    people: 'Good work starts with people.', jobs: 'Careers', freelance: 'Freelancers', jobText: 'Find your next career move, or publish the skills your team needs.', freelanceText: 'Describe your project and discuss the scope and offers with freelancers.',
+    closing: 'Let’s make what comes next.', next: 'Your next move starts with a conversation.', process: 'Our process', demo: 'Local motion lab · internal example, not client work',
+  },
+  nl: {
+    label: 'Een digitale studio. Van idee tot lancering.', title: ['Uw ambitie.', 'Een bijzondere ervaring.'],
+    intro: 'Wij ontwerpen en ontwikkelen websites, apps en slimme systemen. Eén samenhangende visie, uitgewerkt tot een product dat u kunt gebruiken en beheren.',
+    start: 'Laten we uw project bouwen', explore: 'Ontdek de ervaring', pause: 'Beweging pauzeren', resume: 'Beweging hervatten', skip: 'Naar de diensten',
+    services: 'Wat gaat u maken?', serviceIntro: 'Van uw eerste online presentatie tot een systeem dat meegroeit. Kies een richting; samen bepalen we de scope en kosten.', details: 'Bekijk de details', all: 'Alle diensten',
+    story: 'Eén idee. Een verbonden traject.', storyIntro: 'Ontwerp en ontwikkeling, vanaf het begin verbonden.',
+    steps: [
+      { title: 'Begrijpen. Dan ontwerpen.', text: 'Doelen bepalen, gebruikersroutes uitwerken en de ervaring testen vóór de ontwikkeling.', tag: '01 / DISCOVER & DESIGN' },
+      { title: 'Bouwen wat nodig is.', text: 'Heldere interfaces, verbonden gegevens en details die uw werkwijze ondersteunen.', tag: '02 / BUILD & CONNECT' },
+      { title: 'Lanceren. En verdergaan.', text: 'Testen, overdracht en ondersteuning binnen de afgesproken scope. Een product dat u zelf kunt beheren.', tag: '03 / LAUNCH & EVOLVE' },
+    ],
+    work: 'Werk om te zien. En te gebruiken.', workIntro: 'Gepubliceerde projecten en het verhaal achter hun ervaringen.', empty: 'Nog geen gepubliceerde projecten.', emptyText: 'Elk project heeft een verhaal. Goedgekeurde openbare projecten verschijnen hier. De huidige illustratie toont onze webdienst; dit is geen klantproject.', illustration: 'Blue Sass dienststudie · geen klantproject', projects: 'Bekijk ons werk', open: 'Open project', back: 'Terug naar het werk', updated: 'Laatst bijgewerkt', features: 'Projectdetails', visit: 'Bezoek website', preview: 'Voorbeeld',
+    tools: 'Kleine tools. Dagelijks verschil.', toolsIntro: 'Praktische tools voor terugkerende taken. Kies wat u nodig hebt en ga aan de slag.', try: 'Open tool',
+    products: 'Templates voor uw volgende stap.', productIntro: 'Blue Sass-templates voor websites, apps en systemen. Kies een startontwerp; inhoud en functies stemmen we later af op uw project.', productCta: 'Bekijk diensten',
+    subscriptions: 'Ook na de lancering.', subIntro: 'Periodieke websitecontroles en rapporten. Kies een passend abonnement; functies en limieten staan bij elk abonnement.', plans: 'Bekijk abonnementen',
+    hosting: 'Van uw project naar de wereld.', hostIntro: 'Upload een statische site of Next.js-project. Volg de publicatiestatus en beheer uw sites vanuit uw account.', hostCta: 'Ontdek hosting', hostSteps: ['Upload uw bestanden', 'Volg de publicatie', 'Beheer uw website'],
+    people: 'Goed werk begint met mensen.', jobs: 'Vacatures', freelance: 'Freelancers', jobText: 'Vind uw volgende carrièrestap of publiceer de vaardigheden die uw team zoekt.', freelanceText: 'Beschrijf uw project en bespreek de scope en offertes met freelancers.',
+    closing: 'Laten we de volgende stap maken.', next: 'Uw volgende stap begint met een gesprek.', process: 'Onze werkwijze', demo: 'Lokaal bewegingslab · intern voorbeeld, geen klantproject',
+  },
+};
+export function cinemaCopy(locale: Locale) { return copy[locale === 'ar' || locale === 'nl' ? locale : 'en']; }

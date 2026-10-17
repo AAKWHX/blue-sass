@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { assertCanWrite, requirePermission, requireViewer } from "@/lib/db/access";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { reviews } from "@/lib/db/schema";
+import { reviews, users } from "@/lib/db/schema";
 import { isLocale } from "@/lib/i18n";
 
 export type ReviewState = { ok: boolean; message: string };
@@ -19,9 +19,15 @@ export async function submitReviewAction(_previous: ReviewState, formData: FormD
   const locale = isLocale(String(formData.get("locale"))) ? String(formData.get("locale")) : "en";
   if (!parsed.success || !isDatabaseConfigured) return { ok: false, message: locale === "ar" ? "تحقق من التقييم والنص (20 حرفًا على الأقل)." : localizeForLocale("Check the rating and review (at least 20 characters).", locale) };
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const [recent] = await db.select({ value: count() }).from(reviews).where(and(eq(reviews.userId, viewer.id), gte(reviews.createdAt, since)));
-  if ((recent?.value ?? 0) >= 2) return { ok: false, message: locale === "ar" ? "يمكن إرسال رأيين كحد أقصى خلال 24 ساعة." : localizeForLocale("You can submit up to two reviews in 24 hours.", locale) };
-  await db.insert(reviews).values({ userId: viewer.id, displayName: viewer.name || "Blue Sass client", company: viewer.company, rating: parsed.data.rating, body: parsed.data.body });
+  // Serialize quota checks for this author; concurrent requests share the row lock.
+  const saved = await db.transaction(async tx => {
+    await tx.select({ id: users.id }).from(users).where(eq(users.id, viewer.id)).for("update");
+    const [recent] = await tx.select({ value: count() }).from(reviews).where(and(eq(reviews.userId, viewer.id), gte(reviews.createdAt, since)));
+    if ((recent?.value ?? 0) >= 2) return false;
+    await tx.insert(reviews).values({ userId: viewer.id, displayName: viewer.name || "Blue Sass client", company: viewer.company, rating: parsed.data.rating, body: parsed.data.body });
+    return true;
+  });
+  if (!saved) return { ok: false, message: locale === "ar" ? "يمكن إرسال رأيين كحد أقصى خلال 24 ساعة." : localizeForLocale("You can submit up to two reviews in 24 hours.", locale) };
   revalidatePath(`/${locale}/reviews`);
   revalidatePath(`/${locale}/admin/reviews`);
   return { ok: true, message: locale === "ar" ? "وصل رأيك وسيظهر بعد مراجعة الفريق. شكرًا لك." : localizeForLocale("Your review was received and will appear after moderation. Thank you.", locale) };

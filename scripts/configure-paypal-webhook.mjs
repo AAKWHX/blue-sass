@@ -1,4 +1,4 @@
-// Runs only in the production build, using existing environment credentials in memory.
+// Explicit operator command (npm run paypal:setup); never part of the build.
 const endpoint = "https://www.bluesass.nl/api/paypal/webhook";
 if (process.env.VERCEL_ENV === "production" && process.env.PAYPAL_ENV === "live") {
   const id = process.env.PAYPAL_CLIENT_ID?.trim(); const secret = process.env.PAYPAL_CLIENT_SECRET?.trim();

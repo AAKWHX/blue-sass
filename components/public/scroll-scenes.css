@@ -1,0 +1,51 @@
+/* The complete document remains readable when enhancement is disabled. */
+.bs-service-deck{display:flex;flex-direction:column-reverse;gap:24px}
+.bs-service-scene{padding:32px;border:1px solid #616976;border-radius:8px;background:#1d232c;color:#f3f4f6;box-shadow:0 20px 60px #0004}
+.bs-service-scene h3{font-size:clamp(24px,3vw,40px);line-height:1.4}
+.cinema-home .bs-service-scene p{margin-block:16px;color:#c6cbd2;line-height:1.8;font-size:16px;max-width:60ch}
+.bs-service-scene ul{display:flex;flex-wrap:wrap;gap:12px 24px;color:#c6cbd2;font-size:13px;margin-block:16px}
+.bs-scene-number{display:block;margin-bottom:16px;color:#c6cbd2;font-size:13px}
+.bs-service-select{display:none}
+.bs-service-scenes[data-stacked=true]{position:relative;padding:24px 40px 12px;max-width:100%;height:min(540px,calc(100svh - 104px))}
+.bs-service-scenes[data-stacked=true] .bs-service-deck{position:relative;height:calc(100% - 64px);perspective:1000px}
+.bs-service-scenes[data-stacked=true] .bs-service-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:start;justify-content:center}
+.bs-service-scenes[data-stacked=true] .bs-service-select{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;position:relative;margin-top:16px}
+.bs-service-select button{min-width:44px;min-height:44px;padding:8px;border-bottom:2px solid transparent;font-size:13px}
+.bs-service-select [aria-current]{border-color:#fff;background:#ffffff10}
+.cinema-home[data-scroll-motion=true] .cinema-opening{height:calc(100svh - 80px);min-height:0}
+.cinema-home[data-scroll-motion=true] .cinema-hero{position:relative;top:auto;height:calc(100svh - 80px);min-height:0;perspective:1200px}
+.cinema-home[data-scroll-motion=true] .immersive-hero-content{padding-top:70px;padding-bottom:85px}
+.cinema-home[data-scroll-motion=true] .cinema-services{position:relative;background:#0b0d11}
+.cinema-home[data-scroll-motion=true] .cinema-section{scroll-margin-top:92px}
+.bs-track-viewport{min-width:0;position:relative}
+.bs-track-viewport[data-track-scene=true]{overflow:hidden;isolation:isolate}
+.bs-track-viewport[data-track-scene=true] [data-cinematic-track]{display:flex!important;flex-wrap:nowrap;width:max-content;gap:24px;overflow:visible;scroll-snap-type:none;padding-bottom:12px;transition:none}
+.bs-track-viewport[data-track-scene=true] [data-cinematic-track]>*{width:min(68vw,760px);flex:0 0 auto;min-width:0;max-width:none}
+.bs-track-viewport[data-track-scene=true] .creation-card{width:min(70vw,520px);transition:none}
+.bs-track-viewport[data-track-scene=true] .cinema-project-cover{aspect-ratio:1.9;max-height:45svh}
+.bs-track-viewport[data-track-scene=true] .cinema-project-caption{margin-top:12px}
+.bs-track-viewport[data-track-scene=true] .cinema-project-caption h3{font-size:clamp(22px,3vw,36px)}
+.bs-public-motion[data-scene-motion=true] :is(.creation-card,.platform-card,.tool-card,.project-service-grid>article,.project-type-grid>article){transition:none}
+.bs-page-curtain{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;gap:24px;transform:translateY(100%);background:#dde2e8;color:#101216;font-size:clamp(28px,5vw,64px);pointer-events:none}
+@media(max-width:767px){
+ .bs-service-scenes[data-stacked=true]{padding:12px 16px;height:min(480px,calc(100svh - 104px))}
+ .bs-service-scene{padding:20px}
+ .cinema-home .bs-service-scene p{font-size:14px;margin-block:10px}
+ .bs-service-scene ul{font-size:12px;gap:8px 12px;margin-block:10px}
+ .bs-service-select{gap:0!important}
+ .bs-service-select button{min-width:36px;font-size:12px}
+ .bs-track-viewport[data-track-scene=true] [data-cinematic-track]>*{width:calc(100vw - 48px)}
+ .cinema-home[data-scroll-motion=true] .immersive-hero-content{padding-bottom:75px}
+}
+@media(max-height:739px){
+ .bs-service-scenes[data-stacked=true]{height:calc(100svh - 108px)}
+ .bs-service-scene{padding:20px}
+ .bs-scene-number{margin-bottom:8px}
+ .cinema-home[data-scroll-motion=true] .cinema-hero h1{font-size:clamp(30px,4.5vw,58px)}
+ .cinema-home[data-scroll-motion=true] .cinema-hero .cinema-intro{font-size:14px;margin-top:12px!important}
+ .cinema-home[data-scroll-motion=true] .cinema-actions{margin-top:16px}
+ .cinema-home[data-scroll-motion=true] .immersive-wordmark{font-size:clamp(36px,9vw,100px)}
+ .bs-track-viewport[data-track-scene=true] .creation-card{padding:20px}
+ .bs-track-viewport[data-track-scene=true] .creation-card h2{font-size:24px}
+}
+@media(prefers-reduced-motion:reduce){.bs-page-curtain{display:none}}

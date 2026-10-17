@@ -1,19 +1,15 @@
+import { publicPageMetadata } from "@/lib/i18n/seo";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) { return publicPageMetadata((await params).locale, "services", "/services"); }
 import { notFound } from "next/navigation";
-import { StudioServices } from "@/components/public/studio-sections";
+import { CreationGrid } from "@/components/public/creation-grid";
 import { CallToAction } from "@/components/public/process";
 import { isLocale } from "@/lib/i18n";
-import { PromotionBanner } from "@/components/public/website-pricing";
-import { WebsitePricing } from "@/components/public/website-pricing";
-import { TemplateGallery } from "@/components/public/template-gallery";
 
 export default async function ServicesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   return <div className="public-flow service-page-flow">
-    <StudioServices all />
-    <TemplateGallery embedded />
-    <PromotionBanner/>
-    <WebsitePricing embedded />
+    <CreationGrid locale={locale} all />
     <CallToAction />
   </div>;
 }

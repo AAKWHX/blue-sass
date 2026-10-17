@@ -1,0 +1,21 @@
+/* Gold is an explicit requested finish. Stack order, dimensions and scroll timelines stay intact. */
+.cinema-home .bs-service-scene{border-color:#ac8744;background:linear-gradient(135deg,#302718 0%,#17140e 40%,#292115 78%,#15130e 100%);box-shadow:inset 0 1px 0 #f0d59966,inset 0 -1px 0 #96723155,0 20px 60px #0005;color:#fbf3df}
+.cinema-home .bs-service-scene h3{color:#f6dfab}
+.cinema-home .bs-service-scene :is(p,ul){color:#e1d5bb}
+.cinema-home .bs-service-scene .bs-scene-number{color:#c5a969}
+.cinema-home .bs-service-scene .cinema-link{color:#f9e2ac;border-color:#b29553}
+.cinema-home .bs-service-select [aria-current]{color:#fae4af;background:#b7913d26;border-color:#d5ae5b}
+.bs-service-image{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:10px;background:#0b0e15}
+.bs-service-image img{object-fit:cover}
+.creation-card>.bs-service-image{margin-bottom:20px}
+.creation-card:has(>.bs-service-image) .creation-card-head{display:none}
+.creation-card:has(>.bs-service-image) :is(h2,h3){margin-top:0}
+.bs-track-viewport[data-track-scene=true] .creation-card>.bs-service-image{height:140px;aspect-ratio:auto;flex-shrink:0}
+.creation-detail-art>.bs-service-image{height:100%;min-height:240px;border-radius:inherit}
+.cinema-home .bs-service-scene>.bs-service-image{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border-radius:inherit;pointer-events:none;opacity:.24;mask-image:linear-gradient(90deg,#000,transparent 76%)}
+[dir=rtl] .cinema-home .bs-service-scene>.bs-service-image{mask-image:linear-gradient(-90deg,#000,transparent 76%)}
+.cinema-home .bs-service-scene>:not(.bs-service-image){position:relative}
+.cinema-home .bs-service-scene>.bs-service-image img{object-fit:cover}
+.immersive-media .cinema-artwork-video{object-fit:contain}
+.immersive-media:has(.cinema-artwork-video){background:#090c11}
+@media(max-width:767px){.cinema-home .bs-service-scene>.bs-service-image{opacity:.15}.bs-service-image{border-radius:8px}}
