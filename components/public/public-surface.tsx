@@ -11,7 +11,7 @@ export function PublicSurface({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const ref = useRef<HTMLDivElement>(null);
   const path = pathname.split("/")[2] ?? "";
-  const marketing = ["", "services", "about", "contact", "projects", "reviews", "pricing", "templates", "subscriptions", "discover", "compare"].includes(path);
+  const marketing = ["", "services", "about", "contact", "projects", "reviews", "pricing", "templates", "subscriptions", "discover", "compare", "privacy", "terms"].includes(path);
   const enhanced = publicMotionPath(pathname);
   usePublicMotion(ref, pathname, enhanced && path !== '');
   return <div ref={ref} className={[marketing ? 'studio-public' : '', enhanced ? 'bs-public-motion' : ''].filter(Boolean).join(' ') || undefined}>{children}<PublicPageTransition/></div>;

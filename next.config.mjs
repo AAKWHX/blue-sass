@@ -7,7 +7,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  experimental: { serverActions: { bodySizeLimit: "3200kb" } },
+  experimental: { globalNotFound: true, serverActions: { bodySizeLimit: "3200kb" } },
   serverExternalPackages: ["@react-pdf/renderer"],
   outputFileTracingIncludes: { "/api/audits/*/pdf": ["./public/report-fonts/*.ttf"], "/api/tools/invoice": ["./public/report-fonts/*.ttf"] },
   images: { qualities: [75, 92] },

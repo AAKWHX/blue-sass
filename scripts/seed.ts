@@ -6,6 +6,7 @@
  * Safe to re-run — every insert is idempotent on a natural key.
  */
 import { readFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import bcrypt from "bcryptjs";
@@ -29,6 +30,15 @@ for (const file of [".env.local", ".env"]) {
 const url = process.env.DATABASE_URL;
 if (!url) {
   console.error("DATABASE_URL is not set. Copy .env.example to .env.local first.");
+  process.exit(1);
+}
+
+// SAFETY: this script creates well-known demo accounts (including a super admin).
+// It must only ever run against a disposable, synthetic database - never production.
+if (process.env.SEED_CONFIRM_DISPOSABLE_DB !== "yes-synthetic-only") {
+  console.error(
+    "Refusing to seed: set SEED_CONFIRM_DISPOSABLE_DB=yes-synthetic-only to confirm DATABASE_URL points to a disposable, non-production database.",
+  );
   process.exit(1);
 }
 
@@ -71,7 +81,15 @@ async function upsertUser(input: {
 async function main() {
   console.log("Seeding AWWA database…");
 
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe!2026";
+  // No built-in default: the admin password must be supplied by the operator.
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (!adminPassword || adminPassword.length < 12) {
+    console.error("SEED_ADMIN_PASSWORD is required and must be at least 12 characters.");
+    process.exit(1);
+  }
+  // Other demo accounts get unguessable random passwords that are never printed;
+  // use the password-reset flow to access them.
+  const randomPassword = () => randomBytes(24).toString("base64url");
 
   const omar = await upsertUser({
     email: process.env.SEED_ADMIN_EMAIL ?? "admin@aakwhx.com",
@@ -83,24 +101,24 @@ async function main() {
     locale: "ar",
   });
   const lieke = await upsertUser({
-    email: "lieke@aakwhx.com", name: "Lieke van Dijk", password: adminPassword,
+    email: "lieke@aakwhx.com", name: "Lieke van Dijk", password: randomPassword(),
     role: "admin", company: "AAKWHX", title: "Head of Delivery", locale: "nl",
   });
   const jonas = await upsertUser({
-    email: "jonas@aakwhx.com", name: "Jonas Weber", password: adminPassword,
+    email: "jonas@aakwhx.com", name: "Jonas Weber", password: randomPassword(),
     role: "pm", company: "AAKWHX", title: "Project Manager", locale: "de",
   });
   const elif = await upsertUser({
-    email: "elif@aakwhx.com", name: "Elif Demir", password: adminPassword,
+    email: "elif@aakwhx.com", name: "Elif Demir", password: randomPassword(),
     role: "employee", company: "AAKWHX", title: "Lead Engineer", locale: "tr",
   });
 
   const nadia = await upsertUser({
-    email: "nadia@meridian-health.com", name: "Nadia Haddad", password: "ClientDemo!2026",
+    email: "nadia@meridian-health.com", name: "Nadia Haddad", password: randomPassword(),
     role: "client", company: "Meridian Health", title: "CTO", locale: "en",
   });
   const tom = await upsertUser({
-    email: "tom@northgate-logistics.nl", name: "Tom Bakker", password: "ClientDemo!2026",
+    email: "tom@northgate-logistics.nl", name: "Tom Bakker", password: randomPassword(),
     role: "client", company: "Northgate Logistics", title: "COO", locale: "nl",
   });
 
@@ -259,9 +277,10 @@ async function main() {
     console.log("  ✓ demo leads");
   }
 
-  console.log("\nDone. Sign in with:");
-  console.log(`  admin  ${process.env.SEED_ADMIN_EMAIL ?? "admin@aakwhx.com"} / ${adminPassword}`);
-  console.log("  client nadia@meridian-health.com / ClientDemo!2026");
+  console.log("\nDone. Admin account:", process.env.SEED_ADMIN_EMAIL ?? "admin@aakwhx.com", "(password as supplied in SEED_ADMIN_PASSWORD; not printed).");
+  console.log("  Other demo accounts have random passwords; use the password-reset flow.");
+  console.log("  admin account password was supplied via SEED_ADMIN_PASSWORD (not printed)");
+  console.log("  demo client accounts were created with random passwords (not printed)");
 }
 
 main().catch((error) => {

@@ -15,3 +15,12 @@
 @media(max-width:1023px){.bs-discovery-badges{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:480px){.bs-discovery-badges{gap:8px}.bs-discovery-badges a{padding:16px 5px;border-radius:12px}.bs-discovery-badges span{font-size:10px}.bs-more-tools a{font-size:12px}.bs-story-content{padding-block:55px}}
 @media(prefers-reduced-motion:reduce){.bs-more-tools a,.bs-discovery-badges a{transition:none;transform:none!important}.bs-story-circle{display:none}}
+.cinema-home .home-faq{background:transparent}
+.cinema-home .home-faq h2{color:#FFFFFF}
+.cinema-home .home-faq .text-ink-low{color:#AEB6BF}
+.cinema-home .home-faq span.bg-black{background:#101216;border:1px solid #232630;color:#E8ECF0}
+.cinema-home .home-faq article{background:#101216;border-color:#232630}
+.cinema-home .home-faq article.bg-neon-cyan{background:#101216;border-color:#AEB6BF}
+.cinema-home .home-faq article button{color:#FFFFFF}
+.cinema-home .home-faq article p{color:#E8ECF0;border-color:#232630}
+.cinema-home .home-faq button.bg-black{background:#101216;border-color:#AEB6BF;color:#FFFFFF}

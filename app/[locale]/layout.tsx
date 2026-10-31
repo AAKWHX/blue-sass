@@ -75,7 +75,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={getDir(locale)} className={`${fontVariables}${locale === "ar" ? ` ${arabicFont.variable}` : ""}`} suppressHydrationWarning>
-      <head><meta name="google-adsense-account" content={adsensePublisher}/><AdSense signedIn={Boolean(viewer)} publisher={adsensePublisher} enabled={process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ADSENSE_ENABLED !== "false"}/></head>
+      <head>{/* Native reveal fires before React effects; observe only its expected opt-out rejection. */}<script dangerouslySetInnerHTML={{ __html: `(()=>{const observe=event=>{const transition=event.viewTransition;if(transition)void transition.ready.catch(error=>{if(error instanceof DOMException&&error.name==="InvalidStateError"&&error.message.includes("ViewTransition opt-in disabled"))return;queueMicrotask(()=>{throw error;});});};addEventListener("pageswap",observe);addEventListener("pagereveal",observe);})();` }}/><meta name="google-adsense-account" content={adsensePublisher}/><AdSense signedIn={Boolean(viewer)} publisher={adsensePublisher} enabled={process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ADSENSE_ENABLED !== "false"}/></head>
       <body className="bg-base text-ink-mid">
         <script
           type="application/ld+json"

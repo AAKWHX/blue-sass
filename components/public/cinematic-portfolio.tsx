@@ -34,15 +34,15 @@ export function CinematicPortfolio({ entries, locale, standalone = false, lab = 
           {/* Native document navigation enables shared-image transitions and browser Back without intercepting history. */}
           <a href={`/${locale}/${lab ? 'motion-lab' : 'projects'}/${encodeURIComponent(entry.id)}`} className="cinema-project-link">
             <ProjectCover src={entry.cover} name={entry.name} id={entry.id} priority={standalone && index === 0}/>
-            <div className="cinema-project-caption"><span><small>{entry.industry}</small><h3>{entry.name}</h3></span><span className="cinema-project-open">{c.open}<ArrowUpRight aria-hidden size={23}/></span></div>
+            <div className="cinema-project-caption"><span><small>{entry.industry}</small><h3>{entry.name}</h3></span><span className="cinema-project-open">{c.open}<ArrowUpRight aria-hidden className="flip-x" size={23}/></span></div>
             <p>{entry.summary}</p>
           </a>
         </article>)}
       </div></div> : <div className="cinema-work-empty">
         <figure className="cinema-work-window"><div className="immersive-work-scene"><ImmersiveMedia poster="/media/immersive-v2/web-showcase.webp" video={standalone ? undefined : "/media/immersive-v2/web-showcase.webm"} paused={paused}/></div><figcaption>{c.illustration}</figcaption></figure>
-        <div className="cinema-work-empty-copy"><h3>{c.empty}</h3><p>{c.emptyText}</p><Button asChild variant="unstyled" size="auto" className="cinema-link"><Link href={`/${locale}/services`}>{c.all}<ArrowUpRight aria-hidden size={20}/></Link></Button></div>
+        <div className="cinema-work-empty-copy"><h3>{c.empty}</h3><p>{c.emptyText}</p><Button asChild variant="unstyled" size="auto" className="cinema-link"><Link href={`/${locale}/services`}>{c.all}<ArrowUpRight aria-hidden className="flip-x" size={20}/></Link></Button></div>
       </div>}
-      {!standalone && entries.length > 0 && <Button asChild variant="unstyled" size="auto" className="cinema-link"><Link href={`/${locale}/projects`}>{c.projects}<ArrowUpRight aria-hidden size={20}/></Link></Button>}
+      {!standalone && entries.length > 0 && <Button asChild variant="unstyled" size="auto" className="cinema-link"><Link href={`/${locale}/projects`}>{c.projects}<ArrowUpRight aria-hidden className="flip-x" size={20}/></Link></Button>}
     </div>
   </section>;
 }
