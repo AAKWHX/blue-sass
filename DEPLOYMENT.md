@@ -57,7 +57,7 @@ npm run db:seed    # يضيف حساب المدير + فريق العمل + ٣ �
 
 ```
 admin   admin@aakwhx.com / <كلمة المرور التي وضعتها>
-client  nadia@meridian-health.com / ClientDemo!2026
+client  nadia@meridian-health.com / (كلمة مرور عشوائية - استخدم استعادة كلمة المرور)
 ```
 
 جرّبه محليًا:

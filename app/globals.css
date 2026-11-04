@@ -50,45 +50,7 @@
 .tool-surface [data-variant=neon] { background:#f5f5f5; color:#080808; border-color:#f5f5f5; }
 @media print {
   @page { size:A4; margin:15mm 14mm 17mm; }
-  body:has(.audit-report) header, body:has(.audit-report) footer, .audit-report [data-no-print] { display:none !important; }
-  body:has(.audit-report), .audit-report, .audit-report .tool-card { background:#fff !important; color:#080808 !important; box-shadow:none !important; }
-  .audit-report .tool-card { border-color:#b8bec8 !important; break-inside:avoid; }
-  .audit-report p, .audit-report span, .audit-report h1, .audit-report h2, .audit-report h3 { color:#080808 !important; }
-  body:has(.audit-report) { background:#fff !important; }
-  .audit-report { padding:0 !important; }
-  .audit-report .container-x { max-width:none; padding:0 !important; }
-  .audit-print-layout { table-layout:fixed; border-collapse:collapse; }
-  .audit-print-layout thead { display:table-header-group; }
-  .audit-print-layout tfoot { display:table-footer-group; }
-  .audit-print-layout td { padding-inline:0; }
-  .audit-letterhead { padding:3mm 0; border-color:#30343b !important; }
-  .audit-report .audit-overview { display:flex; gap:3mm; }
-  .audit-report .audit-overview > * { flex:1; }
-  .audit-report .audit-finding { padding:4mm; break-inside:avoid; border:1px solid #b8bec8; border-inline-start-width:3px; background:#fff !important; color:#080808 !important; box-shadow:none; }
-  .audit-report .tool-card { break-inside:auto; margin-bottom:5mm; padding:3mm; }
-  .audit-report h1 { font-size:23pt; }
-  .audit-report h2 { font-size:15pt; break-after:avoid; }
-  .audit-report h3 { font-size:11pt; }
-  .audit-report h4,.audit-report dt,.audit-report dd { color:#080808 !important; }
-  .audit-report p { font-size:9pt; line-height:1.7; }
-  .audit-report .audit-evidence { background:#f0f1f3 !important; }
-  .audit-print-footer { border-top:1px solid #b8bec8; padding-top:2mm; }
-  .audit-report .audit-result { color:#080808 !important; border-color:#68717e; }
-  .audit-report * { animation:none !important; transition:none !important; }
 }
-.audit-print-layout { table-layout:fixed; }
-.audit-print-layout td { vertical-align:top; }
-.audit-finding { border:1px solid #30343b; border-inline-start:4px solid #aeb6bf; border-radius:12px; padding:20px; color:#f5f5f5; }
-.audit-finding h3,.audit-finding h4 { color:inherit; }
-.audit-passed { border-inline-start-color:#6fe39c; background:rgb(111 227 156 / .07); }
-.audit-warning { border-inline-start-color:var(--color-amber-400); background:color-mix(in srgb,var(--color-amber-400) 8%,transparent); }
-.audit-urgent { border-inline-start-color:var(--color-red-400); background:color-mix(in srgb,var(--color-red-400) 9%,transparent); }
-.audit-excluded { background:#171a20; }
-.audit-result { flex-shrink:0; max-width:100%; border:1px solid currentColor; border-radius:7px; padding:4px 8px; font-size:12px; line-height:1.5; }
-.audit-passed .audit-result { color:#6fe39c; }
-.audit-warning .audit-result { color:var(--color-amber-300); }
-.audit-urgent .audit-result { color:var(--color-red-300); }
-.audit-evidence { background:rgb(255 255 255 / .05); }
 
 /* Continuous public-page rhythm; cards keep their own readable contrast. */
 .public-flow { background:#050608; color:#f5f5f5; --section-y:clamp(2.5rem,5vw,4rem); }

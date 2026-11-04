@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useMemo } from "react";
 import { dictionaries, getDir, type Dictionary, type Locale } from "@/lib/i18n";
-import { ContentProvider } from "@/lib/content-store";
 import { MotionConfig } from "framer-motion";
 
 interface I18nValue {
@@ -33,7 +32,7 @@ export function Providers({ locale, children }: { locale: Locale; children: Reac
 
   return (
     <I18nContext.Provider value={i18n}>
-      <MotionConfig reducedMotion="user"><ContentProvider>{children}</ContentProvider></MotionConfig>
+      <MotionConfig reducedMotion="user">{children}</MotionConfig>
     </I18nContext.Provider>
   );
 }

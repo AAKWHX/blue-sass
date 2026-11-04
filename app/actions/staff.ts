@@ -5,7 +5,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { adminAudit, platformOwner, projectMembers, projects, staffAccess, staffInvitations, users } from "@/lib/db/schema";
-import { requireOwner, requirePermission, requireViewer, assertCanViewProject } from "@/lib/db/access";
+import { requireOwner, requirePermission, requireViewer, assertCanWrite, assertCanViewProject } from "@/lib/db/access";
 import { capabilityKeys } from "@/lib/capabilities";
 import { canAcceptInvitation, canChangeAccount } from "@/lib/staff-policy";
 import { sendEmail, isEmailConfigured } from "@/lib/email/resend";
@@ -25,7 +25,7 @@ export async function updateStaffAccess(_previous: StaffState, form: FormData): 
   await db.transaction(async tx => {
     const [target] = await tx.select({ id: users.id, email: users.email }).from(users).where(eq(users.id, targetId)).limit(1);
     if (!target) return;
-    if (target.email.toLowerCase() === "al3rab@bluesass.nl" && permissions.some(value => !["leads.read", "projects.read_all", "projects.read_assigned"].includes(value))) throw new Error("READ_ONLY_ACCOUNT");
+    if (target.email.toLowerCase() === "qa-readonly@example.invalid" && permissions.some(value => !["leads.read", "projects.read_all", "projects.read_assigned"].includes(value))) throw new Error("READ_ONLY_ACCOUNT");
     await tx.update(staffInvitations).set({ revokedAt: new Date() }).where(and(eq(staffInvitations.email, target.email.toLowerCase()), isNull(staffInvitations.acceptedAt), isNull(staffInvitations.revokedAt)));
     await tx.insert(staffAccess).values({ userId: targetId, permissions, updatedBy: actor.id }).onConflictDoUpdate({ target: staffAccess.userId, set: { permissions, updatedBy: actor.id, updatedAt: new Date() } });
     await tx.insert(adminAudit).values({ actorId: actor.id, targetId, action: "permissions.updated", details: { permissions } });
@@ -48,7 +48,7 @@ export async function inviteStaff(_previous: StaffState, form: FormData): Promis
   const email = z.string().trim().email().max(254).parse(form.get("email")).toLowerCase();
   const permissions = permissionsFrom(form);
   if (email === actor.email.toLowerCase()) return { ok: false, code: "OWNER_PROTECTED" };
-  if (email === "al3rab@bluesass.nl" && permissions.some(value => !["leads.read", "projects.read_all", "projects.read_assigned"].includes(value))) return { ok: false, code: "READ_ONLY_ACCOUNT" };
+  if (email === "qa-readonly@example.invalid" && permissions.some(value => !["leads.read", "projects.read_all", "projects.read_assigned"].includes(value))) return { ok: false, code: "READ_ONLY_ACCOUNT" };
   const token = randomBytes(32).toString("hex");
   const invitation = await db.transaction(async tx => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${email}, 0))`);
@@ -74,6 +74,7 @@ export async function revokeInvitation(_previous: StaffState, form: FormData): P
 }
 export async function acceptStaffInvitation(_previous: StaffState, form: FormData): Promise<StaffState> {
   const viewer = await requireViewer();
+  assertCanWrite(viewer);
   const token = z.string().regex(/^[a-f0-9]{64}$/).safeParse(form.get("token"));
   if (!token.success || !(await takeRateLimit(`staff-accept:${viewer.id}`, 6, 60_000))) return { ok: false, code: "INVITATION_INVALID" };
   const ok = await db.transaction(async tx => {

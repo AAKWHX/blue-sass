@@ -10,9 +10,7 @@ import { getViewer, requirePermission, assertCanWrite } from "@/lib/db/access";
 import { validateEmail } from "@/lib/validation/contact";
 import { takeRateLimit } from "@/lib/rate-limit";
 import { estimate, featureCost, getImplementationPromotion, type FeatureKey } from "@/lib/pricing";
-import { findServiceTemplate } from "@/lib/service-templates";
 import { isLocale } from "@/lib/i18n/config";
-import { serviceQuotePresets } from "@/lib/service-details";
 import { websitePackage, websitePackageName } from "@/lib/website-packages";
 import { pricingCopy } from "@/lib/i18n/pricing-copy";
 
@@ -119,7 +117,7 @@ export async function submitLeadAction(
   }
   const addOns = data.addOns ? data.addOns.split(",").filter(Boolean) : [];
   const features = [...new Set((data.services ?? "").split(",").filter(Boolean))];
-  if (features.some((key) => !Object.hasOwn(featureCost, key)) || addOns.some((key) => !["domain", "email", "hosting", "maintenance", "google", "analytics"].includes(key))) {
+  if (features.some((key) => !Object.hasOwn(featureCost, key)) || addOns.some((key) => !["domain", "email", "maintenance", "google", "analytics"].includes(key))) {
     return { ok: false, message: "Invalid project options." };
   }
   const pack = websitePackage(data.kind);
@@ -128,8 +126,7 @@ export async function submitLeadAction(
   const promotion = getImplementationPromotion();
   const locale = isLocale(data.locale) ? data.locale : "en";
   const pricing = pricingCopy(locale);
-  const template = findServiceTemplate(data.templateId, isLocale(data.locale) ? data.locale : "en");
-  if (data.templateId && (!template || serviceQuotePresets[template.service].type !== data.projectType)) return { ok: false, message: "Invalid template." };
+  if (data.templateId) return { ok: false, message: "Invalid project options." };
   const performance = (data.performance ?? "").split(",").filter(Boolean);
   if (performance.some(key => !["images", "cache", "lazy"].includes(key))) return { ok: false, message: "Invalid performance options." };
   const details = [
@@ -137,7 +134,6 @@ export async function submitLeadAction(
     `${pricing.base}: EUR ${calculated.baseLow}–${calculated.baseHigh}`,
     `${promotion.id}: ${promotion.percent}% · ${pricing.discount}: EUR ${calculated.discount} · EUR ${calculated.low}–${calculated.high}`,
     pricing.tax,
-    template ? `Template: ${template.name} (${template.id})` : "",
     data.projectName ? `Project: ${data.projectName}` : "",
     data.domain ? `Domain: ${data.domain}` : "",
     `Delivery: ${data.speed}`,

@@ -1,6 +1,7 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { RegisterForm } from "@/components/auth/auth-forms";
 import { GoogleSignIn } from "@/components/auth/google-sign-in";
+import { publicFeatureFlags } from "@/lib/capabilities";
 import { getViewer } from "@/lib/db/access";
 import { isDatabaseConfigured } from "@/lib/db";
 
@@ -11,6 +12,7 @@ export default async function RegisterPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  if (!publicFeatureFlags.accounts) notFound();
   const { locale } = await params;
   if (isDatabaseConfigured) {
     const viewer = await getViewer();

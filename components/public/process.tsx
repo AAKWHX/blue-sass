@@ -92,7 +92,7 @@ export function CallToAction() {
             </p></div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
               <Button asChild variant="neon" size="lg" className="group">
-                <Link href={`/${locale}/create-project`}>
+                <Link href={`/${locale}/contact#inquiry`}>
                   <span className="relative z-10">{t.hero.ctaPrimary}</span>
                   <ArrowRight className="relative z-10 h-4 w-4 shrink-0 flip-x transition-transform group-hover:translate-x-1" />
                 </Link>

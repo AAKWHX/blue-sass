@@ -9,7 +9,6 @@ assert.ok(["localhost", "127.0.0.1", "[::1]"].includes(origin.hostname));
 assert.equal(origin.protocol, "http:");
 assert.ok(!origin.username && !origin.password && origin.pathname === "/");
 const { indexablePublicPaths } = load("lib/seo-public-paths.ts");
-const { toolIds } = load("lib/tools/catalog.ts");
 const { locales } = load("lib/i18n/config.ts");
 const urls = ["ar", "en", "nl"].flatMap(locale => indexablePublicPaths.map(path => ({ locale, path })));
 const get = path => {
@@ -50,17 +49,19 @@ await Promise.all(Array.from({ length: 3 }, async () => {
  }
 }));
 
-for (const locale of ["ar", "en", "nl"]) for (const alias of ["pricing", "templates"]) {
- const response = await get(`/${locale}/${alias}`);
- assert.equal(response.status, 307);
- assert.equal(response.headers.get("location"), `/${locale}/services#${alias}`);
+for (const locale of ["ar", "en", "nl"]) {
+ const response = await get(`/${locale}/pricing`);
+ assert.equal(response.status, 308);
+ assert.equal(response.headers.get("location"), `/${locale}/services`);
+ const library = await get(`/${locale}/templates`);
+ assert.equal(library.status, 404);
 }
 for (const locale of ["ar", "en", "nl"]) for (const [alias, target] of Object.entries({ mobile: "android", cloud: "erp", security: "web" })) {
  const response = await get(`/${locale}/services/${alias}`);
  assert.equal(response.status, 308);
  assert.equal(response.headers.get("location"), `/${locale}/services/${target}`);
 }
-for (const path of ["login", "register", "verify", "forgot-password", "hosting", "audit"]) {
+for (const path of ["login", "register", "verify", "forgot-password"]) {
  const response = await get(`/ar/${path}`); assert.equal(response.status, 200, path);
  const html = await response.text();
  const robots = (html.match(/<meta\b[^>]*>/gi) ?? []).find(tag => attr(tag, "name") === "robots");
@@ -84,4 +85,4 @@ const styles = (home.match(/<link\b[^>]*>/gi) ?? []).filter(tag => attr(tag, "re
 const css = (await Promise.all(styles.map(async href => (await get(href)).text()))).join("\n");
 assert.match(css, /\/fonts\/ibm-plex-sans-arabic\//);
 assert.doesNotMatch(css, /fonts\.(googleapis|gstatic)\.com/);
-console.log(JSON.stringify({ publicPagesVerified: verified, toolPagesVerified: toolIds.length * 3, redirectsVerified: 15, noindexPagesVerified: 6, sitemapUrls: locs.length, localFontFilesVerified: manifest.files.length, remoteGoogleFontUrls: 0 }, null, 2));
+console.log(JSON.stringify({ publicPagesVerified: verified, redirectsVerified: 15, noindexPagesVerified: 4, sitemapUrls: locs.length, localFontFilesVerified: manifest.files.length, remoteGoogleFontUrls: 0 }, null, 2));

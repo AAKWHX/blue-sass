@@ -48,6 +48,10 @@ const credentialsSchema = z.object({
 
 class UnverifiedCredentials extends CredentialsSignin { code = "email_unverified"; }
 
+// Cost 12, matching registration. This is never an account credential: the
+// record must still exist and be enabled before authentication can succeed.
+const dummyCredentialsHash = "$2b$12$wX1/9dmrjxGFWMP2Jl34f.c.nTyxqYSwbXArfGVaR7aAar8jAT6CW";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: isDatabaseConfigured
     ? DrizzleAdapter(db, {
@@ -86,9 +90,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .where(eq(users.email, parsed.data.email.toLowerCase()))
           .limit(1);
 
-        if (!record?.passwordHash || record.disabledAt) return null;
-        const ok = await bcrypt.compare(parsed.data.password, record.passwordHash);
-        if (!ok) return null;
+        // Unknown, OAuth-only and disabled accounts pay the same bcrypt cost
+        // as ordinary invalid logins, reducing email-enumeration timing leaks.
+        const ok = await bcrypt.compare(parsed.data.password, record?.passwordHash || dummyCredentialsHash);
+        if (!record?.passwordHash || record.disabledAt || !ok) return null;
         // The provider gates every credential entry point and returns a code
         // that loginAction can display with the resend-verification option.
         if (requireEmailVerification && !record.emailVerified) throw new UnverifiedCredentials();

@@ -29,6 +29,13 @@
       "when": 1790783548510,
       "tag": "0003_hard_puck",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792717722976,
+      "tag": "0004_stripe_payment_events",
+      "breakpoints": true
     }
   ]
 }

@@ -4,9 +4,11 @@ import { assertSameOrigin } from "@/lib/api-security";
 import { readBoundedText } from "@/lib/request-body";
 import { inquirySchema } from "@/lib/validation/inquiry";
 import { db,isDatabaseConfigured } from "@/lib/db";
+import { publicFeatureFlags } from "@/lib/capabilities";
 import { leads } from "@/lib/db/schema";
 import { requestIdentity,takeRateLimit } from "@/lib/rate-limit";
 export async function POST(request:Request) {
+ if(!publicFeatureFlags.inquiries)return NextResponse.json({error:"FEATURE_TEMPORARILY_DISABLED"},{status:403,headers:{"Cache-Control":"no-store","X-Robots-Tag":"noindex, nofollow"}});
  try {
   const url=new URL(request.url);
   // next dev binds 0.0.0.0, while the browser uses a loopback hostname.

@@ -172,7 +172,7 @@ const tr: Dictionary = {
     noProjects: "Hesabınıza henüz bir proje atanmadı. Ekibimiz kısa süre içinde ayarlayacak.",
   },
   footer: { rights: "Tüm hakları saklıdır.", built: "Blue Sass tarafından tasarlandı ve geliştirildi.", offices: "Web siteleri · Uygulamalar · Dijital sistemler",
-    newsletterTitle: "Saha notları", newsletterPlaceholder: "senin@email.com", newsletterCta: "Abone ol", newsletterDone: "Abone olundu — aramıza hoş geldin." },
+    newsletterTitle: "Saha notları", newsletterPlaceholder: "qa@example.invalid", newsletterCta: "Abone ol", newsletterDone: "Abone olundu — aramıza hoş geldin." },
   stack: {
     title: "Modern bir teknoloji yığınıyla çalışıyoruz",
     subtitle: "Üzerine kurduğumuz teknolojiler — her projede üretimde test edildi.",

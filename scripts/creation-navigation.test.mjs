@@ -4,7 +4,6 @@ import { load } from "./test-typescript-loader.mjs";
 const { locales, retiredLocales, isLocale } = load("lib/i18n/config.ts");
 const { serviceSlugs, serviceCatalog } = load("lib/service-catalog.ts");
 const { creationService, creationLayouts } = load("lib/i18n/creation.ts");
-const { homePlatformCopy } = load("lib/i18n/home-platform.ts");
 
 test("all creation paths have distinct content and layouts in the three active languages", () => {
   assert.deepEqual(locales, ["ar", "en", "nl"]);
@@ -18,8 +17,6 @@ test("all creation paths have distinct content and layouts in the three active l
       return copy.steps.join("|");
     });
     assert.equal(new Set(journeys).size, 8);
-    assert.equal(homePlatformCopy(locale).tools.length, 4);
-    for (const tool of homePlatformCopy(locale).tools) assert.ok(tool.split("|")[1].length > 30);
   }
 });
 

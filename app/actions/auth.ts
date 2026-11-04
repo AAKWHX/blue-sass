@@ -102,7 +102,7 @@ export async function registerAction(
   const t = dict(locale).auth;
 
   if (!isDatabaseConfigured) {
-    return { ok: false, message: "The database is not connected yet. Set DATABASE_URL." };
+    return { ok: false, message: locale === "ar" ? "تسجيل الدخول والحسابات غير متاحة حاليًا. حاول مجددًا بعد قليل." : locale === "nl" ? "Aanmelden en accounts zijn tijdelijk niet beschikbaar. Probeer het straks opnieuw." : "Sign-in and accounts are temporarily unavailable. Please try again shortly." };
   }
 
   const raw = Object.fromEntries(formData);
@@ -242,7 +242,7 @@ export async function loginAction(
   const t = dict(locale).auth;
 
   if (!isDatabaseConfigured) {
-    return { ok: false, message: "The database is not connected yet. Set DATABASE_URL." };
+    return { ok: false, message: locale === "ar" ? "تسجيل الدخول والحسابات غير متاحة حاليًا. حاول مجددًا بعد قليل." : locale === "nl" ? "Aanmelden en accounts zijn tijdelijk niet beschikbaar. Probeer het straks opnieuw." : "Sign-in and accounts are temporarily unavailable. Please try again shortly." };
   }
 
   const schema = baseLoginSchema.extend({ email: emailField(locale) });
@@ -281,7 +281,7 @@ export async function resendVerificationAction(
   const t = dict(locale).auth;
 
   if (!isDatabaseConfigured) {
-    return { ok: false, message: "The database is not connected yet. Set DATABASE_URL." };
+    return { ok: false, message: locale === "ar" ? "تسجيل الدخول والحسابات غير متاحة حاليًا. حاول مجددًا بعد قليل." : locale === "nl" ? "Aanmelden en accounts zijn tijdelijk niet beschikbaar. Probeer het straks opnieuw." : "Sign-in and accounts are temporarily unavailable. Please try again shortly." };
   }
 
   const email = normaliseEmail(String(formData.get("email") ?? ""));

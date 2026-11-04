@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { consumeVerificationToken } from "@/lib/auth/verification";
+import { publicFeatureFlags } from "@/lib/capabilities";
 import { isDatabaseConfigured } from "@/lib/db";
 import { getDictionary, isLocale } from "@/lib/i18n";
 import { validateEmail } from "@/lib/validation/contact";
@@ -17,6 +19,7 @@ export default async function VerifyPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ token?: string; email?: string }>;
 }) {
+  if (!publicFeatureFlags.accounts) notFound();
   const { locale } = await params;
   const { token, email } = await searchParams;
   const t = getDictionary(isLocale(locale) ? locale : "en").auth;

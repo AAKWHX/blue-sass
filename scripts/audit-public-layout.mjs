@@ -6,7 +6,7 @@ const phase = process.argv.includes('--after') ? 'after' : 'before';
 const out = path.resolve('artifacts/content-cleanup');
 await mkdir(path.join(out, 'screenshots'), { recursive: true });
 const browser = await (await motionChromium()).launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
-const routes = ['', 'services', ...['web','android','ios','windows','store','erp','ai','design'].map(s => 'services/' + s), 'projects', 'about', 'contact', 'reviews', 'products', 'subscriptions', 'hosting', 'jobs', 'marketplace', 'tools', ...['qr-code-generator','invoice-generator','seo-checker','message-checker'].map(s => 'tools/' + s), 'login', 'register', 'create-project'];
+const routes = ['', 'services', ...['web','android','ios','windows','store','erp','ai','design'].map(s => 'services/' + s), 'contact', 'login', 'register', 'create-project'];
 const results = process.argv.includes('--resume') ? JSON.parse(await readFile(path.join(out,`layout-${phase}.json`),'utf8')) : { phase, cases: [], pageErrors: [], consoleErrors: [] };
 try {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
@@ -32,7 +32,7 @@ try {
       return { width: innerWidth, scrollWidth: document.documentElement.scrollWidth, horizontalOverflow, clipped, unnamed, h1: [...document.querySelectorAll('main h1')].map(e => e.textContent.trim()), outliers };
     });
     results.cases.push({ ...item, status: response.status(), finalUrl: page.url(), ...state });
-    if (['', 'services/web', 'tools', 'contact', 'hosting'].includes(item.route) && [375,1440].includes(item.width) && item.locale === 'ar') await page.screenshot({ path: path.join(out,'screenshots',`${phase}-${item.route.replaceAll('/','-') || 'home'}-${item.width}.jpg`), quality: 80, fullPage: true });
+    if (['', 'services/web', 'contact'].includes(item.route) && [375,1440].includes(item.width) && item.locale === 'ar') await page.screenshot({ path: path.join(out,'screenshots',`${phase}-${item.route.replaceAll('/','-') || 'home'}-${item.width}.jpg`), quality: 80, fullPage: true });
     if (state.horizontalOverflow || state.clipped.length || state.unnamed.length || response.status() >= 400) console.log('ISSUE',JSON.stringify(results.cases.at(-1)));
     if (results.cases.length % 15 === 0) console.log(`Audited ${results.cases.length}/${cases.length}`);
   }

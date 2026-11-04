@@ -1,8 +1,7 @@
 "use server";
-import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { leads, payments, projectBilling, projectMilestones, projectRequests, projects, type ProjectStage } from "@/lib/db/schema";
@@ -10,12 +9,10 @@ import { assertCanWrite, getViewer } from "@/lib/db/access";
 import { lifecycleState, lockProject } from "@/lib/db/project-lifecycle";
 import { canChangeRequest } from "@/lib/project-policy";
 import { configurationSchema } from "@/lib/validation/project-configuration";
-import { configuredEstimate, projectOption } from "@/lib/project-options";
+import { configuredEstimate, projectOption, isRetiredExtra } from "@/lib/project-options";
 import { builderCopy } from "@/lib/i18n/project-builder";
 import { getDictionary, isLocale } from "@/lib/i18n";
 import { takeRateLimit } from "@/lib/rate-limit";
-import { findServiceTemplate } from "@/lib/service-templates";
-import { serviceQuotePresets } from "@/lib/service-details";
 import { getImplementationPromotion } from "@/lib/pricing";
 
 export type ConfigurationState = { ok: boolean; message: string; projectId?: string; fields?: string[] };
@@ -35,12 +32,14 @@ export async function saveConfiguredProject(_prev: ConfigurationState, form: For
   try { input = JSON.parse(raw); } catch { return fail; }
   const parsed = configurationSchema.safeParse(input);
   if (!parsed.success) return { ...fail, fields: [...new Set(parsed.error.issues.map(i => String(i.path[0])))] };
+  if (parsed.data.extras.some(isRetiredExtra)) return { ...fail, fields: ["extras"] };
   const config = { ...parsed.data, priceVersion: 2 as 1 | 2, promotionPercent: getImplementationPromotion().percent as number };
-  const template = config.templateId ? findServiceTemplate(config.templateId, locale) : null;
-  if (config.templateId && (!template || serviceQuotePresets[template.service].type !== config.type)) return fail;
+  if (config.templateId) return fail;
   let quote = configuredEstimate(config);
   const projectIdValue = String(form.get("projectId") ?? "");
   if (projectIdValue && !z.string().uuid().safeParse(projectIdValue).success) return fail;
+  const requestId=String(form.get("requestId") ?? "");
+  if (!projectIdValue && !z.string().uuid().safeParse(requestId).success) return fail;
   const selected = projectOption(config.kind)!;
   const summary = [selected.names[locale], config.notes].filter(Boolean).join("\n");
   const leadServices = [...config.features, ...config.extras.map(k => `addon:${k}`), ...config.providers.map(k => `login:${k}`), ...config.languages.map(k => `lang:${k}`), ...config.modules.map(k => `module:${k}`), ...config.performance.map(k => `performance:${k}`)];
@@ -66,8 +65,12 @@ export async function saveConfiguredProject(_prev: ConfigurationState, form: For
         await tx.update(projectMilestones).set({ dueDate: null, estimatedHours: Math.max(4, Math.round(quote.weeks * 32 / 6)) }).where(eq(projectMilestones.projectId, projectIdValue));
         return projectIdValue;
       }
+      // Serialize retries of one submitted form, including concurrent requests.
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"request:"+requestId}))`);
+      const [previous]=await tx.select({id:projects.id,clientId:projects.clientId}).from(projects).where(eq(projects.id,requestId)).limit(1);
+      if(previous)return previous.clientId===viewer.id?previous.id:null;
       const [lead] = await tx.insert(leads).values({ name: config.name, email: viewer.email.toLowerCase(), company: config.company || null, locale, projectType: config.type, services: leadServices, budgetEstimate: quote.totalLow, timelineWeeks: Math.ceil(config.deliveryDays / 7), currency: "EUR", message: summary, convertedUserId: viewer.id }).returning({ id: leads.id });
-      const id = randomUUID();
+      const id = requestId;
       await tx.insert(projects).values({ id, slug: `request-${id}`, name: config.projectName, summary, clientId: viewer.id, stage: "planning", progress: 0, visibility: "private", industry: config.type, budget: quote.totalLow, currency: "EUR", startDate: null, deadline: null, estimatedHours: Math.max(24, quote.weeks * 32), hoursLogged: 0, tech: config.features });
       await tx.insert(projectRequests).values({ projectId: id, leadId: lead.id, configuration: config, estimate: quote });
       await tx.insert(projectBilling).values({ projectId: id });

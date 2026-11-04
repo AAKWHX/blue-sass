@@ -49,6 +49,22 @@ const fileIcons: Record<FileCategory, typeof FileText> = {
 const CLIENT_ID = "u-101";
 
 export function PortalView() {
+  const { locale } = useI18n();
+  const copy = {
+    ar: "بيئة QA محلية: لا توجد بيانات مشروع تجريبية متاحة.",
+    en: "Local QA: no project fixture data is available.",
+    nl: "Lokale QA: er zijn geen projecttestgegevens beschikbaar.",
+  };
+  const usableProjects = projects.filter((item) => item.client_id === CLIENT_ID);
+  const hasProfiles = [CLIENT_ID, "u-003", "u-004", "u-005"].every((id) => Boolean(getProfile(id)));
+  if (usableProjects.length === 0 || !hasProfiles) {
+    const message = locale === "ar" ? copy.ar : locale === "nl" ? copy.nl : copy.en;
+    return <section className="container-x py-12" dir={locale === "ar" ? "rtl" : "ltr"}><p role="status">{message}</p></section>;
+  }
+  return <PortalViewContent />;
+}
+
+function PortalViewContent() {
   const { t, locale } = useI18n();
   const clientProjects = useMemo(() => projects.filter((p) => p.client_id === CLIENT_ID), []);
   const [projectId, setProjectId] = useState(clientProjects[0].id);

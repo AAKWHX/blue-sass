@@ -172,7 +172,7 @@ const es: Dictionary = {
     noProjects: "Aún no hay ningún proyecto asignado a tu cuenta. Nuestro equipo lo configurará pronto.",
   },
   footer: { rights: "Todos los derechos reservados.", built: "Diseñado y desarrollado por Blue Sass.", offices: "Sitios web · Aplicaciones · Sistemas digitales",
-    newsletterTitle: "Notas de campo", newsletterPlaceholder: "tu@email.com", newsletterCta: "Suscribirse", newsletterDone: "Suscrito — bienvenido a bordo." },
+    newsletterTitle: "Notas de campo", newsletterPlaceholder: "qa@example.invalid", newsletterCta: "Suscribirse", newsletterDone: "Suscrito — bienvenido a bordo." },
   stack: {
     title: "Impulsado por un stack moderno",
     subtitle: "Las tecnologías en las que confiamos — probadas en producción en cada proyecto.",

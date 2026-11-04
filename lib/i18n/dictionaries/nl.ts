@@ -172,7 +172,7 @@ const nl: Dictionary = {
     noProjects: "Er is nog geen project aan je account gekoppeld. Ons team regelt dit binnenkort.",
   },
   footer: { rights: "Alle rechten voorbehouden.", built: "Ontworpen en gebouwd door Blue Sass.", offices: "Websites · Apps · Digitale systemen",
-    newsletterTitle: "Veldnotities", newsletterPlaceholder: "jouw@email.com", newsletterCta: "Abonneren", newsletterDone: "Geabonneerd — welkom aan boord." },
+    newsletterTitle: "Veldnotities", newsletterPlaceholder: "qa@example.invalid", newsletterCta: "Abonneren", newsletterDone: "Geabonneerd — welkom aan boord." },
   stack: {
     title: "Aangedreven door een moderne stack",
     subtitle: "De technologie waarop wij bouwen — produktie-getest in elk traject.",

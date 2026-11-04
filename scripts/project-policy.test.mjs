@@ -20,8 +20,10 @@ test("returning to planning does not reopen design-started or cancelled requests
  assert.equal(canChangeRequest(planning, "owner", { ...open, locked: true }), false);
  assert.equal(canChangeRequest(planning, "owner", { ...open, cancelled: true }), false);
 });
-test("authentication preserves template and subscription choices", () => {
- for (const path of ["/ar/quote?service=web&template=web-2", "/ar/quote?service=subscription-growth", "/ar/portal/projects/10000000-0000-4000-8000-000000000001"]) assert.equal(quoteReturnPath(path, "ar"), path);
+test("authentication preserves service requests but drops retired template choices", () => {
+ for (const path of ["/ar/quote?service=web", "/ar/portal/projects/10000000-0000-4000-8000-000000000001"]) assert.equal(quoteReturnPath(path, "ar"), path);
+ assert.equal(quoteReturnPath("/ar/quote?service=web&template=web-2", "ar"), "/ar/quote?service=web");
+ assert.equal(quoteReturnPath("/ar/quote?service=subscription-growth", "ar"), "/ar/portal");
  assert.equal(quoteReturnPath("//evil.example/ar/quote", "ar"), "/ar/portal");
 });
 test("new interface copy is populated in all seven languages", () => {

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { saveConfiguredProject, type ConfigurationState } from "@/app/actions/configured-projects";
 import { builderCopy } from "@/lib/i18n/project-builder";
 import { localeMeta } from "@/lib/i18n/config";
-import { configuredEstimate, extraOptions, featureOptions, moduleOptions, performanceOptions, providerOptions, projectOptions, initialConfiguration, languageNames, projectLanguages, type ProjectConfiguration, type PricedOption } from "@/lib/project-options";
+import { configuredEstimate, extraOptions, isRetiredExtra, featureOptions, moduleOptions, performanceOptions, providerOptions, projectOptions, initialConfiguration, languageNames, projectLanguages, type ProjectConfiguration, type PricedOption } from "@/lib/project-options";
 import { featureCost, formatEUR, type ProjectType } from "@/lib/pricing";
 import { ProjectRequestSummary } from "./project-request-summary";
 import { DeliveryDuration } from "./delivery-duration";
@@ -27,9 +27,9 @@ function SelectionCard({ title, description, icon: Icon, selected, disabled, onC
   </Button>;
 }
 
-export function ProjectBuilder({ initial, email, projectId, paypal = false, initialStep = 0 }: { initial?: ProjectConfiguration; email: string; projectId?: string; paypal?: boolean; initialStep?: number }) {
+export function ProjectBuilder({ initial, requestId, email, projectId, paypal = false, initialStep = 0 }: { requestId?: string; initial?: ProjectConfiguration; email: string; projectId?: string; paypal?: boolean; initialStep?: number }) {
   const { locale, t } = useI18n();
-  const [config, setConfig] = useState<ProjectConfiguration>(() => initial ?? initialConfiguration());
+  const [config, setConfig] = useState<ProjectConfiguration>(() => { const value = initial ?? initialConfiguration(); return { ...value, templateId: "", extras: value.extras.filter(id => !isRetiredExtra(id)) }; });
   const [step, setStep] = useState(initialStep >= 0 && initialStep <= 4 ? initialStep : 0);
   const [openProviders, setOpenProviders] = useState(Boolean(initial?.providers.length));
   const [openLanguages, setOpenLanguages] = useState(Boolean(initial && initial.languages.length > 1));
@@ -54,7 +54,7 @@ export function ProjectBuilder({ initial, email, projectId, paypal = false, init
   function toggle(key: "extras" | "modules" | "performance" | "providers", id: string) {
     setConfig(prev => {
       let ids = prev[key].includes(id) ? prev[key].filter(k => k !== id) : [...prev[key], id];
-      if (key === "extras") for (const pair of [["hosting", "hosting-business"], ["maintenance", "support-plus"]]) if (pair.includes(id) && ids.includes(id)) ids = ids.filter(k => k === id || !pair.includes(k));
+      if (key === "extras") for (const pair of [["maintenance", "support-plus"]]) if (pair.includes(id) && ids.includes(id)) ids = ids.filter(k => k === id || !pair.includes(k));
       return { ...prev, [key]: ids, ...(key === "providers" && ids.length ? { features: [...new Set([...prev.features, "auth" as const])] } : {}) };
     });
   }
@@ -70,13 +70,13 @@ export function ProjectBuilder({ initial, email, projectId, paypal = false, init
     heading.current?.focus({ preventScroll: true });
     heading.current?.scrollIntoView({ block: "start", behavior: "instant" });
   }
-  const optionsGrid = (options: PricedOption[], key: "extras" | "modules" | "performance" | "providers", icon: LucideIcon) => <div className="grid gap-3 sm:grid-cols-2">{options.filter(p => p.types.includes(config.type)).map((p, i) => <SelectionCard key={p.id} title={p.names[locale]} description={price(p)} icon={key === "providers" ? LockKeyhole : [icon, Database, Settings2, Workflow][i % 4]} selected={config[key].includes(p.id)} onClick={() => toggle(key, p.id)}/>)}</div>;
+  const optionsGrid = (options: PricedOption[], key: "extras" | "modules" | "performance" | "providers", icon: LucideIcon) => <div className="grid gap-3 sm:grid-cols-2">{options.filter(p => p.types.includes(config.type) && (key !== "extras" || !isRetiredExtra(p.id))).map((p, i) => <SelectionCard key={p.id} title={p.names[locale]} description={price(p)} icon={key === "providers" ? LockKeyhole : [icon, Database, Settings2, Workflow][i % 4]} selected={config[key].includes(p.id)} onClick={() => toggle(key, p.id)}/>)}</div>;
   return <section className="container-x request-builder py-12 sm:py-16">
     <div className="max-w-3xl"><h1 className="text-3xl font-bold leading-tight sm:text-5xl">{projectId ? b("saveEdit") : b("title")}</h1><p className="mt-5 text-base leading-8 text-white/65">{b("intro")}</p></div>
     <div className="mt-9 flex items-center gap-4"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-label={steps[step]} aria-valuemin={1} aria-valuemax={6} aria-valuenow={step + 1}><div className="h-full rounded-full bg-white" style={{ width: `${(step + 1) / 6 * 100}%` }}/></div><span className="shrink-0 text-sm tabular-nums text-white/65">{step + 1} / 6</span></div>
     <div className={`mt-7 grid items-start gap-7 ${step === 5 ? "" : "lg:grid-cols-[minmax(0,1fr)_300px]"}`}>
       <form ref={formRef} action={action} onSubmit={e => { if (step !== 5) { e.preventDefault(); goTo(step + 1); } }} className="min-w-0">
-        <Input type="hidden" name="locale" value={locale}/><Input type="hidden" name="configuration" value={JSON.stringify(effective)}/><Input type="hidden" name="projectId" value={projectId ?? ""}/><Input type="hidden" name="paymentChoice" value={paymentChoice}/>
+        <Input type="hidden" name="requestId" value={requestId ?? ""}/><Input type="hidden" name="locale" value={locale}/><Input type="hidden" name="configuration" value={JSON.stringify(effective)}/><Input type="hidden" name="projectId" value={projectId ?? ""}/><Input type="hidden" name="paymentChoice" value={paymentChoice}/>
         <h2 ref={heading} tabIndex={-1} className="mb-6 scroll-mt-28 text-2xl font-bold outline-none">{steps[step]}</h2>
         <fieldset disabled={pending || state.ok} className="min-w-0 space-y-6">
           {step === 0 ? <>
@@ -98,7 +98,7 @@ export function ProjectBuilder({ initial, email, projectId, paypal = false, init
             <div className="sm:col-span-2"><Label htmlFor="request-company">{t.quote.fields.company}</Label><Input id="request-company" value={config.company} onChange={e => update({ company: e.target.value })} maxLength={160} autoComplete="organization" className="mt-2" dir="auto"/></div>
             <div className="sm:col-span-2"><Label htmlFor="request-notes">{t.quote.fields.notes}</Label><Textarea id="request-notes" value={config.notes} onChange={e => update({ notes: e.target.value })} maxLength={4000} rows={5} className="mt-2" dir="auto"/></div>
           </div> : null}
-          {step === 5 ? <><ProjectRequestSummary configuration={effective} quote={quote} onEdit={goTo} email={email}/>{!projectId ? <section className="request-panel"><h3 className="text-xl font-semibold">{t.experience.payment}</h3><p className="mt-3 text-sm leading-7 text-white/65">{b("paymentNote")}</p><div className="mt-5 grid gap-3 sm:grid-cols-2"><SelectionCard title={b("saveLater")} icon={Save} selected={paymentChoice === "later"} onClick={() => setPaymentChoice("later")}/><SelectionCard title="PayPal · Visa · Mastercard" description={b("payNow")} icon={CreditCard} selected={paymentChoice === "now"} disabled={!paypal} onClick={() => setPaymentChoice("now")}/></div></section> : null}<Button type="submit" variant="neon" size="lg" className="w-full" disabled={pending || state.ok}>{pending ? <Loader2 className="size-4 animate-spin"/> : <Save className="size-4"/>}{projectId ? b("saveEdit") : paymentChoice === "now" ? b("payNow") : b("saveLater")}</Button></> : null}
+          {step === 5 ? <><ProjectRequestSummary configuration={effective} quote={quote} onEdit={goTo} email={email}/>{!projectId ? <section className="request-panel"><h3 className="text-xl font-semibold">{t.experience.payment}</h3><p className="mt-3 text-sm leading-7 text-white/65">{b("paymentNote")}</p><div className="mt-5 grid gap-3 sm:grid-cols-2"><SelectionCard title={b("saveLater")} icon={Save} selected={paymentChoice === "later"} onClick={() => setPaymentChoice("later")}/><SelectionCard title="Stripe · PayPal" description={b("payNow")} icon={CreditCard} selected={paymentChoice === "now"} disabled={!paypal} onClick={() => setPaymentChoice("now")}/></div></section> : null}<Button type="submit" variant="neon" size="lg" className="w-full" disabled={pending || state.ok}>{pending ? <Loader2 className="size-4 animate-spin"/> : <Save className="size-4"/>}{projectId ? b("saveEdit") : paymentChoice === "now" ? b("payNow") : b("saveLater")}</Button></> : null}
         </fieldset>
         {state.message ? <div role="status" className="request-panel mt-5"><p>{state.message}</p>{state.fields?.length ? <p className="mt-2 text-sm">{state.fields.map(key => fieldLabels[key] ?? b("contact")).join(" / ")}</p> : null}{state.ok && state.projectId ? <div className="mt-4"><Button asChild variant="neon"><Link href={`/${locale}/portal/projects/${state.projectId}${paymentChoice === "now" && !projectId ? "/payment" : ""}`}>{paymentChoice === "now" && !projectId ? b("payNow") : t.experience.details}</Link></Button></div> : null}</div> : null}
         <div className="mt-7 flex justify-between gap-3"><Button type="button" variant="outline" disabled={step === 0 || pending || state.ok} onClick={() => goTo(step - 1)}><ChevronRight className={`size-4 ${localeMeta[locale].dir === "ltr" ? "rotate-180" : ""}`}/>{t.common.back}</Button>{step < 5 ? <Button type="button" variant="neon" disabled={pending || state.ok} onClick={() => goTo(step + 1)}>{step === 4 ? b("review") : b("next")}<ChevronLeft className={`size-4 ${localeMeta[locale].dir === "ltr" ? "rotate-180" : ""}`}/></Button> : null}</div>

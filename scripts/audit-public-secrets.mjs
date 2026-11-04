@@ -1,12 +1,2 @@
-import {readdir,readFile,writeFile,mkdir,stat} from 'node:fs/promises';
-import path from 'node:path';
-import {execFileSync} from 'node:child_process';
-const root=process.cwd(),findings=[];let scanned=0;const secrets=[];
-for(const file of (await readdir(root)).filter(name=>/^\.env(?:\.|$)/.test(name)&&!name.endsWith('.example'))){
- const body=await readFile(file,'utf8');for(const line of body.split(/\r?\n/)){const match=line.match(/^\s*([A-Z_][A-Z\d_]*)\s*=\s*(.*?)\s*$/);if(!match||match[1].startsWith('NEXT_PUBLIC_')||!/SECRET|TOKEN|PASSWORD|PRIVATE|DATABASE_URL|API_KEY/.test(match[1]))continue;const value=match[2].replace(/^(['"])(.*)\1$/,'$2');if(value.length>=16&&!/placeholder|your[_-]|example|changeme/i.test(value))secrets.push({name:match[1],value});}
-}
-const patterns=[['private-key',/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/],['github-token',/gh[pousr]_[A-Za-z0-9]{30,}/],['aws-access-key',/AKIA[A-Z0-9]{16}/],['stripe-live-secret',/sk_live_[A-Za-z0-9]{20,}/],['openai-project-secret',/sk-proj-[A-Za-z0-9_-]{40,}/],['database-password-url',/postgres(?:ql)?:\/\/[^\s:@/]+:[^\s@/]{8,}@/]];
-async function walk(folder){let entries;try{entries=await readdir(folder,{withFileTypes:true});}catch{return;}for(const entry of entries){const file=path.join(folder,entry.name);if(entry.isDirectory()){await walk(file);continue;}if(!/\.(?:js|json|map|html|css|svg|txt|pem|key|env|ya?ml)$/i.test(entry.name)&&!entry.name.startsWith('.env'))continue;if((await stat(file)).size>10_000_000)continue;scanned++;const body=await readFile(file,'utf8');for(const secret of secrets)if(body.includes(secret.value)||body.includes(JSON.stringify(secret.value).slice(1,-1)))findings.push({file:path.relative(root,file),kind:'private-environment-value',variable:secret.name});for(const[kind,pattern]of patterns)if(pattern.test(body))findings.push({file:path.relative(root,file),kind});}}
-await walk(path.join(root,'public'));await walk(path.join(root,'.next-build/static'));
-const tracked=execFileSync('git',['ls-files','--','.env','.env.*','*.pem','*.key'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean).filter(file=>!file.endsWith('.example'));
-const report={scannedTextFiles:scanned,privateEnvironmentVariablesChecked:secrets.length,findings,trackedSensitiveFilenames:tracked,scope:'Public files and browser build assets only. Values never included in this report.'};await mkdir('artifacts/refinement',{recursive:true});await writeFile('artifacts/refinement/secret-scan.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));if(findings.length||tracked.length)process.exitCode=1;
+// QA-only entry point lock; original QA content is backed up.
+throw new Error("QA_ENTRY_POINT_NOT_APPROVED_L2_B1");

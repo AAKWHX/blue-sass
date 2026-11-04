@@ -1,12 +1,10 @@
 import { serviceSlugs } from "./service-catalog";
-import { toolIds } from "./tools/catalog";
+import { publishedWork, validWork } from "./public-work";
 
-// Canonical public pages only. Pricing/templates redirect to services;
-// account, hosting dashboards, private reports and previews are not indexable.
+// Canonical public pages only. Pricing redirects to services;
+// account, hosting dashboards, private reports, unfinished workflows, and empty portfolio are not indexable.
 export const indexablePublicPaths = [
- "", "/about", "/services", "/subscriptions", "/projects", "/reviews",
- "/contact", "/create-project", "/privacy", "/terms", "/tools", "/jobs",
- "/products", "/marketplace", "/services/company", "/services/apps", "/services/systems",
- ...toolIds.map(id => `/tools/${id}`),
+ "", "/services", ...(publishedWork.some(validWork) ? ["/work"] : []),
+ "/contact", "/privacy", "/terms", "/services/company", "/services/apps", "/services/systems",
  ...serviceSlugs.map(slug => `/services/${slug}`),
 ];

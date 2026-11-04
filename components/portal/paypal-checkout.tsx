@@ -51,6 +51,7 @@ export function PayPalCheckout({
   const container = useRef<HTMLDivElement>(null);
   const rendered = useRef(false);
   const activeOrder = useRef<string | undefined>(initialOrderId);
+  const uncertainCreate = useRef(false);
   const [state, setState] = useState<CheckoutState>(initialStatus);
   const [checking, setChecking] = useState(false);
   const reconcile = useCallback(async () => {
@@ -73,6 +74,7 @@ export function PayPalCheckout({
       style: { layout: "vertical", shape: "rect", color: "gold", label: "paypal", height: 48 },
       createOrder: async () => {
         setState("processing");
+        uncertainCreate.current = true;
         const response = await fetch("/api/paypal/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -80,9 +82,12 @@ export function PayPalCheckout({
         });
         const body = await responseBody(response);
         if (!response.ok || !body.orderId) {
-          setState("failed");
+          uncertainCreate.current = response.status >= 500 || response.status === 409;
+          setState(uncertainCreate.current ? "pending" : "failed");
+          router.refresh();
           throw new Error(body.error ?? "PAYPAL_CREATE_FAILED");
         }
+        uncertainCreate.current = false;
         activeOrder.current = body.orderId;
         return body.orderId;
       },
@@ -108,12 +113,17 @@ export function PayPalCheckout({
         if (id) {
           const response = await fetch(`/api/paypal/orders/${encodeURIComponent(id)}/cancel`, { method: "POST" }).catch(() => undefined);
           if (!response?.ok) { await reconcile(); return; }
+          const body = await responseBody(response);
+          if (body.status === "paid" || body.status === "pending") { setState(body.status); router.refresh(); return; }
+          if (body.status !== "failed") { setState("pending"); router.refresh(); return; }
         }
+        if (uncertainCreate.current) { setState("pending"); router.refresh(); return; }
         setState("cancelled");
         router.refresh();
       },
       onError: async () => {
         if (activeOrder.current) await reconcile();
+        else if (uncertainCreate.current) { setState("pending"); router.refresh(); }
         else setState("failed");
       },
     });

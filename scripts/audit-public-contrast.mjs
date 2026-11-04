@@ -2,7 +2,7 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {motionChromium} from './motion-browser-runtime.mjs';
 const out='artifacts/format-ui';await mkdir(out,{recursive:true});const phase=process.argv.includes('--after')?'after':'before';
 const browser=await(await motionChromium()).launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});const results=[];
-try{const p=await browser.newPage({reducedMotion:'reduce',viewport:{width:1440,height:900}});for(const locale of ['ar','en','nl'])for(const route of ['create-project','services','services/web','about','contact','projects','products','subscriptions','hosting','jobs','marketplace','tools','login','register']){
+try{const p=await browser.newPage({reducedMotion:'reduce',viewport:{width:1440,height:900}});for(const locale of ['ar','en','nl'])for(const route of ['create-project','services','services/web','contact','login','register']){
  await p.goto(`http://localhost:3000/${locale}/${route}`,{waitUntil:'domcontentloaded'});await p.locator('main').waitFor();await p.evaluate(()=>document.fonts.ready);
  const result=await p.evaluate(()=>{
  const canvas=document.createElement('canvas');canvas.width=1;canvas.height=1;const ctx=canvas.getContext('2d',{willReadFrequently:true});const rgba=value=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=value;ctx.fillRect(0,0,1,1);return [...ctx.getImageData(0,0,1,1).data].map((n,i)=>i===3?n/255:n);};const over=(a,b)=>[0,1,2].map(i=>a[i]*a[3]+b[i]*(1-a[3])).concat(1);const lum=c=>c.slice(0,3).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;}).reduce((v,n,i)=>v+n*[.2126,.7152,.0722][i],0);

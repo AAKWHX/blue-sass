@@ -1,7 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { defaultLocale, locales, retiredLocales } from "./lib/i18n/config";
+import { isTemporarilyDisabledPath } from "./lib/capabilities";
+import { adsensePublisher, isAdsensePublisherVerified } from "./lib/advertising";
 
 const PUBLIC_FILE = /\.(.*)$/;
+
+function disabledResponse(isApi: boolean) {
+  if (isApi) {
+    return NextResponse.json(
+      { error: "FEATURE_TEMPORARILY_DISABLED" },
+      { status: 403, headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" } },
+    );
+  }
+  return new NextResponse("Not Found", {
+    status: 404,
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" },
+  });
+}
 
 function detectLocale(req: NextRequest): string {
   const cookieLocale = req.cookies.get("awwa-locale")?.value;
@@ -27,7 +42,22 @@ export default function proxy(req: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  if (pathname.startsWith("/_next") || pathname.startsWith("/api") || PUBLIC_FILE.test(pathname)) {
+  if (pathname === "/ads.txt") {
+    const pub = adsensePublisher;
+    if (isAdsensePublisherVerified && /^ca-pub-\d{16}$/.test(pub)) {
+      return new NextResponse(`google.com, ${pub.replace(/^ca-/, "")}, DIRECT, f08c47fec0942fa0\n`, {
+        status: 200,
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=3600" },
+      });
+    }
+    return new NextResponse("Not Found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", "X-Robots-Tag": "noindex, nofollow" } });
+  }
+
+  if (isTemporarilyDisabledPath(pathname)) {
+    return disabledResponse(pathname.startsWith("/api/"));
+  }
+
+  if (pathname.startsWith("/_next") || pathname.startsWith("/api") || pathname.startsWith("/template-demo/") || PUBLIC_FILE.test(pathname)) {
     return NextResponse.next();
   }
 
@@ -38,6 +68,10 @@ export default function proxy(req: NextRequest) {
     const headers = new Headers(req.headers);
     headers.set("x-pathname", pathname);
     return NextResponse.next({ request: { headers } });
+  }
+
+  if (isTemporarilyDisabledPath(`/${defaultLocale}${pathname}`)) {
+    return disabledResponse(false);
   }
 
   const locale = detectLocale(req);

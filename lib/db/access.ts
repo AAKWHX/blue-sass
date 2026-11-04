@@ -52,7 +52,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
     db.select({ userId: platformOwner.userId }).from(platformOwner).where(eq(platformOwner.slot, 1)).limit(1),
     db.select({ permissions: staffAccess.permissions }).from(staffAccess).where(eq(staffAccess.userId, record.id)).limit(1),
   ]);
-  const readOnly = record.email.toLowerCase() === "al3rab@bluesass.nl";
+  const readOnly = record.email.toLowerCase() === "qa-readonly@example.invalid";
   const granted = Array.isArray(access?.permissions) ? access.permissions.filter(value => typeof value === "string" && (capabilityKeys as readonly string[]).includes(value)) : [];
   return { ...record, isOwner: !readOnly && owner?.userId === record.id, permissions: readOnly ? granted.filter(value => ["leads.read", "projects.read_all", "projects.read_assigned"].includes(value)) : granted };
 });
@@ -86,7 +86,7 @@ export async function requireOwner(): Promise<Viewer> {
 
 export const STAFF_ROLES: AppRole[] = ["super_admin", "admin", "pm", "employee"];
 export const isStaff = (role: AppRole) => STAFF_ROLES.includes(role);
-export const isReadOnlyAssistant = (viewer: Viewer) => viewer.email.toLowerCase() === "al3rab@bluesass.nl";
+export const isReadOnlyAssistant = (viewer: Viewer) => viewer.email.toLowerCase() === "qa-readonly@example.invalid";
 export function assertCanWrite(viewer: Viewer) {
   if (isReadOnlyAssistant(viewer)) throw new AuthorisationError("This account has read-only access.");
 }

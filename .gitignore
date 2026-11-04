@@ -7,9 +7,12 @@ dist
 *.tsbuildinfo
 next-env.d.ts
 .next-build
-downloads/
-/tmp/pdfs/
-
+.next-*
+qa/release-*/
+.playwright-mcp/
+.vercel/
 artifacts/
 tmp/
-.vercel/
+dependency-remediation-evidence/
+downloads/
+/tmp/pdfs/
