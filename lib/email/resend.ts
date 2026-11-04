@@ -6,10 +6,12 @@
  * links and reset codes are never written to logs.
  */
 import "server-only";
+import { assertQaRuntimeApproved } from "../db/qa-local-guard.mjs";
 
 const API = "https://api.resend.com/emails";
 
-export const isEmailConfigured = Boolean(process.env.RESEND_API_KEY);
+// QA delivery remains unavailable until execution is separately approved.
+export const isEmailConfigured = false;
 
 function fromAddress(): string {
   // Keep delivery on the verified Resend domain even if an older Vercel
@@ -33,6 +35,9 @@ export async function sendEmail(options: {
   html: string;
   text: string;
 }): Promise<SendResult> {
+  try { assertQaRuntimeApproved(); } catch {
+    return { ok: false, skipped: true, error: "QA_EMAIL_DELIVERY_LOCKED" };
+  }
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     console.warn("[email] Delivery is not configured.");

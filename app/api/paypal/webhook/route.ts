@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const orderId = typeof ids?.order_id === "string" ? ids.order_id : "";
     const captureId = typeof ids?.capture_id === "string" ? ids.capture_id : typeof event.resource?.id === "string" ? event.resource.id : "";
     if (!orderId && !captureId) return NextResponse.json({ ok: true });
-    const [payment] = await db.select().from(payments).where(and(eq(payments.environment, getPayPalEnvironment()), or(eq(payments.providerOrderId, orderId), eq(payments.providerCaptureId, captureId)))).limit(1);
+    const [payment] = await db.select().from(payments).where(and(eq(payments.environment, getPayPalEnvironment()), eq(payments.provider,"paypal"), or(eq(payments.providerOrderId, orderId), eq(payments.providerCaptureId, captureId)))).limit(1);
     if (payment) await reconcilePayment(payment);
     return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
   } catch {

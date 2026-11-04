@@ -1023,7 +1023,7 @@
   "Verify escaping or sanitisation of any untrusted data inserted as HTML.": "HTML로 삽입되지 않은 데이터의 escaping 또는 sanitisation을 검증합니다.",
   "account.disabled": "계정.disabled",
   "account.enabled": "계정.enabled",
-  "invitation.accepted": "이메일: sales@accepted.com",
+  "invitation.accepted": "이메일: qa-contact@example.invalid",
   "invitation.revoked": "초대합니다.revoked",
   "invitation.sent": "초대합니다.",
   "permissions.updated": "권한.updated",

@@ -204,7 +204,7 @@
   "Recorded elapsed server fetch time. This is a measurement, not a speed grade or a user's full load time.": "Kayıt edilen elapd sunucu zamanı getiriyor. Bu bir ölçüm, hız sınıfı veya bir kullanıcının tam yük zamanı değil.",
   "Recorded evidence": "Kayıt edilen kanıtlar",
   "Recorded the final HTML request's HTTP response code. This does not validate all routes.": "Son HTML isteğinin HTTP yanıt kodu kaydı. Bu tüm rotaları doğrulamaz.",
-  "Report questions: help@bluesass.nl · www.bluesass.nl": "Rapor soruları: Yardım@blues.nl · www.blues.nl",
+  "Report questions: help@bluesass.nl · www.bluesass.nl": "Rapor soruları: Yardıqa-contact@example.invalid · www.blues.nl",
   "Report reference": "Rapor referans",
   "Results describe the checks performed at the recorded time. A passing check does not prove the whole website is secure. High-priority indicators need manual confirmation before treating them as confirmed vulnerabilities.": "Sonuçlar, kayıtlı zamanda yapılan çekleri tanımlar. Bir geçiş kontrolü tüm web sitesinin güvenli olduğunu kanıtlamıyor. Yüksek öncelikli göstergelerin onları doğrulanmış açıklar olarak tedavi etmeden önce manuel onayına ihtiyacı var.",
   "Review scope": "İnceleme kapsamı",

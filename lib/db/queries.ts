@@ -5,7 +5,7 @@
  * bundled mock data so the marketing site and dashboards still render.
  */
 import "server-only";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, notInArray } from "drizzle-orm";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import {
   feedback,
@@ -37,7 +37,7 @@ export async function listViewerProjects(): Promise<Project[]> {
   return db
     .select()
     .from(projects)
-    .where(visibleProjectsFilter(viewer))
+    .where(and(visibleProjectsFilter(viewer), notInArray(projects.industry, ["commerce", "subscription"])))
     .orderBy(desc(projects.updatedAt));
 }
 
@@ -56,7 +56,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
   const [project] = await db
     .select()
     .from(projects)
-    .where(and(eq(projects.id, projectId), visibleProjectsFilter(viewer)))
+    .where(and(eq(projects.id, projectId), visibleProjectsFilter(viewer), notInArray(projects.industry, ["commerce", "subscription"])))
     .limit(1);
   if (!project) return null;
 

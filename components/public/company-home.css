@@ -1,0 +1,28 @@
+.company-home{color:#f4f7fc;background:#050608;font-family:var(--font-geist-sans),sans-serif}
+[dir=rtl] .company-home{font-family:"IBM Plex Sans Arabic",sans-serif;letter-spacing:0}
+.company-wrap{width:min(1200px,100%);margin-inline:auto;padding-inline:24px;min-width:0}
+.company-hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:center;gap:64px;padding-block:160px 88px}
+.company-eyebrow{font-size:13px;line-height:1.8;color:#aeb6bf;margin-bottom:20px}
+.company-home h1{font-size:clamp(36px,4.5vw,64px);line-height:1.2;font-weight:600;letter-spacing:-.035em;overflow-wrap:break-word}
+[dir=rtl] .company-home h1{line-height:1.5;letter-spacing:0;font-weight:500}
+.company-intro{font-size:18px;line-height:1.9;color:#c2c8d0;margin-top:24px;max-width:660px}
+.company-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:30px}
+.company-actions>a{max-width:100%;white-space:normal;overflow-wrap:anywhere;min-height:44px}
+.company-summary{border:1px solid #232630;border-radius:24px;padding:32px;background:#101216}
+.company-summary [aria-label="Blue Sass"]>span{color:#f4f7fc}
+.company-summary h2{font-size:22px;font-weight:600;margin-block:28px 18px}
+.company-summary ul{display:grid;gap:18px}.company-summary li{display:flex;align-items:start;gap:10px;color:#c2c8d0;line-height:1.8}.company-summary li svg{flex:none;margin-top:5px}
+.company-section{padding-block:64px}.company-section>h2,.company-home .home-faq h2{font-size:clamp(28px,3vw,42px);font-weight:600;line-height:1.5;letter-spacing:-.025em}
+[dir=rtl] .company-home h2{letter-spacing:0}
+.company-section-intro{max-width:760px;margin-top:14px;color:#c2c8d0;line-height:1.9}
+.company-services{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:32px}
+.company-services article{display:flex;flex-direction:column;min-width:0;border:1px solid #232630;border-radius:20px;background:#101216;padding:24px}
+.company-home h3{font-size:20px;font-weight:600;line-height:1.6}.company-services p,.company-steps p{color:#c2c8d0;line-height:1.9;margin-top:12px}
+.company-services ul{display:grid;gap:8px;color:#aeb6bf;font-size:14px;line-height:1.8;list-style:disc;padding-inline-start:18px;margin-block:20px}
+.company-detail-link{display:flex;align-items:center;gap:8px;margin-top:auto;padding-block:12px 0;font-size:14px;font-weight:600;min-height:44px}
+.company-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:32px}.company-steps li{border-top:1px solid #232630;padding-top:24px;min-width:0}.company-step-number{display:block;color:#aeb6bf;font:14px/1.6 var(--font-geist-mono),monospace;margin-bottom:16px}
+.company-contact{border-top:1px solid #232630;padding-bottom:88px}.company-home .home-faq{background:#050608}.company-home .home-faq h2,.company-home .home-faq button{color:#f4f7fc}.company-home .home-faq p{color:#c2c8d0}
+.company-home a:focus-visible{outline:2px solid #f4f7fc;outline-offset:5px;border-radius:4px}
+@media(max-width:1050px){.company-services{grid-template-columns:repeat(2,minmax(0,1fr))}.company-hero{gap:32px}}
+@media(max-width:760px){.company-wrap{padding-inline:20px}.company-hero{grid-template-columns:1fr;padding-block:120px 48px;gap:32px}.company-summary{padding:24px}.company-section{padding-block:44px}.company-steps{grid-template-columns:1fr;gap:24px}.company-contact{padding-bottom:56px}.company-home .home-faq h2{font-size:32px}}
+@media(max-width:480px){.company-services{grid-template-columns:1fr}.company-intro{font-size:16px}.company-actions{gap:12px}.company-home h1{font-size:38px}}

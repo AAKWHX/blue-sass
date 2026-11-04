@@ -38,6 +38,8 @@ export type PricedOption = { id: string; names: Names; price: number; period: "o
 const all: ProjectType[] = ["web", "mobile", "ai", "ecommerce", "erp", "brand"];
 const software: ProjectType[] = ["web", "mobile", "ai", "ecommerce", "erp"];
 const priced = (id: string, price: number, period: PricedOption["period"], types: ProjectType[], names: Names): PricedOption => ({ id, price: period === "once" ? implementationPrice(price) : price, period, types, names });
+export const isRetiredExtra = (id: string) => id === "hosting" || id === "hosting-business";
+// Retain historic rates for saved requests; retired options cannot be purchased again.
 export const extraOptions = [
   priced("domain", 8, "year", software, translated("نطاق قياسي وربطه بالمشروع", "Standard domain and setup", "Standaarddomein en koppeling", "Standarddomain und Einrichtung", "Standart alan adı ve kurulum", "Domaine standard et configuration", "Dominio estándar y configuración")),
   priced("email", 3, "month", software, translated("بريد الدومين: صندوق مهني واحد", "Domain email: one professional mailbox", "Domeinmail: één zakelijke mailbox", "Domain-E-Mail: ein Geschäftspostfach", "Alan adı e-postası: bir posta kutusu", "E-mail du domaine : une boîte pro", "Correo del dominio: un buzón profesional")),

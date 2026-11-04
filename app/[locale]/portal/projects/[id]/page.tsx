@@ -16,8 +16,6 @@ import { ProjectRequestSummary } from "@/components/public/project-request-summa
 import { builderCopy } from "@/lib/i18n/project-builder";
 import { billingState } from "@/lib/db/billing";
 import { InstallmentSummary } from "@/components/portal/installment-summary";
-import { ownToolOrder } from "@/lib/db/tool-subscriptions";
-import { ToolSubscriptionDetail } from "@/components/portal/tool-subscription-detail";
 import { projectWorkspace } from "@/lib/db/project-workspace";
 import { ProjectWorkspace } from "@/components/portal/project-workspace";
 
@@ -28,10 +26,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ locale
   if (!viewer) redirect(`/${locale}/login?next=${encodeURIComponent(`/${locale}/portal/projects/${id}`)}`);
   const detail = await getProjectDetail(id);
   if (!detail) notFound();
-  if (detail.project.industry === "subscription" && detail.project.clientId === viewer.id) {
-    const toolOrder = await ownToolOrder(id);
-    if (toolOrder) return <><PortalNav locale={locale}/><ToolSubscriptionDetail locale={locale} data={toolOrder} userId={viewer.id}/></>;
-  }
+  if (detail.project.industry === "subscription" || detail.project.industry === "commerce") notFound();
   const [state, payment, request] = await Promise.all([
     lifecycleState(id),
     detail.project.clientId === viewer.id ? getProjectPayment(id, viewer.id) : Promise.resolve(null),

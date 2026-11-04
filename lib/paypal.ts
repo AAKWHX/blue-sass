@@ -1,4 +1,7 @@
 import "server-only";
+import { assertQaRuntimeApproved } from "./db/qa-local-guard.mjs";
+// Keep the runtime lock intact without declaring subsequent provider code unreachable.
+function ensureQaProviderAllowed(): void { assertQaRuntimeApproved(); }
 
 const PAYPAL_BASE_URLS = {
   sandbox: "https://api-m.sandbox.paypal.com",
@@ -9,8 +12,8 @@ type PayPalEnvironment = keyof typeof PAYPAL_BASE_URLS;
 
 export function getPayPalEnvironment(): PayPalEnvironment {
   const environment = process.env.PAYPAL_ENV?.trim() || "sandbox";
-  if (!(environment in PAYPAL_BASE_URLS)) {
-    throw new PayPalConfigurationError("PAYPAL_ENV must be either sandbox or live.");
+  if (environment !== "sandbox") {
+    throw new PayPalConfigurationError("QA_PAYPAL_SANDBOX_REQUIRED");
   }
   return environment as PayPalEnvironment;
 }
@@ -39,24 +42,21 @@ function configuration() {
   const environment = getPayPalEnvironment();
 
   if (!clientId || !clientSecret) throw new PayPalConfigurationError();
-  if (!(environment in PAYPAL_BASE_URLS)) {
+  if (!Object.hasOwn(PAYPAL_BASE_URLS, environment)) {
     throw new PayPalConfigurationError("PAYPAL_ENV must be either sandbox or live.");
   }
 
   return { clientId, clientSecret, environment, baseUrl: PAYPAL_BASE_URLS[environment] };
 }
 
-const webhookUrl = "https://www.bluesass.nl/api/paypal/webhook";
+// QA requires an explicit approved webhook identifier; no production discovery.
 export async function verifyPayPalWebhook(raw: string, headers: Headers) {
   const names = ["paypal-auth-algo", "paypal-cert-url", "paypal-transmission-id", "paypal-transmission-sig", "paypal-transmission-time"];
   if (names.some(name => !headers.get(name) || headers.get(name)!.length > 4000)) return false;
-  const cert = new URL(headers.get("paypal-cert-url")!);
+  let cert: URL;
+  try { cert = new URL(headers.get("paypal-cert-url")!); } catch { return false; }
   if (cert.protocol !== "https:" || cert.username || cert.password || cert.port || !["api.paypal.com", "api.sandbox.paypal.com", "api-m.paypal.com", "api-m.sandbox.paypal.com"].includes(cert.hostname) || !cert.pathname.startsWith("/v1/notifications/certs/")) return false;
-  let webhookId = process.env.PAYPAL_WEBHOOK_ID?.trim();
-  if (!webhookId) {
-    const registered = await paypalRequest<{ webhooks: Array<{ id: string; url: string }> }>("/v1/notifications/webhooks", { method: "GET" });
-    webhookId = registered.webhooks.find(item => item.url === webhookUrl)?.id;
-  }
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID?.trim();
   if (!webhookId) throw new PayPalConfigurationError("PayPal webhook is not registered.");
   const result = await paypalRequest<{ verification_status: string }>("/v1/notifications/verify-webhook-signature", {
     method: "POST",
@@ -67,15 +67,18 @@ export async function verifyPayPalWebhook(raw: string, headers: Headers) {
 
 export function getPayPalClientConfig() {
   const clientId = process.env.PAYPAL_CLIENT_ID?.trim() ?? "";
-  const environment = process.env.PAYPAL_ENV?.trim() || "sandbox";
+  const environment = getPayPalEnvironment();
+  let approved = false;
+  try { ensureQaProviderAllowed(); approved = true; } catch { /* QA remains locked. */ }
   return {
     clientId,
     environment,
-    configured: Boolean(clientId && process.env.PAYPAL_CLIENT_SECRET?.trim() && environment in PAYPAL_BASE_URLS),
+    configured: Boolean(approved && clientId && process.env.PAYPAL_CLIENT_SECRET?.trim() && Object.hasOwn(PAYPAL_BASE_URLS, environment)),
   };
 }
 
 async function accessToken() {
+  ensureQaProviderAllowed();
   const { clientId, clientSecret, baseUrl } = configuration();
   const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
     method: "POST",

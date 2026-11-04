@@ -14,8 +14,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
     assertCanWrite(viewer);
     if (!(await takeRateLimit(`paypal-cancel:${viewer.id}`, 10, 60_000))) return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429 });
     const orderId = orderIdSchema.parse((await params).orderId);
-    await cancelPayPalPayment(orderId, viewer.id);
-    return NextResponse.json({ status: "failed", reason: "cancelled" });
+    const payment = await cancelPayPalPayment(orderId, viewer.id);
+    return NextResponse.json({ status: payment.status, reason: payment.status === "failed" ? "cancelled" : "confirmation_required" }, { status: payment.status === "pending" ? 202 : 200 });
   } catch (error) {
     if (error instanceof z.ZodError) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
     if (error instanceof AuthorisationError) return NextResponse.json({ error: "AUTH_REQUIRED" }, { status: 401 });

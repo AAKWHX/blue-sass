@@ -172,7 +172,7 @@ const de: Dictionary = {
     noProjects: "Ihrem Konto wurde noch kein Projekt zugewiesen. Unser Team richtet es in Kürze ein.",
   },
   footer: { rights: "Alle Rechte vorbehalten.", built: "Gestaltet und entwickelt von Blue Sass.", offices: "Websites · Apps · Digitale Systeme",
-    newsletterTitle: "Feldnotizen", newsletterPlaceholder: "ihre@email.com", newsletterCta: "Abonnieren", newsletterDone: "Abonniert — willkommen an Bord." },
+    newsletterTitle: "Feldnotizen", newsletterPlaceholder: "qa@example.invalid", newsletterCta: "Abonnieren", newsletterDone: "Abonniert — willkommen an Bord." },
   stack: {
     title: "Angetrieben von einem modernen Stack",
     subtitle: "Die Technologien, auf die wir setzen — erprobt in Produktion bei jedem Projekt.",

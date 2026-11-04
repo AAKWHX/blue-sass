@@ -204,7 +204,7 @@
   "Recorded elapsed server fetch time. This is a measurement, not a speed grade or a user's full load time.": "Tiempo de búsqueda de servidor escalonado registrado. Esta es una medición, no una velocidad o un tiempo de carga completo del usuario.",
   "Recorded evidence": "Pruebas grabadas",
   "Recorded the final HTML request's HTTP response code. This does not validate all routes.": "Grabado el código de respuesta HTTP de la solicitud HTML final. Esto no valida todas las rutas.",
-  "Report questions: help@bluesass.nl · www.bluesass.nl": "Preguntas del informe: help@bluess.nl · www.bluesass.nl",
+  "Report questions: help@bluesass.nl · www.bluesass.nl": "Preguntas del informe: qa-contact@example.invalid · www.bluesass.nl",
   "Report reference": "Informe de referencia",
   "Results describe the checks performed at the recorded time. A passing check does not prove the whole website is secure. High-priority indicators need manual confirmation before treating them as confirmed vulnerabilities.": "Los resultados describen los cheques realizados en el momento registrado. Un cheque de paso no prueba que todo el sitio web es seguro. Los indicadores de alta prioridad necesitan confirmación manual antes de tratarlos como vulnerabilidades confirmadas.",
   "Review scope": "Ámbito de examen",

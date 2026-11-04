@@ -6,7 +6,6 @@ const { extraLexicons, localizeForLocale } = load("lib/i18n/legacy-extra-locales
 const { dictionaries } = load("lib/i18n/index.ts");
 const { quoteReturnPath } = load("lib/auth/return-path.ts");
 const { serviceCatalog } = load("lib/service-catalog.ts");
-const { subscriptionPlans } = load("lib/subscriptions.ts");
 
 test("three active locales have full dictionaries and safe return paths", () => {
   assert.deepEqual(locales, ["ar", "en", "nl"]);
@@ -19,7 +18,6 @@ test("three active locales have full dictionaries and safe return paths", () => 
     assert.equal(quoteReturnPath(`/${locale}/quote?kind=landing&type=web`, locale), `/${locale}/quote?type=web&kind=landing`);
     assert.equal(serviceCatalog(locale).length, 8);
     for (const item of serviceCatalog(locale)) assert.ok(item.title && item.description && item.features.length);
-    for (const item of subscriptionPlans(locale)) { assert.ok(item.name && item.description && item.features.length && item.limits.reports && item.limits.sites); assert.equal("hours" in item, false); }
   }
 });
 

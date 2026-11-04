@@ -1,6 +1,7 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/auth-forms";
 import { getDictionary, isLocale } from "@/lib/i18n";
+import { publicFeatureFlags } from "@/lib/capabilities";
 import { getViewer } from "@/lib/db/access";
 import { isDatabaseConfigured } from "@/lib/db";
 import { BrandLogo } from "@/components/brand-logo";
@@ -15,6 +16,7 @@ export default async function LoginPage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
+  if (!publicFeatureFlags.accounts) notFound();
   const { locale } = await params;
   const { error, next } = await searchParams;
   const returnTo = quoteReturnPath(next, locale);

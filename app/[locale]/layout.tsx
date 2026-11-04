@@ -10,9 +10,13 @@ import { getDir, isLocale, locales } from "@/lib/i18n";
 import { getViewer } from "@/lib/db/access";
 import { isDatabaseConfigured } from "@/lib/db";
 import { AdSense } from "@/components/adsense";
-import { adsensePublisher } from "@/lib/advertising";
+import { adsensePublisher, isAdsensePublisherVerified, isAdsenseRuntimeEnabled } from "@/lib/advertising";
 import { PublicSurface } from "@/components/public/public-surface";
+import { NavigationScroll } from "@/components/navigation-scroll";
 import "../globals.css";
+import "@/components/public/review-polish.css";
+import { SitePressFeedback } from "@/components/site-press-feedback";
+import "@/components/site-refinement.css";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -75,8 +79,9 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={getDir(locale)} className={`${fontVariables}${locale === "ar" ? ` ${arabicFont.variable}` : ""}`} suppressHydrationWarning>
-      <head>{/* Native reveal fires before React effects; observe only its expected opt-out rejection. */}<script dangerouslySetInnerHTML={{ __html: `(()=>{const observe=event=>{const transition=event.viewTransition;if(transition)void transition.ready.catch(error=>{if(error instanceof DOMException&&error.name==="InvalidStateError"&&error.message.includes("ViewTransition opt-in disabled"))return;queueMicrotask(()=>{throw error;});});};addEventListener("pageswap",observe);addEventListener("pagereveal",observe);})();` }}/><meta name="google-adsense-account" content={adsensePublisher}/><AdSense signedIn={Boolean(viewer)} publisher={adsensePublisher} enabled={process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ADSENSE_ENABLED !== "false"}/></head>
+      <head>{isAdsensePublisherVerified && <meta name="google-adsense-account" content={adsensePublisher}/>}<AdSense signedIn={Boolean(viewer)} publisher={adsensePublisher} enabled={isAdsenseRuntimeEnabled}/></head>
       <body className="bg-base text-ink-mid">
+        <NavigationScroll /><SitePressFeedback/>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
@@ -87,6 +92,7 @@ export default async function LocaleLayout({
           {/* relative + z-content keeps every page above the fixed 3D field. */}
           <div className="relative z-content flex min-h-screen flex-col">
             <SiteHeader signedIn={Boolean(viewer)} userName={viewer?.name ?? undefined} userImage={viewer?.image ?? undefined} canAdmin={Boolean(viewer?.isOwner || viewer?.permissions.length)} />
+            {process.env.QA_PUBLIC_ONLY === "1" && <aside role="status" className="mt-24 border-b border-line bg-surface px-4 py-3 text-center text-sm leading-7 text-ink-high">{{ ar: "نسخة QA محلية للعرض: الحسابات والحفظ والدفع غير متاحة في هذا الوضع.", en: "Local QA preview: accounts, saving and payments are unavailable in this mode.", nl: "Lokale QA-preview: accounts, opslaan en betalen zijn in deze modus niet beschikbaar." }[locale]}</aside>}
             <main className="flex-1"><PublicSurface>{children}</PublicSurface></main>
             <SiteFooter />
           </div>

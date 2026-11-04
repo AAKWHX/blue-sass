@@ -4,12 +4,12 @@ import { load } from "./test-typescript-loader.mjs";
 const { verifiedGoogleEmail, mayRepairGoogleLink } = load("lib/auth/google-identity.ts");
 const { westernDigits, durationValue } = load("lib/validation/delivery-duration.ts");
 test("Google identity must be verified and match the canonical account before link repair", () => {
-  assert.equal(verifiedGoogleEmail({ email: "ETSKAR.K@gmail.com", email_verified: true }), "etskar.k@gmail.com");
-  assert.equal(verifiedGoogleEmail({ email: "aak.geneltek@gmail.com", email_verified: false }), null);
+  assert.equal(verifiedGoogleEmail({ email: "QA-IDENTITY-1@EXAMPLE.INVALID", email_verified: true }), "qa-identity-1@example.invalid");
+  assert.equal(verifiedGoogleEmail({ email: "qa-identity-2@example.invalid", email_verified: false }), null);
   assert.equal(verifiedGoogleEmail({ email: "invalid", email_verified: true }), null);
-  const target = { email: "etskar.k@gmail.com", emailVerified: new Date(), passwordHash: "hash", disabledAt: null };
-  assert.equal(mayRepairGoogleLink(target, "etskar.k@gmail.com"), true);
-  assert.equal(mayRepairGoogleLink(target, "aak.geneltek@gmail.com"), false);
+  const target = { email: "qa-identity-1@example.invalid", emailVerified: new Date(), passwordHash: "hash", disabledAt: null };
+  assert.equal(mayRepairGoogleLink(target, "qa-identity-1@example.invalid"), true);
+  assert.equal(mayRepairGoogleLink(target, "qa-identity-2@example.invalid"), false);
   assert.equal(mayRepairGoogleLink({ ...target, emailVerified: null }, target.email), false);
   assert.equal(mayRepairGoogleLink({ ...target, disabledAt: new Date() }, target.email), false);
 });

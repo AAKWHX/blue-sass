@@ -262,7 +262,7 @@ const en = {
     built: "Designed and engineered by Blue Sass.",
     offices: "Websites · Apps · Digital systems",
     newsletterTitle: "Field notes",
-    newsletterPlaceholder: "your@email.com",
+    newsletterPlaceholder: "qa@example.invalid",
     newsletterCta: "Subscribe",
     newsletterDone: "Subscribed — welcome aboard.",
   },

@@ -1,11 +1,22 @@
-import { serviceSlugs } from "./lib/service-catalog";
-import { toolIds } from "./lib/tools/catalog";
 import { NextRequest, NextResponse } from "next/server";
 import { defaultLocale, locales, retiredLocales } from "./lib/i18n/config";
+import { isTemporarilyDisabledPath } from "./lib/capabilities";
+import { adsensePublisher, isAdsensePublisherVerified } from "./lib/advertising";
 
 const PUBLIC_FILE = /\.(.*)$/;
-// Explicit App Router pages are separate from the dynamic service catalog.
-const staticServicePages: readonly string[] = ["apps", "company", "systems"];
+
+function disabledResponse(isApi: boolean) {
+  if (isApi) {
+    return NextResponse.json(
+      { error: "FEATURE_TEMPORARILY_DISABLED" },
+      { status: 403, headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" } },
+    );
+  }
+  return new NextResponse("Not Found", {
+    status: 404,
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" },
+  });
+}
 
 function detectLocale(req: NextRequest): string {
   const cookieLocale = req.cookies.get("awwa-locale")?.value;
@@ -31,7 +42,22 @@ export default function proxy(req: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  if (pathname.startsWith("/_next") || pathname.startsWith("/api")) {
+  if (pathname === "/ads.txt") {
+    const pub = adsensePublisher;
+    if (isAdsensePublisherVerified && /^ca-pub-\d{16}$/.test(pub)) {
+      return new NextResponse(`google.com, ${pub.replace(/^ca-/, "")}, DIRECT, f08c47fec0942fa0\n`, {
+        status: 200,
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=3600" },
+      });
+    }
+    return new NextResponse("Not Found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", "X-Robots-Tag": "noindex, nofollow" } });
+  }
+
+  if (isTemporarilyDisabledPath(pathname)) {
+    return disabledResponse(pathname.startsWith("/api/"));
+  }
+
+  if (pathname.startsWith("/_next") || pathname.startsWith("/api") || pathname.startsWith("/template-demo/") || PUBLIC_FILE.test(pathname)) {
     return NextResponse.next();
   }
 
@@ -41,24 +67,12 @@ export default function proxy(req: NextRequest) {
     // correctly on the SERVER. Next's internal x-invoke-path is not reliable.
     const headers = new Headers(req.headers);
     headers.set("x-pathname", pathname);
-    const parts = pathname.split("/");
-    let slug = parts[3] ?? "";
-    try { slug = decodeURIComponent(slug); } catch { slug = ""; }
-    const unknownService = parts[2] === "services" && Boolean(slug) &&
-      !staticServicePages.includes(slug) && !(serviceSlugs as readonly string[]).includes(slug) && !["mobile", "cloud", "security"].includes(slug);
-    const unknownTool = parts[2] === "tools" && Boolean(slug) &&
-      !(toolIds as readonly string[]).includes(slug);
-    if (unknownService || unknownTool) {
-      // Route invalid finite-catalog IDs through the full global error document
-      // before Next renders a matched dynamic page's late notFound() boundary.
-      const missing = req.nextUrl.clone();
-      missing.pathname = `/${parts[1]}/__blue-sass-unmatched__`;
-      return NextResponse.rewrite(missing, { request: { headers } });
-    }
     return NextResponse.next({ request: { headers } });
   }
 
-  if (PUBLIC_FILE.test(pathname)) return NextResponse.next();
+  if (isTemporarilyDisabledPath(`/${defaultLocale}${pathname}`)) {
+    return disabledResponse(false);
+  }
 
   const locale = detectLocale(req);
   const url = req.nextUrl.clone();

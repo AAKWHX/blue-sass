@@ -3,9 +3,11 @@ import { notFound, redirect } from "next/navigation";
 import { CircleCheck, CreditCard, LockKeyhole, ShieldCheck } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { PayPalCheckout } from "@/components/portal/paypal-checkout";
+import { PaymentMethods } from "@/components/portal/payment-methods";
+import { stripeClientAvailable, stripeSettlementAvailable } from "@/lib/stripe";
+import { paymentMethodsCopy } from "@/lib/i18n/payment-methods";
 import { PortalNav } from "@/components/portal/portal-nav";
-import { getViewer, hasCapability } from "@/lib/db/access";
+import { getViewer, hasCapability, isReadOnlyAssistant } from "@/lib/db/access";
 import { PriceApprovalForm } from "@/components/admin/price-approval-form";
 import { getProjectPayment, payableProjectAmount } from "@/lib/db/payments";
 import { getProjectDetail } from "@/lib/db/queries";
@@ -19,7 +21,12 @@ import { InstallmentSummary } from "@/components/portal/installment-summary";
 import { billingCopy } from "@/lib/i18n/billing-copy";
 import { projectWorkspace } from "@/lib/db/project-workspace";
 import { workspaceCopy } from "@/lib/i18n/workspace-copy";
-import { businessUi } from "@/lib/i18n/business-ui";
+
+const readOnlyCopy = {
+  ar: "حسابك للقراءة فقط. هذه الحالة المسجلة، وقد يتأخر تحديثها.",
+  en: "Your account is read-only. This is the recorded status; updates may be delayed.",
+  nl: "Uw account heeft alleen-lezen toegang. Dit is de opgeslagen status; updates kunnen vertraagd zijn.",
+} as const;
 
 function formatMoney(amountCents: number, currency: string, locale: string) {
   return new Intl.NumberFormat(locale, { style: "currency", currency }).format(amountCents / 100);
@@ -30,12 +37,16 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
   if (!isLocale(locale) || !z.string().uuid().safeParse(id).success) notFound();
   const viewer = await getViewer();
   if (!viewer) redirect(`/${locale}/login?next=${encodeURIComponent(`/${locale}/portal/projects/${id}/payment`)}`);
+  const readOnly = isReadOnlyAssistant(viewer);
 
   const detail = await getProjectDetail(id);
-  if (!detail || detail.project.clientId !== viewer.id) notFound();
+  if (!detail || detail.project.clientId !== viewer.id || detail.project.industry === "commerce" || detail.project.industry === "subscription") notFound();
   const [payment, lifecycle] = await Promise.all([getProjectPayment(id, viewer.id), lifecycleState(id)]);
   const config = getPayPalClientConfig();
   const copy = paymentCopy[locale];
+  const methods = paymentMethodsCopy(locale);
+  const stripeConfigured = stripeClientAvailable();
+  const stripeReconcile = stripeSettlementAvailable();
   const safetyCopy = paymentSafetyCopy[locale];
   const billing = await billingState(detail.project);
   const workspace = await projectWorkspace(id);
@@ -49,7 +60,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
   }
   const amountCents = payment?.amountCents ?? payable?.amountCents ?? 0;
   const currency = payment?.currency ?? payable?.currency ?? "EUR";
-  const available = config.configured && payable && !lifecycle.cancelled && scopeReady;
+  const available = (config.configured || stripeConfigured || (payment?.provider === "stripe" && payment.status === "pending" && stripeReconcile)) && payable && !lifecycle.cancelled && scopeReady;
 
   return (
     <>
@@ -60,7 +71,6 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
         </Button>
 
         <div className="mx-auto mt-8 max-w-5xl">
-          {detail.project.industry === "commerce" && <Button asChild variant="outline" className="mb-6"><Link href={`/${locale}/portal/purchases`}>{businessUi(locale).myFiles}</Link></Button>}
           {!scopeReady && <p className="mb-5 rounded-xl border border-white/25 p-4 text-sm leading-7">{workspaceCopy(locale).scopeRequired}</p>}
           {billing && !billing.plan.approvedTotalCents && hasCapability(viewer, "billing.approve") && <div className="tool-surface tool-card mb-6 rounded-2xl border border-white/20 p-5"><PriceApprovalForm projectId={id} locale={locale} amount={detail.project.budget} locked={lifecycle.cancelled || lifecycle.locked || detail.project.stage !== "planning"}/></div>}
           <div className="mb-8 max-w-2xl">
@@ -69,8 +79,10 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
               {copy.title}
             </div>
             <h1 className="text-3xl font-black tracking-tight text-ink-high sm:text-5xl">{copy.title}</h1>
-            <p className="mt-4 leading-7 text-ink-low">{copy.subtitle}</p>
+            <p className="mt-4 leading-7 text-ink-low">{methods.subtitle}</p>
           </div>
+
+          {readOnly ? <p role="status" className="mb-6 min-w-0 rounded-xl border border-line p-4 text-sm leading-7 text-ink-low">{readOnlyCopy[locale]}</p> : null}
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
             <section className="rounded-3xl border border-line bg-surface/90 p-6 shadow-2xl shadow-black/20 sm:p-8">
@@ -79,7 +91,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
                   <CreditCard className="size-5 text-neon-cyan" />
                 </div>
                 <div>
-                  <h2 className="font-black text-ink-high">{copy.paypal}</h2>
+                  <h2 className="font-black text-ink-high">{methods.title}</h2>
                   <p className="text-xs text-ink-low">{copy.method}</p>
                 </div>
               </div>
@@ -94,12 +106,20 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
                     <CircleCheck className="mt-0.5 size-5 shrink-0" />
                     <div><p className="font-black">{copy.paid}</p><p className="mt-1 text-sm">{copy.success}</p></div>
                   </div>
+                ) : payment?.status === "failed" && payment.captureStartedAt ? (
+                  <p role="status" className="rounded-xl border border-line p-4 leading-7">{methods.held}</p>
+                ) : readOnly ? (
+                  <p role="status" className="rounded-xl border border-line p-4 text-sm leading-7 text-ink-low">{payment?.status === "pending" ? copy.pending : payment?.status === "failed" ? copy.error : copy.unavailable}</p>
                 ) : available ? (
-                  <PayPalCheckout
+                  <PaymentMethods
                     projectId={id}
                     clientId={config.clientId}
                     currency={currency}
-                    copy={copy}
+                    locale={locale}
+                    paypal={config.configured}
+                    stripe={stripeConfigured}
+                    stripeReconcile={stripeReconcile}
+                    initialProvider={payment?.provider}
                     initialStatus={payment?.status ?? "idle"}
                     initialOrderId={payment?.providerOrderId ?? undefined}
                   />
@@ -118,7 +138,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
                 </div>
                 <div className="border-b border-line pb-5">
                   <dt className="text-ink-low">{copy.method}</dt>
-                  <dd className="mt-1 font-bold text-ink-high">{safetyCopy.cards}</dd>
+                  <dd className="mt-1 font-bold text-ink-high">{payment?.provider === "stripe" ? "Stripe" : payment?.provider === "paypal" ? "PayPal" : methods.choose}</dd>
                 </div>
                 <div>
                   <dt className="text-ink-low">{copy.amount}</dt>
@@ -127,7 +147,7 @@ export default async function ProjectPaymentPage({ params }: { params: Promise<{
               </dl>
               <div className="mt-8 flex items-start gap-2 border-t border-line pt-5 text-xs leading-5 text-ink-low">
                 <ShieldCheck className="mt-0.5 size-4 shrink-0 text-neon-emerald" />
-                <span>{copy.secure}</span>
+                <span>{methods.secure}</span>
               </div>
             </aside>
           </div>

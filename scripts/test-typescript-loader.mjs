@@ -15,8 +15,8 @@ export function load(path) {
   }
   const compiled = { exports: {} };
   cache.set(file, compiled.exports);
-  const source = ts.transpileModule(readFileSync(file, "utf8"), { fileName:file, compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx:ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText;
-  const extension = spec => /\.(ts|json)$/.test(spec) ? spec : `${spec}.ts`;
+  const source = ts.transpileModule(readFileSync(file, "utf8"), { fileName:file.replace(/\.mjs$/, ".ts"), compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx:ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText;
+  const extension = spec => /\.(tsx?|json|mjs|cjs)$/.test(spec) ? spec : `${spec}.ts`;
   const require = spec => spec === "server-only" ? {} : spec.startsWith("@/") ? load(extension(spec.slice(2))) : spec.startsWith(".") ? load(resolve(dirname(file), extension(spec))) : nativeRequire(spec);
   new Function("require", "module", "exports", source)(require, compiled, compiled.exports);
   cache.set(file, compiled.exports);

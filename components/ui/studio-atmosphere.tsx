@@ -1,10 +1,6 @@
 "use client";
-import { useRef } from "react";
 import Image from "next/image";
-import { useMotionActive } from "@/hooks/use-motion-active";
 export type AtmosphereVariant = "hero" | "services" | "work" | "about" | "contact" | "footer";
 export function StudioAtmosphere({ variant = "services" }: { variant?: AtmosphereVariant }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const active = useMotionActive(ref);
-  return <div ref={ref} aria-hidden="true" data-active={active} className={`studio-atmosphere studio-atmosphere-${variant}`}>{variant === 'footer' && <Image src="/media/higgsfield/hero-titanium-v1.webp" alt="" fill sizes="100vw" quality={75} className="studio-footer-art"/>}<span className="studio-light studio-light-a"/><span className="studio-light studio-light-b"/><span className="studio-orbit"/><span className="studio-grid"/></div>;
+  return <div aria-hidden="true" data-active="false" className={`studio-atmosphere studio-atmosphere-${variant}`}>{variant === 'footer' && <Image src="/media/higgsfield/hero-titanium-v1.webp" alt="" fill sizes="100vw" quality={75} className="studio-footer-art"/>}<span className="studio-light studio-light-a"/><span className="studio-light studio-light-b"/></div>;
 }

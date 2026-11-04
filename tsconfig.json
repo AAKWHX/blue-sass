@@ -37,7 +37,9 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     ".next-build/types/**/*.ts",
-    ".next-build/dev/types/**/*.ts"
+    ".next-build/dev/types/**/*.ts",
+    ".next-public-release/types/**/*.ts",
+    ".next-public-release/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -52,6 +54,12 @@
     "public - kopie",
     "scripts - kopie",
     "next-env.d - kopie.ts",
-    "drizzle.config - kopie.ts"
+    "drizzle.config - kopie.ts",
+    "tmp",
+    "artifacts",
+    "downloads",
+    "proxy - kopie.ts",
+    "tailwind.config - kopie.ts",
+    "qa"
   ]
 }

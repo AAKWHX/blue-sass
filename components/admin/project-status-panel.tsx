@@ -1,3 +1,4 @@
+import { InstallmentSummary } from "@/components/portal/installment-summary";
 import { withExtraLocales } from "@/lib/i18n/extra-locales";
 import { lifecycleState } from "@/lib/db/project-lifecycle";
 import { FolderKanban } from "lucide-react";
@@ -36,6 +37,7 @@ export async function ProjectStatusPanel({ projects, locale, canApprove = false,
       <ProgressBar value={project.progress} className="mt-4"/>
       {!detailed && <Button asChild variant="outline" className="mt-5"><Link href={`/${locale}/admin/projects/${project.id}`}>{toolsUi(locale).details}</Link></Button>}
       {canApprove && bills.get(project.id) && !states.get(project.id)?.cancelled ? <PriceApprovalForm projectId={project.id} locale={locale} approved={Boolean(bills.get(project.id)?.plan.approvedTotalCents)} amount={(bills.get(project.id)?.plan.approvedTotalCents ?? project.budget * 100) / 100} locked={!!bills.get(project.id)?.paidCents || project.stage !== "planning" || !!states.get(project.id)?.locked}/> : null}
+      {detailed && bills.get(project.id) ? <InstallmentSummary locale={locale} billing={bills.get(project.id)!}/> : null}
       {canStage && detailed && <form action={setProjectStageAction} className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3"><Input type="hidden" name="projectId" value={project.id}/>{stages.map(stage => <Button key={stage} type="submit" name="stage" value={stage} variant="outline" size="sm" disabled={stage === project.stage || states.get(project.id)?.cancelled} className={stage === project.stage ? "border-neon-blue bg-neon-cyan/25" : ""}>{c.move} {t.status[stage]}</Button>)}</form>}
     </article>)}</div>}
   </div></section>;
