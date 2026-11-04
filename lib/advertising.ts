@@ -1,10 +1,12 @@
 import {isLocale} from "./i18n/config";
 import {serviceSlugs} from "./service-catalog";
+import {ADS_ENABLED} from './cmp-policy.mjs';
+export {ADS_ENABLED};
 
 export const CONFIRMED_ADSENSE_PUBLISHER_ID="ca-pub-2458310650397376";
 export const adsensePublisher=process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID?.trim()||CONFIRMED_ADSENSE_PUBLISHER_ID;
 export const isAdsensePublisherVerified=adsensePublisher===CONFIRMED_ADSENSE_PUBLISHER_ID;
-export const isAdsenseRuntimeEnabled=false;
+export const isAdsenseRuntimeEnabled=ADS_ENABLED;
 
 const SUBSTANTIAL_SERVICE_PATHS=new Set<string>([...serviceSlugs]);
 

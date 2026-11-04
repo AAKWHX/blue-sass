@@ -4,7 +4,7 @@
   "scripts": {
     "release:build": "node scripts/public-release.mjs build",
     "release:start": "node scripts/public-release.mjs start",
-    "test:release": "node --test --test-concurrency=1 scripts/public-release.test.mjs scripts/server-table-security.test.mjs scripts/security-boundaries.test.mjs scripts/security-verification.test.mjs scripts/password-security.test.mjs scripts/return-path.test.mjs scripts/brand-logo.test.mjs scripts/inquiry-validation.test.mjs scripts/site-origin-security.test.mjs scripts/locale-coverage.test.mjs scripts/simplified-release.test.mjs scripts/seo-foundation.test.mjs",
+    "test:release": "node --test --test-concurrency=1 scripts/public-release.test.mjs scripts/server-table-security.test.mjs scripts/security-boundaries.test.mjs scripts/security-verification.test.mjs scripts/password-security.test.mjs scripts/return-path.test.mjs scripts/brand-logo.test.mjs scripts/inquiry-validation.test.mjs scripts/site-origin-security.test.mjs scripts/locale-coverage.test.mjs scripts/simplified-release.test.mjs scripts/seo-foundation.test.mjs scripts/cmp-integration.test.mjs",
     "dev": "node qa/block-execution.mjs",
     "prebuild": "node qa/block-execution.mjs",
     "build": "node qa/block-execution.mjs",
