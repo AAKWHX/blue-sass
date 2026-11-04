@@ -54,6 +54,7 @@
         // Consent Mode updates when its account-level integration is enabled.
         // In particular, never read stale purpose values during a TCF change.
         root.dataset.blueSassCmpTcf = 'available';
+        if (typeof window.googlefc.showRevocationMessage === 'function') root.dataset.blueSassCmpReady = 'true';
       });
     }
   });

@@ -70,19 +70,18 @@ test('TCF callbacks report readiness without guessing Google grants or logging T
   assert.equal(f.document.documentElement.dataset.blueSassCmpReady,'true');
 });
 
-test('privacy reopening fails accurately without the real API and uses the official ready queue when available',()=>{
+test('privacy reopening fails accurately without the real API and uses the official ready queue when available',async()=>{
   const savedWindow=globalThis.window,savedDocument=globalThis.document;
   try{
     const f=fixture();globalThis.window=f.window;globalThis.document=f.document;
     const client=load('lib/cmp-client.ts');
-    assert.equal(client.openCertifiedConsentManager(),false);
+    assert.equal(await client.openCertifiedConsentManager(),false);
     let opened=0;f.window.googlefc.showRevocationMessage=()=>opened++;
-    assert.equal(client.openCertifiedConsentManager(),false);
-    f.callback('CONSENT_API_READY')();
     const count=f.window.googlefc.callbackQueue.length;
-    assert.equal(client.openCertifiedConsentManager(),true);
+    const opening=client.openCertifiedConsentManager();
     assert.equal(opened,0);
     f.window.googlefc.callbackQueue[count].CONSENT_API_READY();
+    assert.equal(await opening,true);
     assert.equal(opened,1);
     assert.deepEqual(JSON.parse(JSON.stringify(f.entries().at(-1)[2])),denied);
     for(const locale of ['ar','en','nl'])assert.match(client.cmpUnavailableCopy[locale],/help@bluesass\.nl/);
@@ -95,6 +94,20 @@ test('CSP narrowly allows messaging while excluding ad serving and analytics ori
   assert.doesNotMatch(csp,/\*|pagead2|doubleclick|googlesyndication|googletagmanager|google-analytics|unsafe-eval/);
   for(const value of ["frame-ancestors 'none'","object-src 'none'",'upgrade-insecure-requests'])assert.ok(csp.includes(value));
   assert.doesNotMatch(publicContentSecurityPolicy(false),/fundingchoices/);
+});
+
+test('a timed-out privacy request cannot later clear or replace a user choice',async()=>{
+  const savedWindow=globalThis.window,savedDocument=globalThis.document;
+  try{
+    const f=fixture();globalThis.window=f.window;globalThis.document=f.document;
+    let opened=0;f.window.googlefc.showRevocationMessage=()=>opened++;
+    const count=f.window.googlefc.callbackQueue.length;
+    const opening=load('lib/cmp-client.ts').openCertifiedConsentManager();
+    assert.equal(await opening,false);
+    f.window.googlefc.callbackQueue[count].CONSENT_API_READY();
+    assert.equal(opened,0);
+    assert.equal(f.entries().filter(row=>row[1]==='update').length,0);
+  }finally{globalThis.window=savedWindow;globalThis.document=savedDocument;}
 });
 
 test('localized layout preserves RTL and loads bootstrap before only the CMP, with QA isolation',()=>{

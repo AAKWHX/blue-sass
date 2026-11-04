@@ -16,22 +16,33 @@ declare global {
   }
 }
 
-export function openCertifiedConsentManager(): boolean {
+export async function openCertifiedConsentManager(): Promise<boolean> {
   if (typeof window === 'undefined' || typeof document === 'undefined') return false;
   const cmp = window.googlefc;
-  if (document.documentElement.dataset.blueSassCmpReady !== 'true' || !cmp?.callbackQueue || typeof cmp.showRevocationMessage !== 'function') return false;
-  // Google executes this key synchronously once CONSENT_API_READY has fired.
-  cmp.callbackQueue.push({ CONSENT_API_READY: () => {
-    if (typeof cmp.showRevocationMessage === 'function') {
-      // Google's revocation operation clears the existing consent record.
-      window.gtag?.('consent', 'update', {
-        ad_storage: 'denied', analytics_storage: 'denied',
-        ad_user_data: 'denied', ad_personalization: 'denied',
-      });
-      cmp.showRevocationMessage();
-    }
-  } });
-  return true;
+  const queue = cmp?.callbackQueue;
+  const reopen = cmp?.showRevocationMessage;
+  if (!queue || typeof reopen !== 'function') return false;
+  // Google owns readiness. Merely queuing a callback is not a successful call.
+  return new Promise(resolve => {
+    let pending = true;
+    const timer = setTimeout(() => { pending = false; resolve(false); }, 3000);
+    try {
+      queue.push({ CONSENT_API_READY: () => {
+        if (!pending) return;
+        pending = false;
+        clearTimeout(timer);
+        try {
+          // The official revocation operation clears the existing record.
+          window.gtag?.('consent', 'update', {
+            ad_storage: 'denied', analytics_storage: 'denied',
+            ad_user_data: 'denied', ad_personalization: 'denied',
+          });
+          reopen.call(cmp);
+          resolve(true);
+        } catch { resolve(false); }
+      } });
+    } catch { pending = false; clearTimeout(timer); resolve(false); }
+  });
 }
 
 export const cmpUnavailableCopy = {
