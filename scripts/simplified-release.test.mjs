@@ -50,8 +50,10 @@ test('IAB TCF v2.2 & Google Privacy & Messaging consent signals fail closed and 
  const { hasCertifiedTcfConsent, adEligiblePath }=load('lib/advertising.ts');
  const adsenseSource=fs.readFileSync('components/adsense.tsx','utf8');
  assert.doesNotMatch(adsenseSource,/__blueSassAdConsentGranted/);
- assert.match(adsenseSource,/__tcfapi/);
- assert.match(adsenseSource,/googlefc/);
+ const cmpSource=fs.readFileSync('public/cmp-bootstrap.js','utf8');
+ assert.match(cmpSource,/__tcfapi/);
+ assert.match(cmpSource,/googlefc/);
+ assert.doesNotMatch(adsenseSource,/adsbygoogle|pagead2|<script/);
  assert.equal(hasCertifiedTcfConsent(null,true),false);
  assert.equal(hasCertifiedTcfConsent({gdprApplies:true,eventStatus:'tcloaded',purpose:{consents:{'1':false}}},true),false);
  assert.equal(hasCertifiedTcfConsent({gdprApplies:true,eventStatus:'cmpuishown',purpose:{consents:{'1':true}}},true),false);

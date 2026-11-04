@@ -9,8 +9,9 @@ import { ScrollProgress } from "@/components/ui/chrome";
 import { getDir, isLocale, locales } from "@/lib/i18n";
 import { getViewer } from "@/lib/db/access";
 import { isDatabaseConfigured } from "@/lib/db";
-import { AdSense } from "@/components/adsense";
-import { adsensePublisher, isAdsensePublisherVerified, isAdsenseRuntimeEnabled } from "@/lib/advertising";
+import Script from "next/script";
+import { adsensePublisher, isAdsensePublisherVerified } from "@/lib/advertising";
+import { CMP_ENABLED, CMP_SCRIPT_SOURCE } from "@/lib/cmp-policy.mjs";
 import { PublicSurface } from "@/components/public/public-surface";
 import { NavigationScroll } from "@/components/navigation-scroll";
 import "../globals.css";
@@ -79,7 +80,13 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={getDir(locale)} className={`${fontVariables}${locale === "ar" ? ` ${arabicFont.variable}` : ""}`} suppressHydrationWarning>
-      <head>{isAdsensePublisherVerified && <meta name="google-adsense-account" content={adsensePublisher}/>}<AdSense signedIn={Boolean(viewer)} publisher={adsensePublisher} enabled={isAdsenseRuntimeEnabled}/></head>
+      <head>
+        {isAdsensePublisherVerified && <meta name="google-adsense-account" content={adsensePublisher}/>}
+        {CMP_ENABLED && process.env.QA_PUBLIC_ONLY !== '1' && <>
+          <Script id="blue-sass-cmp-bootstrap" src="/cmp-bootstrap.js" strategy="beforeInteractive" />
+          <Script id="blue-sass-google-cmp" src={CMP_SCRIPT_SOURCE} strategy="beforeInteractive" />
+        </>}
+      </head>
       <body className="bg-base text-ink-mid">
         <NavigationScroll /><SitePressFeedback/>
         <script
